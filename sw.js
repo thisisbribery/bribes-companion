@@ -1,6 +1,6 @@
 // Offline copy of the app. Serves the saved copy first, then refreshes it from the network when online, so an
 // update shows up on the launch after it's published.
-var CACHE = "bribes-companion-v12";
+var CACHE = "bribes-companion-v13";
 var FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "assets/coin-front.png", "assets/coin-back.png"];
 
 self.addEventListener("install", function (e) {

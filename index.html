@@ -101,6 +101,7 @@ main{max-width:1180px;margin:0 auto;padding:14px 14px 40px}
 .badge.on{color:#2a0020;background:var(--pink);border-color:var(--pink)}
 #waveCanvas{width:100%;height:46vh;min-height:240px;display:block;border-radius:10px;background:#0c0d10;border:1px solid var(--line);touch-action:none}
 .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font:12px var(--mono);color:var(--muted);min-height:20px}
+#waveDiag{font:12px var(--mono);color:var(--warn);margin-top:6px;min-height:18px;white-space:pre-wrap}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 
 /* Track: engine and knobs */
@@ -281,6 +282,7 @@ footer a{color:var(--pink)}
       </div>
       <canvas id="waveCanvas"></canvas>
       <div class="legend" id="waveLegend"></div>
+      <div id="waveDiag"></div>
     </section>
 
     <section id="song" class="card panel">
@@ -311,7 +313,7 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v11 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v12 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -1364,6 +1366,7 @@ function parse(d) {
     }
     return ar;
   }
+  if (kind === 0x54) return { kind: "diag", text: readName(d, 8).text };
   if (kind === 0x51) return { kind: "beat", phase: ((d[8] << 7) | d[9]) / 16384 };
   if (kind === 0x52) {
     var ks = { kind: "kitSamples", rows: [] }, kc = d[8], kj = 9;
@@ -1443,6 +1446,7 @@ function onMessage(ev) {
   case "arranger": arranger = m; renderSong(); return;
   case "arrangerPos": arrangerPos = m.pos; placeArrangerHead(); return;
   case "clipPos": clipPos = m.pos; placeClipHeads(); return;
+  case "diag": $("waveDiag").textContent = m.text; return;
   case "beat": beatAt = { phase: m.phase, time: performance.now() }; return;
   case "kitSamples": showKitSamples(m.rows); return;
   case "kitActive": showKitActive(m.bits); return;
