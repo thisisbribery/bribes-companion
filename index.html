@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bribes Companion</title>
+<style>
+  :root {
+    --bg: #0e0f12; --panel: #17191e; --line: #2a2d35; --text: #e8e6e1; --dim: #8a8d96;
+    --ok: #4fbf7a; --warn: #e0a83a; --bad: #e0574a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.4 system-ui, sans-serif; }
+  main { max-width: 1000px; margin: 0 auto; padding: 16px; }
+  header { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  h1 { font-size: 18px; margin: 0 auto 0 0; letter-spacing: .04em; }
+  button, select { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 8px;
+    padding: 10px 14px; font: inherit; }
+  button { cursor: pointer; }
+  #status { color: var(--dim); font-size: 14px; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--bad); margin-right: 6px; }
+  .dot.ok { background: var(--ok); } .dot.warn { background: var(--warn); }
+  #hero { margin-top: 16px; border-radius: 16px; padding: 28px 24px; min-height: 220px; display: flex; flex-direction: column;
+    justify-content: flex-end; background: var(--panel); border: 1px solid var(--line); transition: background .2s; }
+  #family { font-size: 14px; letter-spacing: .2em; text-transform: uppercase; opacity: .8; }
+  #engine { font-size: 56px; font-weight: 800; line-height: 1.05; margin: 4px 0; word-break: break-word; }
+  #preset { font-size: 24px; opacity: .9; }
+  #rowname { font-size: 18px; opacity: .75; margin-top: 4px; }
+  #rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; margin-top: 16px; }
+  .row { border-radius: 10px; padding: 10px 8px; font-size: 12px; background: var(--panel); border: 2px solid transparent;
+    min-height: 56px; display: flex; flex-direction: column; justify-content: space-between; }
+  .row.sel { border-color: var(--text); }
+  .row b { font-size: 11px; opacity: .7; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 16px 0 0; font-size: 14px; }
+  dt { color: var(--dim); } dd { margin: 0; font-family: ui-monospace, monospace; }
+  details { margin-top: 16px; } summary { color: var(--dim); cursor: pointer; }
+  #log { font: 12px/1.5 ui-monospace, monospace; white-space: pre-wrap; word-break: break-all; color: var(--dim);
+    max-height: 260px; overflow: auto; background: var(--panel); padding: 10px; border-radius: 8px; }
+  @media (max-width: 600px) { #engine { font-size: 40px; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>BRIBES COMPANION <span style="color:var(--dim);font-weight:400">debug v0</span></h1>
+    <select id="port" aria-label="Deluge port"></select>
+    <button id="connect">Connect</button>
+  </header>
+  <div id="status"><span class="dot" id="dot"></span><span id="statusText">Not connected</span></div>
+
+  <section id="hero">
+    <div id="family">waiting</div>
+    <div id="engine">-</div>
+    <div id="preset"></div>
+    <div id="rowname"></div>
+  </section>
+
+  <div id="rows"></div>
+
+  <dl id="fields"></dl>
+
+  <details open>
+    <summary>Raw messages</summary>
+    <div id="log"></div>
+  </details>
+</main>
+
+<script>
+"use strict";
+// Messages: F0 00 21 7B 01 02 03 <mode> F7 out (0 = subscribe + send all, 1 = keep alive), 0x42 STATE / 0x43 KIT_ROWS in
+var HDR = [0xF0, 0x00, 0x21, 0x7B, 0x01, 0x02];
+
+// drum_synth::Engine numbers (append-only in the firmware) and the special codes above them
+var ENGINES = [
+  ["LXR DRUM", "lxr"], ["LXR SNARE", "lxr"], ["LXR METAL", "lxr"],
+  ["DXIA", "xia"], ["DIIA", "xia"],
+  ["CYC KIK", "cyc"], ["CYC SNR", "cyc"], ["CYC METAL", "cyc"], ["CYC PERC", "cyc"],
+  ["CYC TONE", "cyc"], ["CYC CHORD", "cyc"], ["VTG SNR", "cyc"], ["CLAP", "cyc"],
+  ["GIN", "gin"], ["ULTRAKIK", "ultrakik"], ["BRIBERING", "rings"], ["BROPHET", "brophet"], ["BRUNO106", "bruno"]
+];
+var SPECIAL = {
+  0x7A: ["303", "tb303"], 0x7B: ["DELUGE SYNTH", "deluge"], 0x7C: ["DX7", "dx7"],
+  0x7D: ["MIDI / GATE", "midi"], 0x7E: ["SAMPLE", "sample"], 0x7F: ["NONE", "none"]
+};
+// Placeholder colours per family until the art exists
+var FAMILY_COLOUR = {
+  lxr: "#7a2e2e", xia: "#2e4f7a", cyc: "#2e6a7a", gin: "#6a5a2e", ultrakik: "#7a3e1e", rings: "#3e2e7a",
+  brophet: "#5a2e6a", bruno: "#2e6a4a", tb303: "#7a6a1e", deluge: "#3a3d46", dx7: "#4a3a2e", midi: "#2a2d35",
+  sample: "#33404a", none: "#17191e"
+};
+var FAMILY_NAME = {
+  lxr: "LXR drum voice", xia: "XIA engine", cyc: "Cyc engine", gin: "GIN", ultrakik: "Kick engine",
+  rings: "Resonator", brophet: "Poly synth", bruno: "DCO poly", tb303: "Bass line", deluge: "Deluge synth",
+  dx7: "FM operator synth", midi: "External", sample: "Sample", none: "-"
+};
+var OUTPUT_TYPES = ["SYNTH", "KIT", "MIDI", "CV", "AUDIO"];
+var SYNTH_MODES = ["SUBTRACTIVE", "FM", "RINGMOD", "TB303"];
+var OSC_TYPES = ["SINE", "TRIANGLE", "SQUARE", "ANALOG SQUARE", "SAW", "ANALOG SAW", "WAVETABLE", "SAMPLE", "DX7",
+  "DRUM SYNTH", "INPUT L", "INPUT R", "INPUT STEREO"];
+var RINGS_MODELS = ["MODAL", "SYMPATHETIC", "STRING", "FM", "CHORD"];
+
+function engineInfo(code) {
+  if (code < ENGINES.length) return ENGINES[code];
+  return SPECIAL[code] || ["ENGINE " + code, "none"];
+}
+function pick(list, v) { return v === 0x7F ? "-" : (list[v] !== undefined ? list[v] : String(v)); }
+function hex(bytes) { return Array.prototype.map.call(bytes, function (b) { return ("0" + b.toString(16)).slice(-2); }).join(" "); }
+
+var midi = null, input = null, output = null, keepAlive = null;
+var lastMessageAt = 0, lastSeq = -1, dropped = 0, stateCount = 0;
+var state = null, rows = null;
+
+function $(id) { return document.getElementById(id); }
+function setStatus(text, level) { $("statusText").textContent = text; $("dot").className = "dot " + (level || ""); }
+function log(dir, bytes) {
+  var el = $("log");
+  var line = new Date().toLocaleTimeString() + " " + dir + " " + hex(bytes) + "\n";
+  el.textContent = (line + el.textContent).slice(0, 6000);
+}
+
+function send(mode) {
+  if (!output) return;
+  var msg = HDR.concat([0x03, mode, 0xF7]);
+  output.send(msg);
+  if (mode === 0) log(">", msg);
+}
+
+function readName(d, i) {
+  var n = d[i], s = "";
+  for (var k = 0; k < n; k++) s += String.fromCharCode(d[i + 1 + k]);
+  return { text: s, next: i + 1 + n };
+}
+
+// Exposed for offline tests
+function parse(d) {
+  for (var h = 0; h < HDR.length; h++) if (d[h] !== HDR[h]) return null;
+  var kind = d[6];
+  if (kind === 0x42) {
+    var seq = d[7], i = 8;
+    var s = { kind: "state", seq: seq, version: d[i++], outType: d[i++], synthMode: d[i++], osc0: d[i++],
+      engine: d[i++], engineSub: d[i++] };
+    s.track = (d[i] << 7) | d[i + 1]; i += 2;
+    s.row = d[i++];
+    var a = readName(d, i); s.name = a.text;
+    var b = readName(d, a.next); s.rowName = b.text;
+    s.ok = d[b.next] === 0xF7;
+    return s;
+  }
+  if (kind === 0x43) {
+    var count = d[8], list = [];
+    for (var r = 0; r < count; r++) list.push(d[9 + r]);
+    return { kind: "rows", version: d[7], rows: list, ok: d[9 + count] === 0xF7 };
+  }
+  return null;
+}
+
+function onMessage(ev) {
+  var m = parse(ev.data);
+  if (!m) return;
+  lastMessageAt = Date.now();
+  log("<", ev.data);
+  if (m.kind === "state") {
+    if (lastSeq >= 0 && m.seq !== ((lastSeq + 1) & 0x7F)) dropped++;
+    lastSeq = m.seq; stateCount++;
+    state = m;
+  } else {
+    rows = m.rows;
+  }
+  render();
+}
+
+function render() {
+  if (!state) return;
+  var info = engineInfo(state.engine);
+  var family = info[1];
+  $("hero").style.background = FAMILY_COLOUR[family] || "";
+  $("family").textContent = FAMILY_NAME[family] || family;
+  var engineText = info[0];
+  if (family === "deluge") engineText = pick(SYNTH_MODES, state.synthMode);
+  if (family === "rings") engineText += " " + pick(RINGS_MODELS, state.engineSub);
+  $("engine").textContent = engineText;
+  $("preset").textContent = state.name || "(unnamed)";
+  $("rowname").textContent = state.outType === 1 ? "Row " + (state.row === 0x7F ? "-" : state.row + 1) +
+    (state.rowName ? ": " + state.rowName : "") : "";
+
+  var rowsEl = $("rows");
+  rowsEl.innerHTML = "";
+  if (state.outType === 1 && rows) {
+    rows.forEach(function (code, idx) {
+      var ri = engineInfo(code);
+      var div = document.createElement("div");
+      div.className = "row" + (idx === state.row ? " sel" : "");
+      div.style.background = FAMILY_COLOUR[ri[1]] || "";
+      div.innerHTML = "<b>" + (idx + 1) + "</b><span></span>";
+      div.lastChild.textContent = ri[0];
+      rowsEl.appendChild(div);
+    });
+  }
+
+  var f = [
+    ["Output", pick(OUTPUT_TYPES, state.outType)], ["Synth mode", pick(SYNTH_MODES, state.synthMode)],
+    ["Osc 1", pick(OSC_TYPES, state.osc0)], ["Engine code", state.engine + " (0x" + state.engine.toString(16) + ")"],
+    ["Engine sub", state.engineSub], ["Track", state.track === 0x3FFF ? "-" : state.track + 1],
+    ["Messages", stateCount + " state, seq " + state.seq + ", gaps " + dropped], ["Spec version", state.version]
+  ];
+  $("fields").innerHTML = "";
+  f.forEach(function (p) {
+    var dt = document.createElement("dt"); dt.textContent = p[0];
+    var dd = document.createElement("dd"); dd.textContent = p[1];
+    $("fields").appendChild(dt); $("fields").appendChild(dd);
+  });
+}
+
+function listPorts() {
+  var sel = $("port"), prev = sel.value;
+  sel.innerHTML = "";
+  var outs = [];
+  midi.outputs.forEach(function (o) { outs.push(o); });
+  outs.forEach(function (o) {
+    var opt = document.createElement("option");
+    opt.value = o.id; opt.textContent = o.name;
+    sel.appendChild(opt);
+  });
+  if (prev && outs.some(function (o) { return o.id === prev; })) sel.value = prev;
+  else {
+    var d = outs.filter(function (o) { return /deluge/i.test(o.name); });
+    if (d.length) sel.value = d[0].id;
+  }
+  if (!outs.length) setStatus("No MIDI devices. Plug in the Deluge, then reload.", "bad");
+}
+
+function usePort() {
+  if (input) input.onmidimessage = null;
+  output = midi.outputs.get($("port").value) || null;
+  input = null;
+  if (output) {
+    // The Deluge replies on the cable the request came in on: match the input by name
+    midi.inputs.forEach(function (i) { if (!input && i.name === output.name) input = i; });
+    if (!input) midi.inputs.forEach(function (i) { if (!input && /deluge/i.test(i.name)) input = i; });
+  }
+  if (!output || !input) { setStatus("Pick the Deluge port", "bad"); return; }
+  input.onmidimessage = onMessage;
+  lastSeq = -1; dropped = 0;
+  send(0);
+  setStatus("Asked " + output.name + " for state...", "warn");
+}
+
+$("connect").onclick = function () {
+  if (!navigator.requestMIDIAccess) { setStatus("This browser has no Web MIDI. Use Chrome.", "bad"); return; }
+  navigator.requestMIDIAccess({ sysex: true }).then(function (access) {
+    midi = access;
+    midi.onstatechange = function () { listPorts(); };
+    listPorts();
+    usePort();
+    if (keepAlive) clearInterval(keepAlive);
+    keepAlive = setInterval(function () {
+      send(1);
+      var age = Date.now() - lastMessageAt;
+      if (!lastMessageAt) setStatus("Connected to " + (output ? output.name : "?") +
+        ". No reply yet: is this the Bribes companion test bin?", "warn");
+      else setStatus("Live on " + output.name + " (last message " + Math.round(age / 1000) + " s ago)", "ok");
+    }, 1000);
+    $("connect").textContent = "Resend";
+  }, function (err) { setStatus("MIDI access refused: " + err, "bad"); });
+};
+$("port").onchange = function () { if (midi) usePort(); };
+if (typeof module !== "undefined") module.exports = { parse: parse };
+</script>
+</body>
+</html>
