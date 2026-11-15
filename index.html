@@ -305,7 +305,7 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v9 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v10 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -572,7 +572,7 @@ function artKeyFor(family, s) {
 function optionArt(name) {
   var n = String(name).toLowerCase().trim();
   if (OPTION_ART[n]) return OPTION_ART[n];
-  var starts = [["subt", "subt"], ["wave", "wave"], ["ring", "ring"], ["brin", "rings"], ["brop", "brophet"],
+  var starts = [["303", "tb303"], ["ultr", "ultrakik"], ["ukik", "ultrakik"], ["xia", "xia"], ["subt", "subt"], ["wave", "wave"], ["ring", "ring"], ["brin", "rings"], ["brop", "brophet"],
     ["brun", "bruno"], ["dx", "dx7"], ["init", "init"], ["kit", "mpc"], ["samp", "mpc"], ["lxr", "lxr"], ["cyc", "cyc"],
     ["gin", "gin"]];
   for (var i = 0; i < starts.length; i++) if (n.indexOf(starts[i][0]) === 0) return starts[i][1];
@@ -580,7 +580,7 @@ function optionArt(name) {
 }
 var OPTION_ART = {
   subtractive: "subt", subt: "subt", fm: "fm", wavetable: "wave", wave: "wave", "ring mod": "ring", ring: "ring",
-  brings: "rings", dx7: "dx7", brophet: "brophet", bruno106: "bruno", init: "init",
+  brings: "rings", dx7: "dx7", "303": "tb303", brophet: "brophet", bruno106: "bruno", init: "init",
   kit: "mpc", lxr: "lxr", cycles: "cyc", cycl: "cyc", gin: "gin"
 };
 
@@ -765,8 +765,10 @@ var MARKERS = {
 var WAVE_KIND = { 1: "Audio clip", 2: "Sample markers", 3: "Sample preview", 4: "Start offset" };
 var drag = null; // {type, col}
 function draggable(type) { return wave && ((wave.kind === 2 && type <= 3) || (wave.kind === 4 && type === 6)); }
+var waveSent = null; // The markers as the Deluge last sent them
 function showWave(w) {
   wave = w.open ? w : null;
+  if (wave) waveSent = w.markers.map(function (m) { return { type: m.type, col: m.col }; });
   if (wave) {
     if (drag) { // Keep the dragged marker where the finger is until the Deluge catches up
       w.markers.forEach(function (m) { if ((m.type & 0x0F) === drag.type) m.col = drag.col; });
@@ -866,7 +868,13 @@ $("waveCanvas").addEventListener("pointermove", function (ev) {
   if (Date.now() - dragSentAt > 30) sendDrag();
   else { clearTimeout(dragTimer); dragTimer = setTimeout(sendDrag, 35); }
 });
-function endDrag() { if (!drag) return; sendDrag(); drag = null; drawWave(); }
+function endDrag() {
+  if (!drag) return;
+  sendDrag(); drag = null;
+  // Show where the Deluge says the markers are: if it didn't take the move, the marker goes back
+  if (wave && waveSent) wave.markers = waveSent.map(function (m) { return { type: m.type, col: m.col }; });
+  drawWave();
+}
 $("waveCanvas").addEventListener("pointerup", endDrag);
 $("waveCanvas").addEventListener("pointercancel", endDrag);
 
@@ -1159,15 +1167,15 @@ function showKitSamples(list) {
   if (!list.length) { box.innerHTML = ""; box.style.display = "none"; return; }
   box.style.display = "";
   var html = '<div class="label">Samples in this kit</div><div class="kslist">';
-  list.slice().reverse().forEach(function (r, ri) {
-    var i = list.length - 1 - ri;
+  // Same order as the kit row tiles above: row 1 (the bottom pad row) first
+  list.forEach(function (r, i) {
     html += '<button class="ksrow' + (r.selected ? " sel" : "") + '" data-i="' + i + '"><span class="ksled"></span>' +
       '<span class="ksn"></span><span class="ksf"></span></button>';
   });
   box.innerHTML = html + "</div>";
   Array.prototype.forEach.call(box.querySelectorAll(".ksrow"), function (el) {
     var r = list[+el.getAttribute("data-i")];
-    el.querySelector(".ksn").textContent = r.name || "Row " + (r.row + 1);
+    el.querySelector(".ksn").textContent = (r.row + 1) + "  " + (r.name || "Row " + (r.row + 1));
     el.querySelector(".ksf").textContent = r.file.replace(/\.wav$/i, "");
     el.onclick = function () { el.classList.add("tapped"); tx([0x03, 0x0B, r.row]); };
   });
