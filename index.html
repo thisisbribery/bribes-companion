@@ -119,7 +119,7 @@ main{max-width:1180px;margin:0 auto;padding:14px 14px 40px}
 .knob{background:none;border:1px solid transparent;border-radius:10px;padding:2px 0 0;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:0;font:inherit}
 .knob svg{width:58px;height:58px}
 .knob .kv{font:700 17px var(--mono);height:22px;line-height:22px}
-.knob .kn{font:600 12.5px var(--sans);color:var(--muted);height:32px;line-height:1.25;text-align:center;overflow:hidden;width:100%;padding:0 1px;overflow-wrap:break-word}
+.knob .kn{font:600 12px var(--sans);color:var(--muted);height:45px;line-height:1.25;text-align:center;overflow:hidden;width:100%;padding:0 1px;overflow-wrap:normal;word-break:normal}
 .knob.open{border-color:var(--pink);box-shadow:0 0 12px var(--pink-glow);background:color-mix(in srgb,var(--pink) 10%,transparent)}
 .knob.open .kn{color:var(--ink)}
 .knob.tapped{opacity:.6}
@@ -313,7 +313,7 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v13 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v14 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -328,16 +328,16 @@ footer a{color:var(--pink)}
 var HDR = [0xF0, 0x00, 0x21, 0x7B, 0x01, 0x02];
 
 // drum_synth::Engine numbers (append-only in the firmware) and the special codes above them
-var ENGINES = [
-  ["LXR DRUM", "lxr"], ["LXR SNARE", "lxr"], ["LXR METAL", "lxr"],
+var ENGINES = [ // As the Deluge's SYNTH MODE names them
+  ["Kick / tom", "lxr"], ["Snare", "lxr"], ["Cymbal / hat", "lxr"],
   ["DXIA", "xia"], ["DIIA", "xia"],
-  ["CYC KIK", "cyc"], ["CYC SNR", "cyc"], ["CYC METAL", "cyc"], ["CYC PERC", "cyc"],
-  ["CYC TONE", "cyc"], ["CYC CHORD", "cyc"], ["VTG SNR", "cyc"], ["CLAP", "cyc"],
-  ["GIN", "gin"], ["ULTRAKIK", "ultrakik"], ["BRIBERING", "rings"], ["BROPHET", "brophet"], ["BRUNO106", "bruno"]
+  ["Cyc Kik", "cyc"], ["Cyc Snr", "cyc"], ["Cyc Metal", "cyc"], ["Cyc Perc", "cyc"],
+  ["Cyc Tone", "cyc"], ["Cyc Chord", "cyc"], ["Vtg Snr", "cyc"], ["clap eng", "cyc"],
+  ["GIN", "gin"], ["ULTRAKIK", "ultrakik"], ["Bribering", "rings"], ["BROPHET", "brophet"], ["BRUNO106", "bruno"]
 ];
 var SPECIAL = {
-  0x7A: ["303", "tb303"], 0x7B: ["DELUGE SYNTH", "deluge"], 0x7C: ["DX7", "dx7"],
-  0x7D: ["MIDI / GATE", "midi"], 0x7E: ["SAMPLE", "mpc"], 0x7F: ["NONE", "none"]
+  0x7A: ["303", "tb303"], 0x7B: ["Subtractive", "deluge"], 0x7C: ["DX7", "dx7"],
+  0x7D: ["MIDI / gate", "midi"], 0x7E: ["Sample", "mpc"], 0x7F: ["None", "none"]
 };
 var FAMILY_NAME = {
   mpc: "Sample kit row",
@@ -346,10 +346,10 @@ var FAMILY_NAME = {
   dx7: "FM operator synth", midi: "External", sample: "Sample", none: "-"
 };
 var OUTPUT_TYPES = ["SYNTH", "KIT", "MIDI", "CV", "AUDIO"];
-var SYNTH_MODES = ["SUBTRACTIVE", "FM", "RINGMOD", "TB303"];
+var SYNTH_MODES = ["Subtractive", "Fm", "Ringmod", "303"];
 var OSC_TYPES = ["SINE", "TRIANGLE", "SQUARE", "ANALOG SQUARE", "SAW", "ANALOG SAW", "WAVETABLE", "SAMPLE", "DX7",
   "DRUM SYNTH", "INPUT L", "INPUT R", "INPUT STEREO"];
-var RINGS_MODELS = ["MODAL", "SYMPATHETIC", "STRING", "FM", "CHORD"];
+var RINGS_MODELS = ["modal", "sympathetic", "string", "FM", "chord"];
 
 function engineInfo(code) {
   if (code < ENGINES.length) return ENGINES[code];
@@ -977,7 +977,7 @@ function showParams(p) {
       b.innerHTML = k.isSwitch ? '<span class="sw"></span><span class="kn"></span>'
         : '<span class="ks"></span><span class="kv"></span><span class="kn"></span>';
       // Two words too long for a knob label at this size; the rest stay as the Deluge's English titles
-      b.querySelector(".kn").textContent = k.name.replace("frequency", "freq.").replace("resonance", "res.").replace("start offset", "offset").replace(/^Resonance$/, "Res.");
+      b.querySelector(".kn").textContent = k.name; // Exactly as the Deluge names it
       b.title = k.name;
       b.onclick = function () {
         if (b.classList.contains("cant")) return; // Its pad would only say CANT
