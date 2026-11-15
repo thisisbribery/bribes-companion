@@ -49,19 +49,30 @@ h1 span{color:var(--pink)}
 .label{font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 
 /* Display mirror and spelled-out text */
-#top{display:grid;grid-template-columns:auto 1fr;gap:14px;margin-top:16px;align-items:stretch}
-#mirror{background:#060607;border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center}
-#mirror svg{width:250px;height:auto;display:block}
+#top{display:grid;grid-template-columns:1fr auto;gap:18px;margin-top:16px;align-items:center;padding:20px 22px}
+#mirror{background:#060607;border:1px solid var(--line);border-radius:12px;padding:8px 9px;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;align-self:start}
+#mirror svg{width:125px;height:auto;display:block}
 .seg{fill:#2a0f0f} .seg.on{fill:#ff3b2f;filter:drop-shadow(0 0 4px rgba(255,59,47,.7))}
-#oled{width:384px;max-width:100%;image-rendering:pixelated;display:none;background:#000;border-radius:4px}
+#oled{width:192px;max-width:100%;image-rendering:pixelated;display:none;background:#000;border-radius:4px}
 .mode{display:flex}
-.mode button{padding:6px 12px;font-size:12.5px;border-radius:0;background:var(--soft);color:var(--muted);border:1px solid var(--line)}
+.mode button{padding:3px 8px;font-size:11px;border-radius:0;background:var(--soft);color:var(--muted);border:1px solid var(--line)}
 .mode button:first-child{border-radius:8px 0 0 8px} .mode button:last-child{border-radius:0 8px 8px 0}
 .mode button.on{background:var(--pink);color:var(--panel);border-color:var(--pink)}
-#spelled{display:flex;flex-direction:column;justify-content:center;min-width:0}
-#fullText{font-size:34px;font-weight:700;line-height:1.15;word-break:break-word;margin-top:2px}
+#spelled{display:flex;flex-direction:column;justify-content:center;min-width:0;min-height:120px}
+#menuName{font-size:28px;font-weight:600;line-height:1.15;color:var(--muted);word-break:break-word}
+#fullText{font-size:64px;font-weight:800;line-height:1.05;word-break:break-word;margin-top:4px;letter-spacing:-.015em}
 #fullText.popup{color:var(--pink)}
-#rawText{color:var(--muted);font:13px var(--mono);margin-top:6px}
+#rawText{color:var(--muted);font:13px var(--mono);margin-top:8px}
+#popupText{display:none;margin-top:10px;font-size:28px;font-weight:700;color:var(--pink)}
+/* Waveform */
+#wave{display:none;margin-top:14px}
+.whead{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.whead .label{margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{font:600 11px var(--mono);letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 7px}
+.badge.on{color:#2a0020;background:var(--pink);border-color:var(--pink)}
+#waveCanvas{width:100%;height:280px;display:block;border-radius:10px;background:#0c0d10;border:1px solid var(--line)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font:12px var(--mono);color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 
 /* Pickers */
 #picker,#browser{display:none;margin-top:14px}
@@ -107,7 +118,9 @@ dt{color:var(--muted)} dd{margin:0;font-family:var(--mono)}
 footer{color:var(--muted);font-size:13px;margin-top:22px}
 footer a{color:var(--pink)}
 @media (max-width:640px){
-  #top,#hero{grid-template-columns:1fr} #mirror svg{width:100%} #engine{font-size:38px} h1{font-size:20px}
+  #hero{grid-template-columns:1fr} #engine{font-size:38px} h1{font-size:20px}
+  #top{grid-template-columns:1fr auto;padding:16px} #fullText{font-size:42px} #menuName{font-size:20px} #mirror svg{width:90px}
+  #waveCanvas{height:200px}
   .conn{margin-left:0;width:100%} .conn select{flex:1}
 }
 </style>
@@ -119,7 +132,7 @@ footer a{color:var(--pink)}
       <span class="coin" aria-hidden="true"><span class="coin-inner"><img src="assets/coin-front.png" alt=""><span class="edge"></span><img class="back" src="assets/coin-back.png" alt=""></span></span>
       <span>Mods by <b>Bribery</b><small>@thisisbribery on Instagram &#8599;</small></span>
     </a>
-    <div class="title"><h1>Bribeluge <span>Companion</span></h1><span class="ver">v4</span></div>
+    <div class="title"><h1>Bribeluge <span>Companion</span></h1><span class="ver">v5</span></div>
     <div class="conn">
       <select id="port" aria-label="Deluge port"></select>
       <button id="connect">Connect</button>
@@ -127,17 +140,29 @@ footer a{color:var(--pink)}
   </div>
   <div class="pill"><span class="dot" id="dot"></span><span id="statusText">Not connected</span></div>
 
-  <section id="top">
+  <section id="top" class="card">
+    <div id="spelled">
+      <div id="menuName"></div>
+      <div id="fullText">-</div>
+      <div id="popupText"></div>
+      <div id="rawText"></div>
+    </div>
     <div id="mirror" aria-label="Deluge display mirror">
       <svg id="segsvg" viewBox="0 0 236 100"></svg>
       <canvas id="oled" width="128" height="48"></canvas>
       <div class="mode"><button id="mode7">7SEG</button><button id="modeOled">OLED</button></div>
     </div>
-    <div id="spelled" class="card">
-      <div class="label" id="menuName"></div>
-      <div id="fullText">-</div>
-      <div id="rawText"></div>
+  </section>
+
+  <section id="wave" class="card">
+    <div class="whead">
+      <div class="label" id="waveTitle">Waveform</div>
+      <span class="badge" id="wRev">REVERSED</span>
+      <span class="badge" id="wRec">RECORDING</span>
+      <span class="badge" id="wLoad">LOADING</span>
     </div>
+    <canvas id="waveCanvas"></canvas>
+    <div class="legend" id="waveLegend"></div>
   </section>
 
   <section id="picker" class="card">
@@ -640,6 +665,27 @@ function parse(d) {
     bw.ok = d[bj] === 0xF7;
     return bw;
   }
+  if (kind === 0x48) {
+    var w = { kind: "wave", version: d[7], open: d[8] === 1 };
+    if (!w.open) return w;
+    w.waveKind = d[9]; w.reversed = (d[10] & 1) !== 0; w.recording = (d[10] & 2) !== 0; w.complete = (d[10] & 4) !== 0;
+    w.cols = (d[11] << 7) | d[12];
+    var nm = d[13], wj = 14; w.markers = [];
+    for (var mk = 0; mk < nm; mk++) {
+      var mc = (d[wj + 1] << 7) | d[wj + 2];
+      w.markers.push({ type: d[wj], col: mc === 0x3FFE ? -1 : mc }); wj += 3;
+    }
+    var wn = readName(d, wj); w.name = wn.text; wj = wn.next;
+    w.peaks = [];
+    for (var wc = 0; wc < w.cols; wc++, wj += 2) w.peaks.push(d[wj] === 127 && d[wj + 1] === 0 ? null : [d[wj], d[wj + 1]]);
+    w.ok = d[wj] === 0xF7;
+    w.kind = "wave"; w.kindCode = w.waveKind;
+    return w;
+  }
+  if (kind === 0x49) {
+    var ph = (d[8] << 7) | d[9];
+    return { kind: "playhead", col: ph === 0x3FFF ? -1 : (ph === 0x3FFE ? -2 : ph) };
+  }
   if (kind === 0x47) {
     var bs = (d[8] << 7) | d[9];
     return { kind: "browserSel", selected: bs === 0x3FFF ? -1 : bs };
@@ -679,11 +725,13 @@ function onMessage(ev) {
     drawOled();
     return;
   }
-  log("<", ev.data);
+  if (m.kind !== "playhead" && m.kind !== "wave") log("<", ev.data);
   if (m.kind === "text") { showText(m); return; }
   if (m.kind === "picker") { showPicker(m); return; }
   if (m.kind === "browser") { showBrowser(m); return; }
   if (m.kind === "browserSel") { highlightBrowser(m.selected); return; }
+  if (m.kind === "wave") { if (m.open) m.kind = m.kindCode; showWave(m); return; }
+  if (m.kind === "playhead") { wavePlayhead = m.col; drawWave(); return; }
   if (m.kind === "state") {
     if (lastSeq >= 0 && m.seq !== ((lastSeq + 1) & 0x7F)) dropped++;
     lastSeq = m.seq; stateCount++;
@@ -695,12 +743,86 @@ function onMessage(ev) {
 }
 
 function showText(t) {
-  var shown = t.popup ? t.popupEnglish : t.mainEnglish, raw = t.popup ? t.popupText : t.main;
+  // The menu item's name and its value together: the firmware sends the value while a menu item is open, even while
+  // the 7-seg is scrolling the name
+  var main = t.mainEnglish || t.main, pop = t.popupEnglish || t.popupText;
   $("menuName").textContent = t.menu;
-  $("fullText").textContent = shown || "-";
-  $("fullText").className = t.popup ? "popup" : "";
-  $("rawText").textContent = raw && raw !== shown ? "7-seg: " + raw : "";
+  $("fullText").textContent = main || (t.menu ? "" : "-");
+  $("popupText").textContent = t.popup ? pop : "";
+  $("popupText").style.display = t.popup && pop && pop !== main ? "block" : "none";
+  var raws = [];
+  if (t.main && t.main !== main) raws.push(t.main);
+  if (t.popup && t.popupText && t.popupText !== pop) raws.push(t.popupText);
+  $("rawText").textContent = raws.length ? "7-seg: " + raws.join(" / ") : "";
 }
+
+// ---- Waveform: the window the pads show, kWaveSub tablet columns per pad column
+var wave = null, wavePlayhead = -1;
+var MARKERS = {
+  0: ["Start", "#19ffe0"], 1: ["Loop start", "#ff9a3c"], 2: ["Loop end", "#ff9a3c"], 3: ["End", "#ff4d6d"],
+  4: ["Clip start", "#e9e7e2"], 5: ["Clip end", "#e9e7e2"]
+};
+var WAVE_KIND = { 1: "Audio clip", 2: "Sample markers", 3: "Sample preview" };
+function showWave(w) {
+  wave = w.open ? w : null;
+  $("wave").style.display = wave ? "block" : "none";
+  if (!wave) return;
+  $("waveTitle").textContent = (WAVE_KIND[w.kind] || "Waveform") + (w.name ? " \u00b7 " + w.name : "");
+  $("wRev").className = "badge" + (w.reversed ? " on" : ""); $("wRev").style.display = w.reversed ? "" : "none";
+  $("wRec").className = "badge" + (w.recording ? " on" : ""); $("wRec").style.display = w.recording ? "" : "none";
+  $("wLoad").style.display = w.complete || w.recording ? "none" : "";
+  var seen = {}, legend = "";
+  w.markers.forEach(function (m) {
+    var info = MARKERS[m.type & 0x0F]; if (!info || seen[info[0]]) return; seen[info[0]] = 1;
+    legend += '<span><i style="background:' + info[1] + '"></i>' + info[0] + ((m.type & 0x10) ? " (editing)" : "") + "</span>";
+  });
+  $("waveLegend").innerHTML = legend;
+  drawWave();
+}
+function drawWave() {
+  if (!wave) return;
+  var c = $("waveCanvas"), dpr = window.devicePixelRatio || 1;
+  var W = Math.max(1, Math.round(c.clientWidth * dpr)), H = Math.max(1, Math.round(c.clientHeight * dpr));
+  if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
+  var ctx = c.getContext("2d"), n = wave.cols, colW = W / n, mid = H / 2;
+  ctx.clearRect(0, 0, W, H);
+  // Scale to the loudest column in view, as the pads do, but never blow silence up past 1/8 of full scale
+  var peak = 8;
+  wave.peaks.forEach(function (p) { if (p) peak = Math.max(peak, Math.abs(p[0] - 64), Math.abs(p[1] - 64)); });
+  var scale = (H / 2 - 6 * dpr) / peak;
+  // Shade outside the start/end (or clip) markers
+  var lo = null, hi = null;
+  wave.markers.forEach(function (m) {
+    var t = m.type & 0x0F;
+    if (t === 0 || t === 4) lo = m.col; if (t === 3 || t === 5) hi = m.col;
+  });
+  ctx.fillStyle = "rgba(255,255,255,.035)";
+  if (lo !== null && lo > 0) ctx.fillRect(0, 0, lo * colW, H);
+  if (hi !== null && hi < n) ctx.fillRect(Math.max(0, hi) * colW, 0, W - Math.max(0, hi) * colW, H);
+  ctx.fillStyle = "#2c3036"; ctx.fillRect(0, mid - dpr / 2, W, dpr);
+  for (var i = 0; i < n; i++) {
+    var p = wave.peaks[i], x = i * colW;
+    if (!p) { ctx.fillStyle = "rgba(154,160,168,.12)"; ctx.fillRect(x, mid - 6 * dpr, Math.max(1, colW - dpr), 12 * dpr); continue; }
+    var inside = (lo === null || i >= lo) && (hi === null || i < hi);
+    var top = mid - (p[1] - 64) * scale, bot = mid - (p[0] - 64) * scale;
+    ctx.fillStyle = inside ? "#ff1fd6" : "rgba(255,31,214,.35)";
+    ctx.fillRect(x, top, Math.max(1, colW - dpr * 0.5), Math.max(dpr, bot - top));
+  }
+  wave.markers.forEach(function (m, mi) {
+    var info = MARKERS[m.type & 0x0F]; if (!info || m.col < 0 || m.col > n) return;
+    var x = Math.min(W - dpr, m.col * colW), editing = (m.type & 0x10) !== 0;
+    ctx.fillStyle = info[1];
+    if ((m.type & 0x0F) >= 4) { for (var y = 0; y < H; y += 8 * dpr) ctx.fillRect(x, y, dpr, 4 * dpr); }
+    else ctx.fillRect(x - (editing ? dpr : 0), 0, editing ? 3 * dpr : 1.5 * dpr, H);
+    if (editing) { ctx.shadowColor = info[1]; ctx.shadowBlur = 10 * dpr; ctx.fillRect(x - dpr, 0, 3 * dpr, H); ctx.shadowBlur = 0; }
+    ctx.font = (editing ? "600 " : "") + 12 * dpr + "px ui-monospace, monospace";
+    ctx.fillText(info[0], Math.min(x + 4 * dpr, W - 80 * dpr), (16 + (mi % 2) * 16) * dpr);
+  });
+  if (wavePlayhead >= 0 && wavePlayhead <= n) {
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(Math.min(W - 2 * dpr, wavePlayhead * colW), 0, 2 * dpr, H);
+  }
+}
+window.addEventListener("resize", drawWave);
 
 var lastHeroArt = "";
 function render() {
