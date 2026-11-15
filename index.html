@@ -138,6 +138,17 @@ main{max-width:1180px;margin:0 auto;padding:14px 14px 40px}
 .row b{font:600 11px var(--mono);color:var(--muted)}
 .row.sel{border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink),0 0 12px var(--pink-glow)}
 .row.sel b{color:var(--pink)}
+#kitSamples{margin-top:14px}
+#kitSamples .label{margin-bottom:8px}
+.kslist{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px}
+.ksrow{display:grid;grid-template-columns:12px minmax(0,1fr);grid-template-rows:auto auto;column-gap:10px;align-items:center;text-align:left;
+  padding:8px 10px;border-radius:9px;background:var(--soft);border:1px solid var(--line);color:var(--ink);font:inherit}
+.ksled{grid-row:1/3;width:12px;height:12px;border-radius:50%;background:#2c3036}
+.ksrow.on .ksled{background:var(--pink);box-shadow:0 0 10px var(--pink-glow)}
+.ksn{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ksf{font:12px var(--mono);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ksrow.sel{border-color:var(--pink);box-shadow:inset 3px 0 0 var(--pink)}
+.ksrow.tapped{opacity:.6}
 
 /* Song */
 .sections{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
@@ -149,9 +160,10 @@ main{max-width:1180px;margin:0 auto;padding:14px 14px 40px}
 .clip .co{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .clip .sec{font:600 12px var(--mono);color:var(--muted)}
 .clip .st{font:700 11px var(--mono);letter-spacing:.08em;border-radius:6px;padding:2px 8px;border:1px solid var(--line);color:var(--muted)}
-.clip{grid-template-columns:10px minmax(0,1fr) auto 26px}
+.clip{grid-template-columns:10px minmax(0,1fr) auto 26px 26px}
+.secpad{width:22px;height:22px;border-radius:5px;background:#000}
 .clip .led{width:22px;height:22px;border-radius:5px;background:var(--pad-stop);box-shadow:0 0 8px rgba(232,50,47,.45)}
-.clip.playing .led{background:var(--pad-play);box-shadow:0 0 10px rgba(43,217,74,.6);animation:breathe 1.2s ease-in-out infinite}
+.clip.playing .led{background:var(--pad-play);box-shadow:0 0 10px rgba(43,217,74,.6)}
 .clip.soloing .led{background:var(--pad-solo);box-shadow:0 0 10px rgba(47,123,255,.6)}
 .clip.pending .led{animation:armflash .44s steps(1) infinite}
 .clip.playing{border-color:color-mix(in srgb,var(--pad-play) 60%,var(--line))}
@@ -164,7 +176,8 @@ main{max-width:1180px;margin:0 auto;padding:14px 14px 40px}
 .cell.empty{background:transparent;border-style:dashed;cursor:default}
 .cell{display:flex;flex-direction:column;justify-content:space-between}
 .cell.dim{filter:brightness(.38) saturate(.7)}
-.cell.playing{animation:breathe 1.2s ease-in-out infinite;box-shadow:0 0 12px var(--cg,transparent)}
+.cell.playing{box-shadow:0 0 12px var(--cg,transparent)}
+.cell.current{animation:breathe 1.2s ease-in-out infinite}
 .cell.pending{animation:armflash .44s steps(1) infinite}
 .cell .steps{height:10px;margin-top:2px}
 .cell .steps i{background:rgba(0,0,0,.25)} .cell .steps i.on{background:rgba(0,0,0,.75)}
@@ -282,6 +295,7 @@ footer a{color:var(--pink)}
       </div>
       <div id="knobs"></div>
       <div id="rows"></div>
+      <div id="kitSamples" style="display:none"></div>
     </section>
   </div>
 
@@ -291,7 +305,7 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v8 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v9 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -554,6 +568,16 @@ function artKeyFor(family, s) {
   return s.osc0 === 6 ? "wave" : "subt";
 }
 // Picker options that are instruments or kit types (English, or the 7-seg text when the English isn't certain)
+// The drawing for a picker option: exact name, else by its first letters (7-seg texts are cut short)
+function optionArt(name) {
+  var n = String(name).toLowerCase().trim();
+  if (OPTION_ART[n]) return OPTION_ART[n];
+  var starts = [["subt", "subt"], ["wave", "wave"], ["ring", "ring"], ["brin", "rings"], ["brop", "brophet"],
+    ["brun", "bruno"], ["dx", "dx7"], ["init", "init"], ["kit", "mpc"], ["samp", "mpc"], ["lxr", "lxr"], ["cyc", "cyc"],
+    ["gin", "gin"]];
+  for (var i = 0; i < starts.length; i++) if (n.indexOf(starts[i][0]) === 0) return starts[i][1];
+  return null;
+}
 var OPTION_ART = {
   subtractive: "subt", subt: "subt", fm: "fm", wavetable: "wave", wave: "wave", "ring mod": "ring", ring: "ring",
   brings: "rings", dx7: "dx7", brophet: "brophet", bruno106: "bruno", init: "init",
@@ -664,14 +688,15 @@ function showPicker(p) {
   if (picker) {
     $("pickerTitle").textContent = p.title;
     var tiles = $("pickerTiles");
-    var keysFor = p.options.map(function (name) { return OPTION_ART[name.toLowerCase()]; });
-    var withArt = keysFor.length > 1 && keysFor.every(function (k) { return !!k; });
+    var keysFor = p.options.map(optionArt);
+    // Pictures when most options are instruments or kit types (a list can carry an extra entry, like Current)
+    var withArt = keysFor.length > 1 && keysFor.filter(function (k) { return !!k; }).length * 2 >= keysFor.length;
     tiles.className = withArt ? "art" : "";
     tiles.innerHTML = "";
     p.options.forEach(function (name, idx) {
       var t = document.createElement("button");
       t.className = "tile" + (idx === p.selected ? " sel" : "");
-      t.innerHTML = withArt ? art(keysFor[idx]) : "";
+      t.innerHTML = withArt && keysFor[idx] ? art(keysFor[idx]) : "";
       var label = document.createElement("span"); label.textContent = name; t.appendChild(label);
       t.onclick = function () { t.className += " tapped"; tx([0x03, 0x02, idx]); };
       tiles.appendChild(t);
@@ -732,7 +757,7 @@ function showText(t) {
 
 // ---- Waveform: the window the pads show, 12 tablet columns per pad column. Markers can be dragged in the sample
 // marker editor (start, loop start, loop end, end) and in Start offset (the offset).
-var wavePlayhead = -1;
+var wavePlayheads = [];
 var MARKERS = {
   0: ["Start", "#19ffe0"], 1: ["Loop start", "#ff9a3c"], 2: ["Loop end", "#ff9a3c"], 3: ["End", "#ff4d6d"],
   4: ["Clip start", "#e9e7e2"], 5: ["Clip end", "#e9e7e2"], 6: ["Offset", "#ffe14d"]
@@ -799,9 +824,11 @@ function drawWave() {
     ctx.font = (editing ? "600 " : "") + 12 * dpr + "px ui-monospace, monospace";
     ctx.fillText(info[0], Math.min(x + 4 * dpr, W - 80 * dpr), (16 + (mi % 2) * 16) * dpr);
   });
-  if (wavePlayhead >= 0 && wavePlayhead <= n) {
-    ctx.fillStyle = "#ffffff"; ctx.fillRect(Math.min(W - 2 * dpr, wavePlayhead * colW), 0, 2 * dpr, H);
-  }
+  // Playheads: the clip's, or each voice playing the sample
+  ctx.fillStyle = "#ffffff";
+  wavePlayheads.forEach(function (c) {
+    if (c >= 0 && c <= n) ctx.fillRect(Math.min(W - 2 * dpr, c * colW), 0, 2 * dpr, H);
+  });
 }
 window.addEventListener("resize", drawWave);
 // Dragging: grab the nearest draggable marker, send its new place (a 14-bit fraction of the window) at most every
@@ -995,7 +1022,8 @@ function renderSong() {
       (c.soloing ? " soloing" : "") + '" data-i="' + i + '"><span class="sw" style="background:' + rgb(o) + '"></span>' +
       '<span style="min-width:0"><div class="cn"></div><div class="co"></div><div class="steps" style="--c:' + rgb(o) + '">' +
       stepCells(c.pattern) + '<span class="ph"></span></div></span><span class="sec">' +
-      (c.section < 127 ? "S" + (c.section + 1) : "") + '</span><span class="led"></span></button>';
+      (c.section < 127 ? "S" + (c.section + 1) : "") + '</span><span class="led"></span><span class="secpad" data-type="' +
+      (o ? o.type : 4) + '" data-rgb="' + (c.sectionRgb || [0, 0, 0]).join(",") + '"></span></button>';
   });
   html += "</div>";
   if (songLayout !== html) {
@@ -1035,7 +1063,7 @@ function renderGrid(body) {
       clips.forEach(function (c, i) { if (ci < 0 && c.output === oi && c.section === s) ci = i; });
       if (ci < 0) { html += '<div class="cell empty"></div>'; return; }
       var c = clips[ci], col = rgb(outputs[oi]);
-      html += '<button class="cell' + (c.playing ? " playing" : " dim") + (c.pending ? " pending" : "") + '" data-i="' + ci +
+      html += '<button class="cell' + (c.playing ? " playing" : " dim") + (c.pending ? " pending" : "") + (c.current ? " current" : "") + '" data-i="' + ci +
         '" style="background:' + col + ";--cg:" + col + '"><span>' + escapeHtml(c.name) + '</span><div class="steps">' +
         stepCells(c.pattern) + '<span class="ph"></span></div></button>';
     });
@@ -1091,6 +1119,65 @@ function placeArrangerHead() {
   h.style.display = "block";
   h.style.left = (r.left - arr.left + r.width * arrangerPos / 16383) + "px";
 }
+// Section pads move with the track type, as on the Deluge (session_view.cpp trackTypeBrightness): kits flash on the
+// beat, synths breathe over two beats, MIDI pings and fades each beat, CV and audio stay solid. The beat comes from
+// the Deluge (BEAT) and runs on at the tempo in between.
+var beatAt = null;
+function beatNow() {
+  if (!beatAt) return 0;
+  var bpm = transport && transport.bpm ? transport.bpm / 100 : 120;
+  var beats = beatAt.phase * 4 + (performance.now() - beatAt.time) / (60000 / bpm);
+  return ((beats % 4) + 4) % 4; // 0-4 quarter notes
+}
+function typeBrightness(type, beats) {
+  var low = 50, p1 = (beats % 1) * 256, p2 = (beats % 2) / 2 * 256;
+  if (type === 1) return p1 < 40 ? 255 : low;                       // Kit
+  if (type === 0) {                                                 // Synth
+    var tri = p2 < 128 ? p2 * 2 : (255 - p2) * 2;
+    return low + (tri * tri / 255) * (255 - low) / 255;
+  }
+  if (type === 2) return 255 - p1 * (255 - low) / 255;              // MIDI
+  return 255;                                                       // CV, audio
+}
+function glowLoop() {
+  if ($("song").classList.contains("show")) {
+    var beats = beatNow();
+    Array.prototype.forEach.call(document.querySelectorAll(".secpad"), function (el) {
+      var rgbv = el.getAttribute("data-rgb").split(",").map(Number), k = typeBrightness(+el.getAttribute("data-type"), beats) / 255;
+      el.style.background = "rgb(" + Math.round(rgbv[0] * k) + "," + Math.round(rgbv[1] * k) + "," + Math.round(rgbv[2] * k) + ")";
+    });
+  }
+}
+setInterval(glowLoop, 40);
+
+// ---- Kit samples: every kit row playing a sample, top row first as on the pads, lit while sounding. A tap selects
+// the row and opens its sample's waveform.
+var kitRows = [];
+function showKitSamples(list) {
+  kitRows = list;
+  var box = $("kitSamples");
+  if (!list.length) { box.innerHTML = ""; box.style.display = "none"; return; }
+  box.style.display = "";
+  var html = '<div class="label">Samples in this kit</div><div class="kslist">';
+  list.slice().reverse().forEach(function (r, ri) {
+    var i = list.length - 1 - ri;
+    html += '<button class="ksrow' + (r.selected ? " sel" : "") + '" data-i="' + i + '"><span class="ksled"></span>' +
+      '<span class="ksn"></span><span class="ksf"></span></button>';
+  });
+  box.innerHTML = html + "</div>";
+  Array.prototype.forEach.call(box.querySelectorAll(".ksrow"), function (el) {
+    var r = list[+el.getAttribute("data-i")];
+    el.querySelector(".ksn").textContent = r.name || "Row " + (r.row + 1);
+    el.querySelector(".ksf").textContent = r.file.replace(/\.wav$/i, "");
+    el.onclick = function () { el.classList.add("tapped"); tx([0x03, 0x0B, r.row]); };
+  });
+}
+function showKitActive(bits) {
+  Array.prototype.forEach.call(document.querySelectorAll(".ksrow"), function (el) {
+    el.classList.toggle("on", ((bits >>> +el.getAttribute("data-i")) & 1) === 1);
+  });
+}
+
 function escapeHtml(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
 var midi = null, input = null, output = null, keepAlive = null;
@@ -1180,8 +1267,12 @@ function parse(d) {
     return w;
   }
   if (kind === 0x49) {
-    var ph = (d[8] << 7) | d[9];
-    return { kind: "playhead", col: ph === 0x3FFF ? -1 : (ph === 0x3FFE ? -2 : ph) };
+    var heads = [], hn = d[8];
+    for (var hh = 0; hh < hn; hh++) {
+      var hc = (d[9 + hh * 2] << 7) | d[10 + hh * 2];
+      if (hc !== 0x3FFE && hc !== 0x3FFF) heads.push(hc);
+    }
+    return { kind: "playhead", heads: heads };
   }
   if (kind === 0x4A) {
     var pp = { kind: "params", open: d[8] === 1, knobs: [] };
@@ -1220,7 +1311,8 @@ function parse(d) {
       var ce = { output: d[cj], section: d[cj + 1], playing: (cf & 1) !== 0, pending: (cf & 2) !== 0, audio: (cf & 4) !== 0,
         soloing: (cf & 8) !== 0, current: (cf & 16) !== 0 };
       ce.pattern = d[cj + 3] | (d[cj + 4] << 7) | (d[cj + 5] << 14) | (d[cj + 6] << 21) | ((d[cj + 7] & 0x0F) << 28);
-      var cn2 = readName(d, cj + 8); ce.name = cn2.text; cj = cn2.next;
+      ce.sectionRgb = [d[cj + 8] * 2, d[cj + 9] * 2, d[cj + 10] * 2];
+      var cn2 = readName(d, cj + 11); ce.name = cn2.text; cj = cn2.next;
       cl.list.push(ce);
     }
     cl.ok = d[cj] === 0xF7;
@@ -1239,6 +1331,19 @@ function parse(d) {
       ar.lanes.push(lane);
     }
     return ar;
+  }
+  if (kind === 0x51) return { kind: "beat", phase: ((d[8] << 7) | d[9]) / 16384 };
+  if (kind === 0x52) {
+    var ks = { kind: "kitSamples", rows: [] }, kc = d[8], kj = 9;
+    for (var kq = 0; kq < kc; kq++) {
+      var krow = { row: d[kj], selected: (d[kj + 1] & 2) !== 0 }, kn1 = readName(d, kj + 2);
+      krow.name = kn1.text; var kn2 = readName(d, kn1.next); krow.file = kn2.text; kj = kn2.next;
+      ks.rows.push(krow);
+    }
+    return ks;
+  }
+  if (kind === 0x53) {
+    return { kind: "kitActive", bits: d[8] | (d[9] << 7) | (d[10] << 14) | (d[11] << 21) | ((d[12] & 0x0F) << 28) };
   }
   if (kind === 0x50) {
     var cpos = {}, pc2 = d[8];
@@ -1278,7 +1383,8 @@ function parse(d) {
 }
 
 
-var QUIET = { playhead: 1, wave: 1, transport: 1, arrangerPos: 1, params: 1, clips: 1, clipPos: 1, arranger: 1, outputs: 1 };
+var QUIET = { playhead: 1, wave: 1, transport: 1, arrangerPos: 1, params: 1, clips: 1, clipPos: 1, arranger: 1, outputs: 1,
+  beat: 1, kitActive: 1 };
 function onMessage(ev) {
   var m = parse(ev.data);
   if (!m) return;
@@ -1297,7 +1403,7 @@ function onMessage(ev) {
   case "browser": showBrowser(m); return;
   case "browserSel": highlightBrowser(m.selected); return;
   case "wave": if (m.open) m.kind = m.kindCode; showWave(m); return;
-  case "playhead": wavePlayhead = m.col; drawWave(); return;
+  case "playhead": wavePlayheads = m.heads; drawWave(); return;
   case "params": showParams(m); return;
   case "transport": showTransport(m); return;
   case "outputs": outputs = m.list; renderSong(); return;
@@ -1305,6 +1411,9 @@ function onMessage(ev) {
   case "arranger": arranger = m; renderSong(); return;
   case "arrangerPos": arrangerPos = m.pos; placeArrangerHead(); return;
   case "clipPos": clipPos = m.pos; placeClipHeads(); return;
+  case "beat": beatAt = { phase: m.phase, time: performance.now() }; return;
+  case "kitSamples": showKitSamples(m.rows); return;
+  case "kitActive": showKitActive(m.bits); return;
   case "state":
     if (lastSeq >= 0 && m.seq !== ((lastSeq + 1) & 0x7F)) dropped++;
     lastSeq = m.seq; stateCount++;
