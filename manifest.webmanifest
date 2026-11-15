@@ -1,6 +1,6 @@
 {
-  "name": "Bribes Companion",
-  "short_name": "Bribes",
+  "name": "Bribeluge Companion",
+  "short_name": "Bribeluge",
   "description": "Companion screen for the Deluge Bribes firmware",
   "start_url": "./",
   "scope": "./",

@@ -1,4 +1,4 @@
-# Bribes Companion
+# Bribeluge Companion
 
 A companion screen for the Deluge Bribes custom firmware. Open it in Chrome on a phone or tablet that's connected to the Deluge over USB. It mirrors the Deluge's display with every 7-seg word spelled out, shows the engine, preset and kit rows you're on with a drawing of each engine, and lets you tap picker tiles and presets to choose them on the Deluge.
 
