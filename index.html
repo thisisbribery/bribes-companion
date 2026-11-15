@@ -18,65 +18,68 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
-main{max-width:1080px;margin:0 auto;padding:18px 16px 48px}
-button,select{font:600 15px var(--sans);border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--accent);color:var(--panel)}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-y:scroll}
+button,select{font:600 15px var(--sans);border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--accent);color:var(--panel);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 button.secondary,select{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
 select{font-weight:500}
+.label{font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
 
-/* Byline and header, as on the Seal Eggs flasher */
-.byline{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.coinlink{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:4px 14px 4px 4px;font-size:14px;line-height:1.25}
-.coinlink:hover{border-color:var(--pink)}
-.coinlink small{display:block;white-space:nowrap;color:var(--muted);font-size:12.5px}
-.coin{display:block;width:40px;height:40px;perspective:220px;flex:0 0 auto}
+/* Top bar: always on screen. Fixed heights throughout, so nothing below it moves as the text changes. */
+#bar{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.barin{max-width:1180px;margin:0 auto;padding:8px 14px}
+.row1{display:flex;align-items:center;gap:10px;height:62px}
+.brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-weight:700;font-size:15px;white-space:nowrap}
+.brand span{color:var(--pink)}
+.coin{display:block;width:30px;height:30px;perspective:220px;flex:0 0 auto}
 .coin-inner{display:block;position:relative;width:100%;height:100%;transform-style:preserve-3d;animation:coinspin 4s steps(24) infinite}
-.coin img{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:translateZ(2.5px)}
-.coin .back{transform:rotateY(180deg) translateZ(2.5px)}
-.coin .edge{display:block;position:absolute;left:50%;top:8%;width:5px;height:84%;margin-left:-2.5px;background:linear-gradient(#9a9a9a,#6f6f6f 50%,#4a4a4a);transform:rotateY(90deg)}
+.coin img{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:translateZ(2px)}
+.coin .back{transform:rotateY(180deg) translateZ(2px)}
+.coin .edge{display:block;position:absolute;left:50%;top:8%;width:4px;height:84%;margin-left:-2px;background:linear-gradient(#9a9a9a,#6f6f6f 50%,#4a4a4a);transform:rotateY(90deg)}
 @keyframes coinspin{to{transform:rotateY(360deg)}}
 @media (prefers-reduced-motion:reduce){.coin-inner{animation:none}}
-.title{display:flex;align-items:baseline;gap:10px;margin:0 auto 0 0}
-h1{font-size:24px;line-height:1.1;margin:0;letter-spacing:-.01em}
-h1 span{color:var(--pink)}
-.ver{font:500 11.5px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
-.conn{display:flex;gap:8px;align-items:center;margin-left:auto}
-.pill{display:inline-flex;gap:8px;align-items:center;margin-top:12px;font-size:13px;color:var(--muted);background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
-.dot{width:9px;height:9px;border-radius:50%;background:var(--bad);flex:0 0 auto}
-.dot.ok{background:var(--ok);box-shadow:0 0 8px var(--ok)} .dot.warn{background:var(--warn)}
-
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
-.label{font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-
-/* Display mirror and spelled-out text */
-#top{display:grid;grid-template-columns:1fr auto;gap:18px;margin-top:16px;align-items:center;padding:20px 22px}
-#mirror{background:#060607;border:1px solid var(--line);border-radius:12px;padding:8px 9px;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;align-self:start}
-#mirror svg{width:125px;height:auto;display:block}
-.seg{fill:#2a0f0f} .seg.on{fill:#ff3b2f;filter:drop-shadow(0 0 4px rgba(255,59,47,.7))}
-#oled{width:192px;max-width:100%;image-rendering:pixelated;display:none;background:#000;border-radius:4px}
-.mode{display:flex}
-.mode button{padding:3px 8px;font-size:11px;border-radius:0;background:var(--soft);color:var(--muted);border:1px solid var(--line)}
-.mode button:first-child{border-radius:8px 0 0 8px} .mode button:last-child{border-radius:0 8px 8px 0}
+.group{display:flex;align-items:center;gap:6px}
+.tbtn{width:48px;height:44px;padding:0;border-radius:10px;background:var(--soft);border:1px solid var(--line);color:var(--ink);display:grid;place-items:center}
+.tbtn svg{width:20px;height:20px}
+#tPlay.on{background:#1f3b26;border-color:var(--ok);color:var(--ok);box-shadow:0 0 12px rgba(105,219,124,.35)}
+#tRec{color:#ff4d4d}
+#tRec.on{background:#3b1717;border-color:#ff4d4d;box-shadow:0 0 12px rgba(255,77,77,.4)}
+#tempo{font:700 20px var(--mono);min-width:92px;text-align:right;color:var(--ink)}
+#tempo small{display:block;font:500 10px var(--mono);color:var(--muted);letter-spacing:.1em;text-align:right;margin-top:-2px}
+#metro{width:8px;height:8px;border-radius:50%;background:var(--line)} #metro.on{background:var(--pink)}
+#mirror{background:#060607;border:1px solid var(--line);border-radius:10px;padding:5px 8px;display:flex;align-items:center;gap:8px;height:52px}
+#mirror svg{width:96px;height:auto;display:block}
+.seg{fill:#2a0f0f} .seg.on{fill:#ff3b2f;filter:drop-shadow(0 0 3px rgba(255,59,47,.7))}
+#oled{width:112px;height:42px;image-rendering:pixelated;display:none;background:#000;border-radius:3px}
+.mode{display:flex;flex-direction:column;gap:2px}
+.mode button{padding:2px 6px;font-size:10px;border-radius:5px;background:var(--soft);color:var(--muted);border:1px solid var(--line)}
 .mode button.on{background:var(--pink);color:var(--panel);border-color:var(--pink)}
-#spelled{display:flex;flex-direction:column;justify-content:center;min-width:0;min-height:120px}
-#menuName{font-size:28px;font-weight:600;line-height:1.15;color:var(--muted);word-break:break-word}
-#fullText{font-size:64px;font-weight:800;line-height:1.05;word-break:break-word;margin-top:4px;letter-spacing:-.015em}
-#fullText.popup{color:var(--pink)}
-#rawText{color:var(--muted);font:13px var(--mono);margin-top:8px}
-#popupText{display:none;margin-top:10px;font-size:28px;font-weight:700;color:var(--pink)}
-/* Waveform */
-#wave{display:none;margin-top:14px}
-.whead{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.whead .label{margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.badge{font:600 11px var(--mono);letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 7px}
-.badge.on{color:#2a0020;background:var(--pink);border-color:var(--pink)}
-#waveCanvas{width:100%;height:280px;display:block;border-radius:10px;background:#0c0d10;border:1px solid var(--line)}
-.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font:12px var(--mono);color:var(--muted)}
-.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.nav{margin-left:auto}
+#nSelect{height:44px;padding:0 22px;border-radius:22px;font:700 14px var(--sans);letter-spacing:.06em}
+.conn{display:flex;align-items:center;gap:6px}
+.conn select{max-width:130px;padding:8px 10px;font-size:13px}
+.conn button{padding:8px 12px;font-size:13px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--bad);flex:0 0 auto}
+.dot.ok{background:var(--ok);box-shadow:0 0 8px var(--ok)} .dot.warn{background:var(--warn)}
+/* Readout: name and value, one line each, fixed height */
+.row2{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end;height:92px;padding:2px 2px 8px}
+#menuName{font-size:20px;font-weight:600;color:var(--muted);height:28px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#fullText{font-size:48px;font-weight:800;line-height:1.1;height:54px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.015em}
+.side{text-align:right;min-width:0;max-width:44vw}
+#popupText{font-size:22px;font-weight:700;color:var(--pink);height:30px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#rawText{color:var(--muted);font:12px var(--mono);height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#statusText{color:var(--muted);font:12px var(--mono);height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+main{max-width:1180px;margin:0 auto;padding:14px 14px 40px}
+/* One panel at a time in the stage, so panels opening don't push others around */
+.stage{min-height:62vh}
+.panel{display:none} .panel.show{display:block}
+.phead{display:flex;align-items:center;gap:10px;margin-bottom:12px;min-height:34px}
+.phead .label{margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.phead button{padding:7px 13px;font-size:13.5px}
+.hint{color:var(--muted);font-size:13px;margin:0 0 10px}
 
 /* Pickers */
-#picker,#browser{display:none;margin-top:14px}
-#pickerTitle,#browserTitle{margin-bottom:12px}
 #pickerTiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
 #pickerTiles.art{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
 .tile{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:16px 12px;font:700 18px var(--sans);color:var(--ink);min-height:68px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:border-color .15s,box-shadow .15s}
@@ -84,12 +87,8 @@ h1 span{color:var(--pink)}
 .tile.sel{border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink),0 0 16px var(--pink-glow)}
 .tile.tapped{opacity:.6}
 
-/* Preset browser */
-.bhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.bhead .label{margin:0 auto 0 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bhead button{padding:8px 14px;font-size:14px}
-.hint{color:var(--muted);font-size:13.5px;margin:0 0 10px}
-#browserList{max-height:55vh;overflow-y:auto;border-radius:10px;border:1px solid var(--line)}
+/* Browser */
+#browserList{height:56vh;overflow-y:auto;border-radius:10px;border:1px solid var(--line)}
 .item{padding:12px 14px;font-size:18px;border-bottom:1px solid var(--line);display:flex;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .item:last-child{border-bottom:0}
 .item .n{color:var(--muted);font:13px var(--mono);min-width:38px;padding-top:4px}
@@ -97,19 +96,67 @@ h1 span{color:var(--pink)}
 .item.sel{background:color-mix(in srgb,var(--pink) 14%,var(--panel));color:var(--ink);box-shadow:inset 4px 0 0 var(--pink)}
 .item.tapped{opacity:.55}
 
-/* Engine view */
-#hero{margin-top:14px;display:grid;grid-template-columns:minmax(0,320px) 1fr;gap:20px;align-items:center}
-#heroArt{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:14px;aspect-ratio:16/10;display:flex;align-items:center}
+/* Waveform */
+.badge{font:600 11px var(--mono);letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 7px}
+.badge.on{color:#2a0020;background:var(--pink);border-color:var(--pink)}
+#waveCanvas{width:100%;height:46vh;min-height:240px;display:block;border-radius:10px;background:#0c0d10;border:1px solid var(--line);touch-action:none}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font:12px var(--mono);color:var(--muted);min-height:20px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+/* Track: engine and knobs */
+#hero{display:grid;grid-template-columns:200px 1fr;gap:18px;align-items:center}
+#heroArt{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px;aspect-ratio:16/10;display:flex;align-items:center}
 #heroArt svg{width:100%;height:auto;display:block}
-#engine{font-size:52px;font-weight:800;line-height:1.05;margin:4px 0;word-break:break-word;letter-spacing:-.01em}
-#preset{font-size:24px}
-#rowname{font-size:17px;color:var(--muted);margin-top:4px}
+#engine{font-size:38px;font-weight:800;line-height:1.05;margin:2px 0;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#preset{font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#rowname{font-size:15px;color:var(--muted);height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#knobs{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.kgroup{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px 10px 6px}
+.kgroup .label{margin:0 0 6px 2px}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:4px}
+.knob{background:none;border:1px solid transparent;border-radius:10px;padding:4px 2px;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:0;font:inherit}
+.knob svg{width:46px;height:46px}
+.knob .kv{font:700 13px var(--mono);height:18px}
+.knob .kn{font:500 11px var(--sans);color:var(--muted);height:30px;line-height:1.2;text-align:center;overflow:hidden;width:100%}
+.knob.open{border-color:var(--pink);box-shadow:0 0 12px var(--pink-glow);background:color-mix(in srgb,var(--pink) 10%,transparent)}
+.knob.open .kn{color:var(--ink)}
+.knob.tapped{opacity:.6}
 #rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;margin-top:12px}
-.row{border-radius:10px;padding:8px;font-size:12.5px;background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+.row{border-radius:10px;padding:8px;font-size:12.5px;background:var(--soft);border:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
 .row svg{width:100%;height:auto;display:block}
 .row b{font:600 11px var(--mono);color:var(--muted)}
 .row.sel{border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink),0 0 12px var(--pink-glow)}
 .row.sel b{color:var(--pink)}
+
+/* Song */
+.sections{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.sections button{padding:6px 12px;font-size:13px;background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+.clips{display:flex;flex-direction:column;gap:6px;height:52vh;overflow-y:auto}
+.clip{display:grid;grid-template-columns:10px 1fr auto auto;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:var(--soft);border:1px solid var(--line);cursor:pointer;text-align:left;color:var(--ink);font:inherit}
+.clip .sw{width:10px;height:34px;border-radius:4px}
+.clip .cn{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clip .co{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clip .sec{font:600 12px var(--mono);color:var(--muted)}
+.clip .st{font:700 11px var(--mono);letter-spacing:.08em;border-radius:6px;padding:2px 8px;border:1px solid var(--line);color:var(--muted)}
+.clip.playing{border-color:var(--ok)} .clip.playing .st{color:#062b10;background:var(--ok);border-color:var(--ok)}
+.clip.pending .st{animation:blink .5s steps(2) infinite;color:var(--warn);border-color:var(--warn)}
+.clip.current{box-shadow:inset 4px 0 0 var(--pink)}
+@keyframes blink{50%{opacity:.25}}
+.grid{display:grid;gap:6px;overflow:auto;height:52vh;align-content:start}
+.gh{font:600 11px var(--mono);color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:2px}
+.gs{font:600 11px var(--mono);color:var(--muted);display:grid;place-items:center}
+.cell{min-height:52px;border-radius:9px;border:1px solid var(--line);background:#16181c;padding:4px 6px;font:600 11px var(--sans);color:#0b0b0d;text-align:left;overflow:hidden}
+.cell.empty{background:transparent;border-style:dashed;cursor:default}
+.cell.dim{filter:brightness(.35) saturate(.6)}
+.cell.playing{outline:2px solid #fff;outline-offset:-2px}
+.cell.pending{animation:blink .5s steps(2) infinite}
+.arr{display:flex;flex-direction:column;gap:4px;height:52vh;overflow-y:auto;position:relative}
+.alane{display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center;height:34px;flex:0 0 auto}
+.alane .an{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alane.muted .an{color:var(--muted);text-decoration:line-through}
+.atrack{position:relative;height:28px;background:#0c0d10;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.ablock{position:absolute;top:3px;bottom:3px;border-radius:4px;min-width:2px}
+#arrHead{position:absolute;top:0;bottom:0;width:2px;background:#fff;display:none;pointer-events:none;box-shadow:0 0 6px #fff}
 
 details{margin-top:18px} summary{color:var(--muted);cursor:pointer;font-size:14px}
 dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:12px 0 0;font-size:14px}
@@ -117,80 +164,105 @@ dt{color:var(--muted)} dd{margin:0;font-family:var(--mono)}
 #log{font:12px/1.5 var(--mono);white-space:pre-wrap;word-break:break-all;color:var(--muted);max-height:260px;overflow:auto;background:var(--panel);border:1px solid var(--line);padding:10px;border-radius:10px;margin-top:10px}
 footer{color:var(--muted);font-size:13px;margin-top:22px}
 footer a{color:var(--pink)}
+@media (max-width:900px){
+  .brand b{display:none} #tempo{min-width:70px;font-size:16px} .conn select{max-width:90px}
+  #fullText{font-size:36px;height:42px} .row2{height:80px} #hero{grid-template-columns:120px 1fr} #engine{font-size:28px}
+}
 @media (max-width:640px){
-  #hero{grid-template-columns:1fr} #engine{font-size:38px} h1{font-size:20px}
-  #top{grid-template-columns:1fr auto;padding:16px} #fullText{font-size:42px} #menuName{font-size:20px} #mirror svg{width:90px}
-  #waveCanvas{height:200px}
-  .conn{margin-left:0;width:100%} .conn select{flex:1}
+  .row1{flex-wrap:wrap;height:auto;row-gap:6px} .nav{margin-left:0} #mirror svg{width:72px}
 }
 </style>
 </head>
 <body>
-<main>
-  <div class="byline">
-    <a class="coinlink" href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">
+<div id="bar"><div class="barin">
+  <div class="row1">
+    <a class="brand" href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener" title="Mods by Bribery">
       <span class="coin" aria-hidden="true"><span class="coin-inner"><img src="assets/coin-front.png" alt=""><span class="edge"></span><img class="back" src="assets/coin-back.png" alt=""></span></span>
-      <span>Mods by <b>Bribery</b><small>@thisisbribery on Instagram &#8599;</small></span>
+      <b>Bribeluge <span>Companion</span></b>
     </a>
-    <div class="title"><h1>Bribeluge <span>Companion</span></h1><span class="ver">v5</span></div>
-    <div class="conn">
-      <select id="port" aria-label="Deluge port"></select>
-      <button id="connect">Connect</button>
-    </div>
-  </div>
-  <div class="pill"><span class="dot" id="dot"></span><span id="statusText">Not connected</span></div>
-
-  <section id="top" class="card">
-    <div id="spelled">
-      <div id="menuName"></div>
-      <div id="fullText">-</div>
-      <div id="popupText"></div>
-      <div id="rawText"></div>
+    <div class="group">
+      <button class="tbtn" id="tPlay" aria-label="Play"><svg viewBox="0 0 20 20"><path d="M5 3 L17 10 L5 17 Z" fill="currentColor"/></svg></button>
+      <button class="tbtn" id="tRec" aria-label="Record"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.5" fill="currentColor"/></svg></button>
+      <div id="tempo">-<small>BPM</small></div><span id="metro" title="Metronome"></span>
     </div>
     <div id="mirror" aria-label="Deluge display mirror">
       <svg id="segsvg" viewBox="0 0 236 100"></svg>
       <canvas id="oled" width="128" height="48"></canvas>
       <div class="mode"><button id="mode7">7SEG</button><button id="modeOled">OLED</button></div>
     </div>
-  </section>
-
-  <section id="wave" class="card">
-    <div class="whead">
-      <div class="label" id="waveTitle">Waveform</div>
-      <span class="badge" id="wRev">REVERSED</span>
-      <span class="badge" id="wRec">RECORDING</span>
-      <span class="badge" id="wLoad">LOADING</span>
+    <div class="group nav">
+      <button class="tbtn" id="nBack" aria-label="Back"><svg viewBox="0 0 20 20"><path d="M8 4 L3 9 L8 14 M3 9 H12 A5 5 0 0 1 12 19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="tbtn" id="nLeft" aria-label="Select knob left"><svg viewBox="0 0 20 20"><path d="M12 4 L6 10 L12 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button id="nSelect">SELECT</button>
+      <button class="tbtn" id="nRight" aria-label="Select knob right"><svg viewBox="0 0 20 20"><path d="M8 4 L14 10 L8 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
-    <canvas id="waveCanvas"></canvas>
-    <div class="legend" id="waveLegend"></div>
-  </section>
-
-  <section id="picker" class="card">
-    <div class="label" id="pickerTitle"></div>
-    <div id="pickerTiles"></div>
-  </section>
-
-  <section id="browser" class="card">
-    <div class="bhead">
-      <div class="label" id="browserTitle"></div>
-      <button class="secondary" id="bBack">Back</button>
-      <button id="bLoad">Load</button>
+    <div class="conn">
+      <span class="dot" id="dot" title="Connection"></span>
+      <select id="port" aria-label="Deluge port"></select>
+      <button id="connect">Connect</button>
     </div>
-    <p class="hint">Tap to select, like turning the select knob. Tap it again, or Load, to press select.</p>
-    <div id="browserList"></div>
-  </section>
-
-  <section id="hero" class="card">
-    <div id="heroArt"></div>
-    <div>
-      <div class="label" id="family">waiting</div>
-      <div id="engine">-</div>
-      <div id="preset"></div>
-      <div id="rowname"></div>
+  </div>
+  <div class="row2">
+    <div style="min-width:0">
+      <div id="menuName"></div>
+      <div id="fullText">-</div>
     </div>
-  </section>
+    <div class="side">
+      <div id="popupText"></div>
+      <div id="rawText"></div>
+      <div id="statusText">Not connected</div>
+    </div>
+  </div>
+</div></div>
 
-  <div id="rows"></div>
+<main>
+  <div class="stage">
+    <section id="picker" class="card panel">
+      <div class="phead"><div class="label" id="pickerTitle"></div></div>
+      <div id="pickerTiles"></div>
+    </section>
+
+    <section id="browser" class="card panel">
+      <div class="phead">
+        <div class="label" id="browserTitle"></div>
+        <button class="secondary" id="bBack">Back</button>
+        <button id="bLoad">Load</button>
+      </div>
+      <p class="hint">Tap to select, like turning the select knob. Tap it again, or Load, to press select.</p>
+      <div id="browserList"></div>
+    </section>
+
+    <section id="wave" class="card panel">
+      <div class="phead">
+        <div class="label" id="waveTitle">Waveform</div>
+        <span class="badge on" id="wRev">REVERSED</span>
+        <span class="badge on" id="wRec">RECORDING</span>
+        <span class="badge" id="wLoad">LOADING</span>
+      </div>
+      <canvas id="waveCanvas"></canvas>
+      <div class="legend" id="waveLegend"></div>
+    </section>
+
+    <section id="song" class="card panel">
+      <div class="phead"><div class="label" id="songTitle">Song</div></div>
+      <div class="sections" id="sections"></div>
+      <div id="songBody"></div>
+    </section>
+
+    <section id="track" class="card panel show">
+      <div id="hero">
+        <div id="heroArt"></div>
+        <div style="min-width:0">
+          <div class="label" id="family">waiting</div>
+          <div id="engine">-</div>
+          <div id="preset"></div>
+          <div id="rowname"></div>
+        </div>
+      </div>
+      <div id="knobs"></div>
+      <div id="rows"></div>
+    </section>
+  </div>
 
   <details>
     <summary>Debug</summary>
@@ -198,15 +270,18 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v6 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
 "use strict";
-// Messages: F0 00 21 7B 01 02 03 <mode> F7 out (0 = subscribe + send all, 1 = keep alive, 2 <n> = choose picker option
-// n, 3 <hi> <lo> = move the browser to that item, 4 = press SELECT, 5 = press BACK). In: 0x42 STATE, 0x43 KIT_ROWS,
-// 0x44 TEXT, 0x45 PICKER, 0x46 BROWSER, 0x47 BROWSER_SEL. Display mirror: 00 <2 keep alive | 3 force | 4 swap
-// 7SEG/OLED> out, 0x41 7-seg digits / 0x40 OLED frame in.
+// Out: F0 00 21 7B 01 02 03 <mode> F7. Modes: 0 subscribe + send all, 1 keep alive, 2 <n> choose picker option,
+// 3 <hi> <lo> move the browser there, 4 press SELECT, 5 press BACK, 6 <marker> <hi> <lo> drag a waveform marker,
+// 7 <x> <y> open a shortcut pad's setting, 8 <cmd> top bar (0 play, 1 record, 2 select, 3 back, 4 left, 5 right),
+// 9 <hi> <lo> launch or stop a session clip, 10 <section> launch a section.
+// In: 0x42 STATE, 0x43 KIT_ROWS, 0x44 TEXT, 0x45 PICKER, 0x46 BROWSER, 0x47 BROWSER_SEL, 0x48 WAVEFORM, 0x49 PLAYHEAD,
+// 0x4A PARAMS, 0x4B TRANSPORT, 0x4C OUTPUTS, 0x4D CLIPS, 0x4E ARRANGER, 0x4F ARRANGER_POS.
+// Display mirror: 00 <2 keep alive | 3 force | 4 swap 7SEG/OLED> out, 0x41 7-seg digits / 0x40 OLED frame in.
 var HDR = [0xF0, 0x00, 0x21, 0x7B, 0x01, 0x02];
 
 // drum_synth::Engine numbers (append-only in the firmware) and the special codes above them
@@ -531,59 +606,70 @@ function wantScreen(mode) {
   setTimeout(function () { sendDisplay(true); }, 150);
 }
 
+
+function tx(bytes) { if (output) output.send(HDR.concat(bytes, [0xF7])); }
+
+// ---- Stage: one panel at a time, by what the Deluge is doing. A menu or browser on top wins, then the waveform,
+// then the song views, then the track.
+var picker = null, browser = null, wave = null, transport = null;
+function updateStage() {
+  var view = transport ? transport.view : 4;
+  var which = picker ? "picker" : browser ? "browser" : wave ? "wave" : (view >= 1 && view <= 3) ? "song" : "track";
+  ["picker", "browser", "wave", "song", "track"].forEach(function (id) {
+    var el = $(id), on = id === which;
+    if (el.classList.contains("show") !== on) el.classList.toggle("show", on);
+  });
+  if (which === "wave") drawWave();
+  if (which === "song") renderSong();
+}
+
 // ---- Picker (any open context menu). Instrument and kit type lists get a drawing per tile.
-var picker = null;
 function showPicker(p) {
   picker = p.open ? p : null;
-  $("picker").style.display = picker ? "block" : "none";
-  if (!picker) return;
-  $("pickerTitle").textContent = p.title;
-  var tiles = $("pickerTiles");
-  var keysFor = p.options.map(function (name) { return OPTION_ART[name.toLowerCase()]; });
-  var withArt = keysFor.length > 1 && keysFor.every(function (k) { return !!k; });
-  tiles.className = withArt ? "art" : "";
-  tiles.innerHTML = "";
-  p.options.forEach(function (name, idx) {
-    var t = document.createElement("button");
-    t.className = "tile" + (idx === p.selected ? " sel" : "");
-    t.innerHTML = withArt ? art(keysFor[idx]) : "";
-    var label = document.createElement("span"); label.textContent = name; t.appendChild(label);
-    t.onclick = function () {
-      if (!output) return;
-      t.className += " tapped";
-      output.send(HDR.concat([0x03, 0x02, idx, 0xF7]));
-    };
-    tiles.appendChild(t);
-  });
+  if (picker) {
+    $("pickerTitle").textContent = p.title;
+    var tiles = $("pickerTiles");
+    var keysFor = p.options.map(function (name) { return OPTION_ART[name.toLowerCase()]; });
+    var withArt = keysFor.length > 1 && keysFor.every(function (k) { return !!k; });
+    tiles.className = withArt ? "art" : "";
+    tiles.innerHTML = "";
+    p.options.forEach(function (name, idx) {
+      var t = document.createElement("button");
+      t.className = "tile" + (idx === p.selected ? " sel" : "");
+      t.innerHTML = withArt ? art(keysFor[idx]) : "";
+      var label = document.createElement("span"); label.textContent = name; t.appendChild(label);
+      t.onclick = function () { t.className += " tapped"; tx([0x03, 0x02, idx]); };
+      tiles.appendChild(t);
+    });
+  }
+  updateStage();
 }
 
 // ---- Browser (preset, song, pattern and sample browsers): a window of names around the selected one
-var browser = null;
 function showBrowser(b) {
   browser = b.open ? b : null;
-  $("browser").style.display = browser ? "block" : "none";
-  if (!browser) return;
-  $("browserTitle").textContent = b.folder || "Browser";
-  var list = $("browserList");
-  list.innerHTML = "";
-  b.items.forEach(function (it, idx) {
-    var abs = b.base + idx;
-    var row = document.createElement("div");
-    row.className = "item" + (it.folder ? " folder" : "");
-    row.setAttribute("data-abs", abs);
-    var n = document.createElement("span"); n.className = "n"; n.textContent = it.folder ? "DIR" : String(abs + 1);
-    var t = document.createElement("span"); t.textContent = it.name.replace(/\.xml$/i, "").replace(/\.wav$/i, "");
-    row.appendChild(n); row.appendChild(t);
-    row.onclick = function () { tapBrowserItem(row, abs); };
-    list.appendChild(row);
-  });
-  highlightBrowser(b.selected);
-}
-function tapBrowserItem(row, abs) {
-  if (!output || !browser) return;
-  row.className += " tapped";
-  if (abs === browser.selected) output.send(HDR.concat([0x03, 0x04, 0xF7])); // already selected: press select
-  else output.send(HDR.concat([0x03, 0x03, (abs >> 7) & 0x7F, abs & 0x7F, 0xF7]));
+  if (browser) {
+    $("browserTitle").textContent = b.folder || "Browser";
+    var list = $("browserList");
+    list.innerHTML = "";
+    b.items.forEach(function (it, idx) {
+      var abs = b.base + idx;
+      var row = document.createElement("div");
+      row.className = "item" + (it.folder ? " folder" : "");
+      row.setAttribute("data-abs", abs);
+      var n = document.createElement("span"); n.className = "n"; n.textContent = it.folder ? "DIR" : String(abs + 1);
+      var t = document.createElement("span"); t.textContent = it.name.replace(/\.xml$/i, "").replace(/\.wav$/i, "");
+      row.appendChild(n); row.appendChild(t);
+      row.onclick = function () {
+        row.className += " tapped";
+        if (abs === browser.selected) tx([0x03, 0x04]); // already selected: press select
+        else tx([0x03, 0x03, (abs >> 7) & 0x7F, abs & 0x7F]);
+      };
+      list.appendChild(row);
+    });
+  }
+  updateStage();
+  if (browser) highlightBrowser(b.selected);
 }
 function highlightBrowser(sel) {
   if (!browser) return;
@@ -595,6 +681,339 @@ function highlightBrowser(sel) {
     if (on) rows[r].scrollIntoView({ block: "nearest" });
   }
 }
+
+// ---- Readout: the menu item's name and value together (the firmware sends the value even while the 7-seg scrolls
+// the name)
+function showText(t) {
+  var main = t.mainEnglish || t.main, pop = t.popupEnglish || t.popupText;
+  $("menuName").textContent = t.menu;
+  $("fullText").textContent = main || (t.menu ? "" : "-");
+  $("popupText").textContent = t.popup && pop !== main ? pop : "";
+  var raws = [];
+  if (t.main && t.main !== main) raws.push(t.main);
+  if (t.popup && t.popupText && t.popupText !== pop) raws.push(t.popupText);
+  $("rawText").textContent = raws.length ? "7-seg: " + raws.join(" / ") : "";
+}
+
+// ---- Waveform: the window the pads show, 12 tablet columns per pad column. Markers can be dragged in the sample
+// marker editor (start, loop start, loop end, end) and in Start offset (the offset).
+var wavePlayhead = -1;
+var MARKERS = {
+  0: ["Start", "#19ffe0"], 1: ["Loop start", "#ff9a3c"], 2: ["Loop end", "#ff9a3c"], 3: ["End", "#ff4d6d"],
+  4: ["Clip start", "#e9e7e2"], 5: ["Clip end", "#e9e7e2"], 6: ["Offset", "#ffe14d"]
+};
+var WAVE_KIND = { 1: "Audio clip", 2: "Sample markers", 3: "Sample preview", 4: "Start offset" };
+var drag = null; // {type, col}
+function draggable(type) { return wave && ((wave.kind === 2 && type <= 3) || (wave.kind === 4 && type === 6)); }
+function showWave(w) {
+  wave = w.open ? w : null;
+  if (wave) {
+    if (drag) { // Keep the dragged marker where the finger is until the Deluge catches up
+      w.markers.forEach(function (m) { if ((m.type & 0x0F) === drag.type) m.col = drag.col; });
+    }
+    $("waveTitle").textContent = (WAVE_KIND[w.kind] || "Waveform") + (w.name ? " · " + w.name : "");
+    $("wRev").style.display = w.reversed ? "" : "none";
+    $("wRec").style.display = w.recording ? "" : "none";
+    $("wLoad").style.visibility = w.complete || w.recording ? "hidden" : "visible";
+    var seen = {}, legend = "";
+    w.markers.forEach(function (m) {
+      var info = MARKERS[m.type & 0x0F]; if (!info || seen[info[0]]) return; seen[info[0]] = 1;
+      legend += '<span><i style="background:' + info[1] + '"></i>' + info[0] + ((m.type & 0x10) ? " (editing)" : "") + "</span>";
+    });
+    if (w.kind === 2 || w.kind === 4) legend += "<span>Drag a marker to move it</span>";
+    $("waveLegend").innerHTML = legend;
+  }
+  updateStage();
+}
+function drawWave() {
+  if (!wave || !$("wave").classList.contains("show")) return;
+  var c = $("waveCanvas"), dpr = window.devicePixelRatio || 1;
+  var W = Math.max(1, Math.round(c.clientWidth * dpr)), H = Math.max(1, Math.round(c.clientHeight * dpr));
+  if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
+  var ctx = c.getContext("2d"), n = wave.cols, colW = W / n, mid = H / 2;
+  ctx.clearRect(0, 0, W, H);
+  // Scale to the loudest column in view, as the pads do, but never blow silence up past 1/8 of full scale
+  var peak = 8;
+  wave.peaks.forEach(function (p) { if (p) peak = Math.max(peak, Math.abs(p[0] - 64), Math.abs(p[1] - 64)); });
+  var scale = (H / 2 - 6 * dpr) / peak;
+  var lo = null, hi = null;
+  wave.markers.forEach(function (m) {
+    var t = m.type & 0x0F;
+    if (t === 0 || t === 4) lo = m.col; if (t === 3 || t === 5) hi = m.col;
+  });
+  ctx.fillStyle = "rgba(255,255,255,.035)";
+  if (lo !== null && lo > 0) ctx.fillRect(0, 0, lo * colW, H);
+  if (hi !== null && hi < n) ctx.fillRect(Math.max(0, hi) * colW, 0, W - Math.max(0, hi) * colW, H);
+  ctx.fillStyle = "#2c3036"; ctx.fillRect(0, mid - dpr / 2, W, dpr);
+  for (var i = 0; i < n; i++) {
+    var p = wave.peaks[i], x = i * colW;
+    if (!p) { ctx.fillStyle = "rgba(154,160,168,.12)"; ctx.fillRect(x, mid - 6 * dpr, Math.max(1, colW - dpr), 12 * dpr); continue; }
+    var inside = (lo === null || i >= lo) && (hi === null || i < hi);
+    var top = mid - (p[1] - 64) * scale, bot = mid - (p[0] - 64) * scale;
+    ctx.fillStyle = inside ? "#ff1fd6" : "rgba(255,31,214,.35)";
+    ctx.fillRect(x, top, Math.max(1, colW - dpr * 0.5), Math.max(dpr, bot - top));
+  }
+  wave.markers.forEach(function (m, mi) {
+    var t = m.type & 0x0F, info = MARKERS[t]; if (!info || m.col < 0 || m.col > n) return;
+    var x = Math.min(W - dpr, m.col * colW), editing = (m.type & 0x10) !== 0 || (drag && drag.type === t);
+    ctx.fillStyle = info[1];
+    if (t === 4 || t === 5) { for (var y = 0; y < H; y += 8 * dpr) ctx.fillRect(x, y, dpr, 4 * dpr); }
+    else ctx.fillRect(x - (editing ? dpr : 0), 0, editing ? 3 * dpr : 1.5 * dpr, H);
+    if (editing) { ctx.shadowColor = info[1]; ctx.shadowBlur = 10 * dpr; ctx.fillRect(x - dpr, 0, 3 * dpr, H); ctx.shadowBlur = 0; }
+    if (draggable(t)) { ctx.beginPath(); ctx.arc(x, H - 14 * dpr, 9 * dpr, 0, Math.PI * 2); ctx.fill(); }
+    ctx.font = (editing ? "600 " : "") + 12 * dpr + "px ui-monospace, monospace";
+    ctx.fillText(info[0], Math.min(x + 4 * dpr, W - 80 * dpr), (16 + (mi % 2) * 16) * dpr);
+  });
+  if (wavePlayhead >= 0 && wavePlayhead <= n) {
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(Math.min(W - 2 * dpr, wavePlayhead * colW), 0, 2 * dpr, H);
+  }
+}
+window.addEventListener("resize", drawWave);
+// Dragging: grab the nearest draggable marker, send its new place (a 14-bit fraction of the window) at most every
+// 30 ms, and the last place on release
+var dragSentAt = 0, dragTimer = null;
+function waveFraction(ev) {
+  var r = $("waveCanvas").getBoundingClientRect();
+  return Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
+}
+function sendDrag() {
+  if (!drag) return;
+  var f = Math.round(drag.col / wave.cols * 16383);
+  tx([0x03, 0x06, drag.type, (f >> 7) & 0x7F, f & 0x7F]);
+  dragSentAt = Date.now();
+}
+$("waveCanvas").addEventListener("pointerdown", function (ev) {
+  if (!wave) return;
+  var col = waveFraction(ev) * wave.cols, best = null, bestDist = 1e9;
+  var px = $("waveCanvas").getBoundingClientRect().width / wave.cols;
+  wave.markers.forEach(function (m) {
+    var t = m.type & 0x0F; if (!draggable(t)) return;
+    var d = Math.abs(m.col - col) * px;
+    if (d < bestDist) { bestDist = d; best = t; }
+  });
+  if (best === null || bestDist > 44) return;
+  drag = { type: best, col: col };
+  $("waveCanvas").setPointerCapture(ev.pointerId);
+  showWave(wave); drawWave(); sendDrag();
+});
+$("waveCanvas").addEventListener("pointermove", function (ev) {
+  if (!drag || !wave) return;
+  drag.col = waveFraction(ev) * wave.cols;
+  wave.markers.forEach(function (m) { if ((m.type & 0x0F) === drag.type) m.col = drag.col; });
+  drawWave();
+  if (Date.now() - dragSentAt > 30) sendDrag();
+  else { clearTimeout(dragTimer); dragTimer = setTimeout(sendDrag, 35); }
+});
+function endDrag() { if (!drag) return; sendDrag(); drag = null; drawWave(); }
+$("waveCanvas").addEventListener("pointerup", endDrag);
+$("waveCanvas").addEventListener("pointercancel", endDrag);
+
+// ---- Track: engine, knobs, kit rows
+var lastHeroArt = "";
+function render() {
+  if (!state) return;
+  var info = engineInfo(state.engine);
+  var family = info[1];
+  var key = artKeyFor(family, state);
+  if (key !== lastHeroArt) { $("heroArt").innerHTML = art(key); lastHeroArt = key; }
+  $("family").textContent = FAMILY_NAME[family] || family;
+  var engineText = info[0];
+  if (family === "deluge") engineText = pick(SYNTH_MODES, state.synthMode);
+  if (family === "rings") engineText += " " + pick(RINGS_MODELS, state.engineSub);
+  $("engine").textContent = engineText;
+  $("preset").textContent = state.name || "(unnamed)";
+  $("rowname").textContent = state.outType === 1 ? "Row " + (state.row === 0x7F ? "-" : state.row + 1) +
+    (state.rowName ? ": " + state.rowName : "") : "";
+
+  var rowsEl = $("rows");
+  rowsEl.innerHTML = "";
+  if (state.outType === 1 && rows) {
+    rows.forEach(function (code, idx) {
+      var ri = engineInfo(code);
+      var div = document.createElement("div");
+      div.className = "row" + (idx === state.row ? " sel" : "");
+      div.innerHTML = art(ri[1]) + "<b>" + (idx + 1) + "</b><span></span>";
+      div.lastChild.textContent = ri[0];
+      rowsEl.appendChild(div);
+    });
+  }
+
+  var f = [
+    ["Output", pick(OUTPUT_TYPES, state.outType)], ["Synth mode", pick(SYNTH_MODES, state.synthMode)],
+    ["Osc 1", pick(OSC_TYPES, state.osc0)], ["Engine code", state.engine + " (0x" + state.engine.toString(16) + ")"],
+    ["Engine sub", state.engineSub], ["Track", state.track === 0x3FFF ? "-" : state.track + 1],
+    ["Messages", stateCount + " state, seq " + state.seq + ", gaps " + dropped], ["Spec version", state.version]
+  ];
+  $("fields").innerHTML = "";
+  f.forEach(function (p) {
+    var dt = document.createElement("dt"); dt.textContent = p[0];
+    var dd = document.createElement("dd"); dd.textContent = p[1];
+    $("fields").appendChild(dt); $("fields").appendChild(dd);
+  });
+}
+
+var KNOB_GROUPS = ["Oscillators", "Filters", "Envelope 1", "Envelope 2", "Voice", "Effects", "LFOs"];
+function knobSvg(pos, bipolar) {
+  // 270 degree sweep, from 7:30 to 4:30; bipolar fills from the top
+  var a0 = 135, a = 135 + pos / 127 * 270, r = 18, cx = 23, cy = 23;
+  function pt(deg, rad) { var t = deg * Math.PI / 180; return (cx + rad * Math.cos(t)).toFixed(1) + " " + (cy + rad * Math.sin(t)).toFixed(1); }
+  function arc(from, to) {
+    if (Math.abs(to - from) < 0.5) return "";
+    var large = Math.abs(to - from) > 180 ? 1 : 0, sweep = to > from ? 1 : 0;
+    return '<path d="M' + pt(from, r) + " A" + r + " " + r + " 0 " + large + " " + sweep + " " + pt(to, r) + '" fill="none" stroke="#ff1fd6" stroke-width="3.5" stroke-linecap="round"/>';
+  }
+  var track = '<path d="M' + pt(135, r) + " A" + r + " " + r + ' 0 1 1 ' + pt(45, r) + '" fill="none" stroke="#2c3036" stroke-width="3.5" stroke-linecap="round"/>';
+  var fill = bipolar ? arc(270, a) : arc(a0, a);
+  return '<svg viewBox="0 0 46 46">' + track + fill + '<circle cx="23" cy="23" r="12" fill="#2a2d33"/>' +
+    '<line x1="' + pt(a, 4).split(" ")[0] + '" y1="' + pt(a, 4).split(" ")[1] + '" x2="' + pt(a, 11).split(" ")[0] +
+    '" y2="' + pt(a, 11).split(" ")[1] + '" stroke="#e9e7e2" stroke-width="2.4" stroke-linecap="round"/></svg>';
+}
+var knobEls = {}, knobLayout = "";
+function showParams(p) {
+  var box = $("knobs");
+  if (!p.open || !p.knobs.length) { box.innerHTML = ""; knobEls = {}; knobLayout = ""; return; }
+  // Rebuild only when the set of knobs changes; otherwise update in place, so nothing moves
+  var layout = p.knobs.map(function (k) { return k.x + "," + k.y + ":" + k.name; }).join("|");
+  if (layout !== knobLayout) {
+    knobLayout = layout; knobEls = {}; box.innerHTML = "";
+    var groups = {};
+    p.knobs.forEach(function (k) {
+      if (!groups[k.group]) {
+        var g = document.createElement("div"); g.className = "kgroup";
+        g.innerHTML = '<div class="label">' + (KNOB_GROUPS[k.group] || "") + '</div><div class="kgrid"></div>';
+        groups[k.group] = g;
+      }
+      var b = document.createElement("button");
+      b.className = "knob";
+      b.innerHTML = '<span class="ks"></span><span class="kv"></span><span class="kn"></span>';
+      b.querySelector(".kn").textContent = k.name;
+      b.onclick = function () { b.classList.add("tapped"); tx([0x03, 0x07, k.x, k.y]); };
+      groups[k.group].querySelector(".kgrid").appendChild(b);
+      knobEls[k.x + "," + k.y] = b;
+    });
+    Object.keys(groups).sort(function (a, b) { return a - b; }).forEach(function (g) { box.appendChild(groups[g]); });
+  }
+  p.knobs.forEach(function (k) {
+    var b = knobEls[k.x + "," + k.y]; if (!b) return;
+    var key = k.pos + ":" + k.bipolar + ":" + k.value + ":" + k.open;
+    if (b.getAttribute("data-k") === key) return;
+    b.setAttribute("data-k", key);
+    b.querySelector(".ks").innerHTML = knobSvg(k.pos, k.bipolar);
+    b.querySelector(".kv").textContent = (k.bipolar && k.value > 0 ? "+" : "") + k.value;
+    b.className = "knob" + (k.open ? " open" : "");
+  });
+}
+
+// ---- Transport
+function showTransport(t) {
+  var prevView = transport ? transport.view : -1;
+  transport = t;
+  $("tPlay").classList.toggle("on", t.playing);
+  $("tRec").classList.toggle("on", t.recording);
+  $("metro").classList.toggle("on", t.metronome);
+  var bpm = t.bpm / 100;
+  $("tempo").innerHTML = (bpm >= 1000 || bpm % 1 === 0 ? String(Math.round(bpm)) : bpm.toFixed(2).replace(/0$/, "")) +
+    "<small>BPM</small>";
+  if (t.view !== prevView) updateStage();
+}
+
+// ---- Song: rows view (one clip per row, as the Deluge lists them), grid view (tracks across, sections down),
+// arranger (each track's clip instances along the song, read only)
+var outputs = [], clips = [], arranger = null, arrangerPos = -1;
+function rgb(o) { return o ? "rgb(" + (o.r * 2) + "," + (o.g * 2) + "," + (o.b * 2) + ")" : "#555"; }
+var songLayout = "";
+function renderSong() {
+  if (!$("song").classList.contains("show") || !transport) return;
+  var view = transport.view, body = $("songBody");
+  $("songTitle").textContent = view === 3 ? "Arranger" : view === 2 ? "Song · grid" : "Song · rows";
+  // Sections in use, to launch a whole section
+  var secs = {};
+  clips.forEach(function (c) { if (c.section < 127) secs[c.section] = 1; });
+  var secHtml = view === 3 ? "" : Object.keys(secs).sort(function (a, b) { return a - b; }).map(function (s) {
+    return '<button data-sec="' + s + '">Section ' + (+s + 1) + "</button>";
+  }).join("");
+  if ($("sections").getAttribute("data-h") !== secHtml) {
+    $("sections").setAttribute("data-h", secHtml); $("sections").innerHTML = secHtml;
+    Array.prototype.forEach.call($("sections").querySelectorAll("button"), function (b) {
+      b.onclick = function () { tx([0x03, 0x0A, +b.getAttribute("data-sec")]); };
+    });
+  }
+  if (view === 3) return renderArranger(body);
+  if (view === 2) return renderGrid(body);
+  var html = '<div class="clips">';
+  clips.forEach(function (c, i) {
+    var o = outputs[c.output];
+    html += '<button class="clip' + (c.playing ? " playing" : "") + (c.pending ? " pending" : "") + (c.current ? " current" : "") +
+      '" data-i="' + i + '"><span class="sw" style="background:' + rgb(o) + '"></span><span style="min-width:0"><div class="cn"></div>' +
+      '<div class="co"></div></span><span class="sec">' + (c.section < 127 ? "S" + (c.section + 1) : "") + '</span><span class="st">' +
+      (c.pending ? (c.playing ? "STOPPING" : "STARTING") : c.playing ? "PLAYING" : "STOPPED") + "</span></button>";
+  });
+  html += "</div>";
+  if (songLayout !== html) {
+    songLayout = html; body.innerHTML = html;
+    Array.prototype.forEach.call(body.querySelectorAll(".clip"), function (el) {
+      var c = clips[+el.getAttribute("data-i")], o = outputs[c.output];
+      el.querySelector(".cn").textContent = c.name || (o ? o.name : "Clip");
+      el.querySelector(".co").textContent = (o ? o.name : "") + (c.audio ? " · audio" : "");
+      el.onclick = function () { tx([0x03, 0x09, (+el.getAttribute("data-i") >> 7) & 0x7F, +el.getAttribute("data-i") & 0x7F]); };
+    });
+  }
+}
+function renderGrid(body) {
+  // Columns: tracks with session clips, in the Deluge's grid order (the first output is the rightmost). Rows: sections.
+  var cols = [], seen = {};
+  for (var oi = outputs.length - 1; oi >= 0; oi--) {
+    if (clips.some(function (c) { return c.output === oi; }) && !seen[oi]) { seen[oi] = 1; cols.push(oi); }
+  }
+  var maxSec = 0;
+  clips.forEach(function (c) { if (c.section < 127) maxSec = Math.max(maxSec, c.section); });
+  var html = '<div class="grid" style="grid-template-columns:34px repeat(' + Math.max(1, cols.length) + ',minmax(78px,1fr))"><div></div>';
+  cols.forEach(function (oi) { html += '<div class="gh">' + escapeHtml(outputs[oi] ? outputs[oi].name : "") + "</div>"; });
+  for (var s = 0; s <= maxSec; s++) {
+    html += '<div class="gs">S' + (s + 1) + "</div>";
+    cols.forEach(function (oi) {
+      var ci = -1;
+      clips.forEach(function (c, i) { if (ci < 0 && c.output === oi && c.section === s) ci = i; });
+      if (ci < 0) { html += '<div class="cell empty"></div>'; return; }
+      var c = clips[ci];
+      html += '<button class="cell' + (c.playing ? " playing" : " dim") + (c.pending ? " pending" : "") + '" data-i="' + ci +
+        '" style="background:' + rgb(outputs[oi]) + '">' + escapeHtml(c.name) + "</button>";
+    });
+  }
+  html += "</div>";
+  if (songLayout !== html) {
+    songLayout = html; body.innerHTML = html;
+    Array.prototype.forEach.call(body.querySelectorAll(".cell[data-i]"), function (el) {
+      el.onclick = function () { var i = +el.getAttribute("data-i"); tx([0x03, 0x09, (i >> 7) & 0x7F, i & 0x7F]); };
+    });
+  }
+}
+function renderArranger(body) {
+  if (!arranger) { body.innerHTML = ""; songLayout = ""; return; }
+  var html = '<div class="arr" id="arr">';
+  arranger.lanes.forEach(function (lane, oi) {
+    var o = outputs[oi]; if (!o) return;
+    html += '<div class="alane' + (o.muted ? " muted" : "") + '"><div class="an">' + escapeHtml(o.name || "Track " + (oi + 1)) +
+      '</div><div class="atrack">';
+    lane.forEach(function (inst) {
+      html += '<div class="ablock" style="left:' + (inst[0] / 163.83).toFixed(2) + "%;width:" + ((inst[1] - inst[0]) / 163.83).toFixed(2) +
+        "%;background:" + rgb(o) + '"></div>';
+    });
+    html += "</div></div>";
+  });
+  html += '<div id="arrHead"></div></div>';
+  if (songLayout !== html) { songLayout = html; body.innerHTML = html; }
+  placeArrangerHead();
+}
+function placeArrangerHead() {
+  var h = $("arrHead"); if (!h) return;
+  var lane = document.querySelector(".atrack");
+  if (arrangerPos < 0 || !lane) { h.style.display = "none"; return; }
+  var arr = $("arr").getBoundingClientRect(), r = lane.getBoundingClientRect();
+  h.style.display = "block";
+  h.style.left = (r.left - arr.left + r.width * arrangerPos / 16383) + "px";
+}
+function escapeHtml(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
 var midi = null, input = null, output = null, keepAlive = null;
 var lastMessageAt = 0, lastSeq = -1, dropped = 0, stateCount = 0;
@@ -686,6 +1105,60 @@ function parse(d) {
     var ph = (d[8] << 7) | d[9];
     return { kind: "playhead", col: ph === 0x3FFF ? -1 : (ph === 0x3FFE ? -2 : ph) };
   }
+  if (kind === 0x4A) {
+    var pp = { kind: "params", open: d[8] === 1, knobs: [] };
+    if (!pp.open) return pp;
+    var pc = d[9], pi = 10;
+    for (var q2 = 0; q2 < pc; q2++) {
+      var kk = { x: d[pi], y: d[pi + 1], group: d[pi + 2], bipolar: (d[pi + 3] & 1) !== 0, open: (d[pi + 3] & 2) !== 0,
+        pos: d[pi + 4], value: ((d[pi + 5] << 7) | d[pi + 6]) - 8192 };
+      var kn = readName(d, pi + 7); kk.name = kn.text; pi = kn.next;
+      pp.knobs.push(kk);
+    }
+    pp.ok = d[pi] === 0xF7;
+    return pp;
+  }
+  if (kind === 0x4B) {
+    var tf = d[8];
+    return { kind: "transport", playing: (tf & 1) !== 0, recording: (tf & 2) !== 0, arrangement: (tf & 4) !== 0,
+      metronome: (tf & 8) !== 0, bpm: (d[9] << 14) | (d[10] << 7) | d[11], view: d[12] };
+  }
+  if (kind === 0x4C) {
+    var oc = d[8], ol = { kind: "outputs", current: d[9], list: [] }, oj = 10;
+    for (var oo = 0; oo < oc; oo++) {
+      var ent = { type: d[oj], muted: (d[oj + 1] & 1) !== 0, soloing: (d[oj + 1] & 2) !== 0, active: (d[oj + 1] & 4) !== 0,
+        r: d[oj + 2], g: d[oj + 3], b: d[oj + 4] };
+      var on2 = readName(d, oj + 5); ent.name = on2.text; oj = on2.next;
+      ol.list.push(ent);
+    }
+    ol.ok = d[oj] === 0xF7;
+    return ol;
+  }
+  if (kind === 0x4D) {
+    var cc = d[8], cl = { kind: "clips", list: [] }, cj = 9;
+    for (var ci2 = 0; ci2 < cc; ci2++) {
+      var cf = d[cj + 2];
+      var ce = { output: d[cj], section: d[cj + 1], playing: (cf & 1) !== 0, pending: (cf & 2) !== 0, audio: (cf & 4) !== 0,
+        soloing: (cf & 8) !== 0, current: (cf & 16) !== 0 };
+      var cn2 = readName(d, cj + 3); ce.name = cn2.text; cj = cn2.next;
+      cl.list.push(ce);
+    }
+    cl.ok = d[cj] === 0xF7;
+    return cl;
+  }
+  if (kind === 0x4E) {
+    var ar = { kind: "arranger", length: (d[8] << 21) | (d[9] << 14) | (d[10] << 7) | d[11], lanes: [] }, aj = 12;
+    while (aj < d.length - 1) {
+      var an = d[aj++], lane = [];
+      for (var ai = 0; ai < an; ai++, aj += 4) lane.push([(d[aj] << 7) | d[aj + 1], (d[aj + 2] << 7) | d[aj + 3]]);
+      ar.lanes.push(lane);
+    }
+    return ar;
+  }
+  if (kind === 0x4F) {
+    var apos = (d[8] << 7) | d[9];
+    return { kind: "arrangerPos", pos: apos === 0x3FFF ? -1 : apos };
+  }
   if (kind === 0x47) {
     var bs = (d[8] << 7) | d[9];
     return { kind: "browserSel", selected: bs === 0x3FFF ? -1 : bs };
@@ -714,6 +1187,8 @@ function parse(d) {
   return null;
 }
 
+
+var QUIET = { playhead: 1, wave: 1, transport: 1, arrangerPos: 1, params: 1, clips: 1 };
 function onMessage(ev) {
   var m = parse(ev.data);
   if (!m) return;
@@ -725,146 +1200,29 @@ function onMessage(ev) {
     drawOled();
     return;
   }
-  if (m.kind !== "playhead" && m.kind !== "wave") log("<", ev.data);
-  if (m.kind === "text") { showText(m); return; }
-  if (m.kind === "picker") { showPicker(m); return; }
-  if (m.kind === "browser") { showBrowser(m); return; }
-  if (m.kind === "browserSel") { highlightBrowser(m.selected); return; }
-  if (m.kind === "wave") { if (m.open) m.kind = m.kindCode; showWave(m); return; }
-  if (m.kind === "playhead") { wavePlayhead = m.col; drawWave(); return; }
-  if (m.kind === "state") {
+  if (!QUIET[m.kind]) log("<", ev.data);
+  switch (m.kind) {
+  case "text": showText(m); return;
+  case "picker": showPicker(m); return;
+  case "browser": showBrowser(m); return;
+  case "browserSel": highlightBrowser(m.selected); return;
+  case "wave": if (m.open) m.kind = m.kindCode; showWave(m); return;
+  case "playhead": wavePlayhead = m.col; drawWave(); return;
+  case "params": showParams(m); return;
+  case "transport": showTransport(m); return;
+  case "outputs": outputs = m.list; renderSong(); return;
+  case "clips": clips = m.list; renderSong(); return;
+  case "arranger": arranger = m; renderSong(); return;
+  case "arrangerPos": arrangerPos = m.pos; placeArrangerHead(); return;
+  case "state":
     if (lastSeq >= 0 && m.seq !== ((lastSeq + 1) & 0x7F)) dropped++;
     lastSeq = m.seq; stateCount++;
     state = m;
-  } else {
+    break;
+  default:
     rows = m.rows;
   }
   render();
-}
-
-function showText(t) {
-  // The menu item's name and its value together: the firmware sends the value while a menu item is open, even while
-  // the 7-seg is scrolling the name
-  var main = t.mainEnglish || t.main, pop = t.popupEnglish || t.popupText;
-  $("menuName").textContent = t.menu;
-  $("fullText").textContent = main || (t.menu ? "" : "-");
-  $("popupText").textContent = t.popup ? pop : "";
-  $("popupText").style.display = t.popup && pop && pop !== main ? "block" : "none";
-  var raws = [];
-  if (t.main && t.main !== main) raws.push(t.main);
-  if (t.popup && t.popupText && t.popupText !== pop) raws.push(t.popupText);
-  $("rawText").textContent = raws.length ? "7-seg: " + raws.join(" / ") : "";
-}
-
-// ---- Waveform: the window the pads show, kWaveSub tablet columns per pad column
-var wave = null, wavePlayhead = -1;
-var MARKERS = {
-  0: ["Start", "#19ffe0"], 1: ["Loop start", "#ff9a3c"], 2: ["Loop end", "#ff9a3c"], 3: ["End", "#ff4d6d"],
-  4: ["Clip start", "#e9e7e2"], 5: ["Clip end", "#e9e7e2"]
-};
-var WAVE_KIND = { 1: "Audio clip", 2: "Sample markers", 3: "Sample preview" };
-function showWave(w) {
-  wave = w.open ? w : null;
-  $("wave").style.display = wave ? "block" : "none";
-  if (!wave) return;
-  $("waveTitle").textContent = (WAVE_KIND[w.kind] || "Waveform") + (w.name ? " \u00b7 " + w.name : "");
-  $("wRev").className = "badge" + (w.reversed ? " on" : ""); $("wRev").style.display = w.reversed ? "" : "none";
-  $("wRec").className = "badge" + (w.recording ? " on" : ""); $("wRec").style.display = w.recording ? "" : "none";
-  $("wLoad").style.display = w.complete || w.recording ? "none" : "";
-  var seen = {}, legend = "";
-  w.markers.forEach(function (m) {
-    var info = MARKERS[m.type & 0x0F]; if (!info || seen[info[0]]) return; seen[info[0]] = 1;
-    legend += '<span><i style="background:' + info[1] + '"></i>' + info[0] + ((m.type & 0x10) ? " (editing)" : "") + "</span>";
-  });
-  $("waveLegend").innerHTML = legend;
-  drawWave();
-}
-function drawWave() {
-  if (!wave) return;
-  var c = $("waveCanvas"), dpr = window.devicePixelRatio || 1;
-  var W = Math.max(1, Math.round(c.clientWidth * dpr)), H = Math.max(1, Math.round(c.clientHeight * dpr));
-  if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
-  var ctx = c.getContext("2d"), n = wave.cols, colW = W / n, mid = H / 2;
-  ctx.clearRect(0, 0, W, H);
-  // Scale to the loudest column in view, as the pads do, but never blow silence up past 1/8 of full scale
-  var peak = 8;
-  wave.peaks.forEach(function (p) { if (p) peak = Math.max(peak, Math.abs(p[0] - 64), Math.abs(p[1] - 64)); });
-  var scale = (H / 2 - 6 * dpr) / peak;
-  // Shade outside the start/end (or clip) markers
-  var lo = null, hi = null;
-  wave.markers.forEach(function (m) {
-    var t = m.type & 0x0F;
-    if (t === 0 || t === 4) lo = m.col; if (t === 3 || t === 5) hi = m.col;
-  });
-  ctx.fillStyle = "rgba(255,255,255,.035)";
-  if (lo !== null && lo > 0) ctx.fillRect(0, 0, lo * colW, H);
-  if (hi !== null && hi < n) ctx.fillRect(Math.max(0, hi) * colW, 0, W - Math.max(0, hi) * colW, H);
-  ctx.fillStyle = "#2c3036"; ctx.fillRect(0, mid - dpr / 2, W, dpr);
-  for (var i = 0; i < n; i++) {
-    var p = wave.peaks[i], x = i * colW;
-    if (!p) { ctx.fillStyle = "rgba(154,160,168,.12)"; ctx.fillRect(x, mid - 6 * dpr, Math.max(1, colW - dpr), 12 * dpr); continue; }
-    var inside = (lo === null || i >= lo) && (hi === null || i < hi);
-    var top = mid - (p[1] - 64) * scale, bot = mid - (p[0] - 64) * scale;
-    ctx.fillStyle = inside ? "#ff1fd6" : "rgba(255,31,214,.35)";
-    ctx.fillRect(x, top, Math.max(1, colW - dpr * 0.5), Math.max(dpr, bot - top));
-  }
-  wave.markers.forEach(function (m, mi) {
-    var info = MARKERS[m.type & 0x0F]; if (!info || m.col < 0 || m.col > n) return;
-    var x = Math.min(W - dpr, m.col * colW), editing = (m.type & 0x10) !== 0;
-    ctx.fillStyle = info[1];
-    if ((m.type & 0x0F) >= 4) { for (var y = 0; y < H; y += 8 * dpr) ctx.fillRect(x, y, dpr, 4 * dpr); }
-    else ctx.fillRect(x - (editing ? dpr : 0), 0, editing ? 3 * dpr : 1.5 * dpr, H);
-    if (editing) { ctx.shadowColor = info[1]; ctx.shadowBlur = 10 * dpr; ctx.fillRect(x - dpr, 0, 3 * dpr, H); ctx.shadowBlur = 0; }
-    ctx.font = (editing ? "600 " : "") + 12 * dpr + "px ui-monospace, monospace";
-    ctx.fillText(info[0], Math.min(x + 4 * dpr, W - 80 * dpr), (16 + (mi % 2) * 16) * dpr);
-  });
-  if (wavePlayhead >= 0 && wavePlayhead <= n) {
-    ctx.fillStyle = "#ffffff"; ctx.fillRect(Math.min(W - 2 * dpr, wavePlayhead * colW), 0, 2 * dpr, H);
-  }
-}
-window.addEventListener("resize", drawWave);
-
-var lastHeroArt = "";
-function render() {
-  if (!state) return;
-  var info = engineInfo(state.engine);
-  var family = info[1];
-  var key = artKeyFor(family, state);
-  if (key !== lastHeroArt) { $("heroArt").innerHTML = art(key); lastHeroArt = key; }
-  $("family").textContent = FAMILY_NAME[family] || family;
-  var engineText = info[0];
-  if (family === "deluge") engineText = pick(SYNTH_MODES, state.synthMode);
-  if (family === "rings") engineText += " " + pick(RINGS_MODELS, state.engineSub);
-  $("engine").textContent = engineText;
-  $("preset").textContent = state.name || "(unnamed)";
-  $("rowname").textContent = state.outType === 1 ? "Row " + (state.row === 0x7F ? "-" : state.row + 1) +
-    (state.rowName ? ": " + state.rowName : "") : "";
-
-  var rowsEl = $("rows");
-  rowsEl.innerHTML = "";
-  if (state.outType === 1 && rows) {
-    rows.forEach(function (code, idx) {
-      var ri = engineInfo(code);
-      var div = document.createElement("div");
-      div.className = "row" + (idx === state.row ? " sel" : "");
-      div.innerHTML = art(ri[1]) + "<b>" + (idx + 1) + "</b><span></span>";
-      div.lastChild.textContent = ri[0];
-      rowsEl.appendChild(div);
-    });
-  }
-
-  var f = [
-    ["Output", pick(OUTPUT_TYPES, state.outType)], ["Synth mode", pick(SYNTH_MODES, state.synthMode)],
-    ["Osc 1", pick(OSC_TYPES, state.osc0)], ["Engine code", state.engine + " (0x" + state.engine.toString(16) + ")"],
-    ["Engine sub", state.engineSub], ["Track", state.track === 0x3FFF ? "-" : state.track + 1],
-    ["Messages", stateCount + " state, seq " + state.seq + ", gaps " + dropped], ["Spec version", state.version]
-  ];
-  $("fields").innerHTML = "";
-  f.forEach(function (p) {
-    var dt = document.createElement("dt"); dt.textContent = p[0];
-    var dd = document.createElement("dd"); dd.textContent = p[1];
-    $("fields").appendChild(dt); $("fields").appendChild(dd);
-  });
 }
 
 function listPorts() {
@@ -930,8 +1288,12 @@ function connect() {
   }, function (err) { setStatus("MIDI access refused: " + err, "bad"); });
 }
 $("connect").onclick = connect;
-$("bLoad").onclick = function () { if (output) output.send(HDR.concat([0x03, 0x04, 0xF7])); };
-$("bBack").onclick = function () { if (output) output.send(HDR.concat([0x03, 0x05, 0xF7])); };
+$("bLoad").onclick = function () { tx([0x03, 0x04]); };
+$("bBack").onclick = function () { tx([0x03, 0x05]); };
+// Top bar: transport and the select knob, as the Deluge's own buttons
+[["tPlay", 0], ["tRec", 1], ["nSelect", 2], ["nBack", 3], ["nLeft", 4], ["nRight", 5]].forEach(function (b) {
+  $(b[0]).onclick = function () { tx([0x03, 0x08, b[1]]); };
+});
 
 // Once MIDI with SysEx has been allowed, connect on launch without a tap
 if (navigator.permissions && navigator.permissions.query) {
@@ -949,6 +1311,7 @@ $("modeOled").onclick = function () { wantScreen("oled"); };
 // Leaving the page in OLED mode would leave the 7-seg frozen: swap back on the way out
 window.addEventListener("pagehide", function () { if (screenMode === "oled" && output) output.send(HDR.concat([0x00, 0x04, 0xF7])); });
 $("port").onchange = function () { if (midi) usePort(); };
+updateStage();
 if (typeof module !== "undefined") module.exports = { parse: parse, art: art, ART: ART };
 </script>
 </body>
