@@ -1,9 +1,18 @@
 # Bribeluge Companion
 
-A companion screen for the Deluge Bribes custom firmware. Open it in Chrome on a phone or tablet that's connected to the Deluge over USB. It mirrors the Deluge's display with every 7-seg word spelled out, shows the engine, preset and kit rows you're on with a drawing of each engine, and lets you tap picker tiles and presets to choose them on the Deluge.
+A second screen for the Synthstrom Deluge running **[BRIBELUGE (Deluge Bribes firmware)](https://github.com/thisisbribery/deluge-bribes-v1)** v1.32 or later, on a phone or tablet connected over USB.
 
-It needs a Bribes build that sends companion messages. To use it offline, open it once in Chrome and choose Add to Home screen.
+**Open it:** https://thisisbribery.github.io/bribes-companion/
 
-Live page: https://thisisbribery.github.io/bribes-companion/
+- The Deluge's display mirrored (7SEG or OLED), with every 7-segment abbreviation spelled out in full and a menu item's name and value side by side.
+- A top bar with Play, Record, tempo, Back, the select knob and SELECT.
+- The track you're on: a drawing of its engine, its main settings and its engine's own controls as knobs you can tap to open on the Deluge.
+- Synth and kit pickers as picture tiles, preset folders as a list you can tap to load.
+- Waveforms for audio clips, sample markers and Start offset, with draggable markers and playheads.
+- Song view (rows and grid) and the arranger, with each clip's steps, playheads and the pads' glows. Tap to launch clips and sections.
+
+It needs Chrome or Edge (Web MIDI with SysEx); Safari and iOS browsers don't have Web MIDI. To use it offline, open it once in Chrome and choose **Add to Home screen**: it then runs fullscreen, keeps the screen awake and reconnects on its own.
+
+Full details are in the [BRIBELUGE COMPANION section](https://github.com/thisisbribery/deluge-bribes-v1#27-bribeluge-companion) of the firmware's README.
 
 Not affiliated with or endorsed by Synthstrom Audible.
