@@ -47,25 +47,48 @@
   #fullText { font-size: 34px; font-weight: 700; line-height: 1.15; word-break: break-word; }
   #rawText { color: var(--dim); font: 13px ui-monospace, monospace; margin-top: 6px; }
   #fullText.popup { color: var(--warn); }
+  #mirror { flex-direction: column; gap: 10px; justify-content: center; }
+  #oled { width: 384px; max-width: 100%; image-rendering: pixelated; display: none; background: #000; border-radius: 4px; }
+  .mode { display: flex; gap: 0; }
+  .mode button { padding: 6px 12px; font-size: 13px; border-radius: 0; }
+  .mode button:first-child { border-radius: 8px 0 0 8px; } .mode button:last-child { border-radius: 0 8px 8px 0; }
+  .mode button.on { background: var(--text); color: var(--bg); }
+  #picker { display: none; margin-top: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    padding: 16px; }
+  #pickerTitle { color: var(--dim); font-size: 14px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+  #pickerTiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+  .tile { background: #22252c; border: 2px solid transparent; border-radius: 12px; padding: 18px 12px; font-size: 18px;
+    font-weight: 700; text-align: center; color: var(--text); cursor: pointer; min-height: 72px; }
+  .tile.sel { border-color: var(--warn); background: #3a3122; }
+  .tile.tapped { opacity: .6; }
   @media (max-width: 600px) { #engine { font-size: 40px; } #top { grid-template-columns: 1fr; } #mirror svg { width: 100%; } }
 </style>
 </head>
 <body>
 <main>
   <header>
-    <h1>BRIBES COMPANION <span style="color:var(--dim);font-weight:400">debug v1</span></h1>
+    <h1>BRIBES COMPANION <span style="color:var(--dim);font-weight:400">debug v2</span></h1>
     <select id="port" aria-label="Deluge port"></select>
     <button id="connect">Connect</button>
   </header>
   <div id="status"><span class="dot" id="dot"></span><span id="statusText">Not connected</span></div>
 
   <section id="top">
-    <div id="mirror" aria-label="Deluge display mirror"><svg id="segsvg" viewBox="0 0 236 100"></svg></div>
+    <div id="mirror" aria-label="Deluge display mirror">
+      <svg id="segsvg" viewBox="0 0 236 100"></svg>
+      <canvas id="oled" width="128" height="48"></canvas>
+      <div class="mode"><button id="mode7">7SEG</button><button id="modeOled">OLED</button></div>
+    </div>
     <div id="spelled">
       <div id="menuName"></div>
       <div id="fullText">-</div>
       <div id="rawText"></div>
     </div>
+  </section>
+
+  <section id="picker">
+    <div id="pickerTitle"></div>
+    <div id="pickerTiles"></div>
   </section>
 
   <section id="hero">
@@ -88,7 +111,8 @@
 <script>
 "use strict";
 // Messages: F0 00 21 7B 01 02 03 <mode> F7 out (0 = subscribe + send all, 1 = keep alive), 0x42 STATE / 0x43 KIT_ROWS /
-// 0x44 TEXT in. Display mirror: 02 00 <2 keep alive | 3 force> out, 0x41 7-seg digits in.
+// 0x44 TEXT / 0x45 PICKER in, 03 02 <n> out = choose picker option n. Display mirror: 00 <2 keep alive | 3 force |
+// 4 swap 7SEG/OLED> out, 0x41 7-seg digits / 0x40 OLED frame in.
 var HDR = [0xF0, 0x00, 0x21, 0x7B, 0x01, 0x02];
 
 // drum_synth::Engine numbers (append-only in the firmware) and the special codes above them
@@ -154,6 +178,82 @@ function showDigits(digits) {
   }
 }
 
+// OLED mirror: 128 x 48, 6 pages of 128 bytes, bit n of a byte = pixel n down that page
+var oledImage = new Uint8Array(768), screenMode = "7seg";
+
+// Inverse of the firmware's pack_8to7_rle
+function unpackRle(d, start, end) {
+  var out = [], i = start;
+  while (i < end) {
+    var b = d[i++];
+    if (b < 64) {
+      var size, high;
+      if (b < 4) { size = 2; high = b; } else if (b < 12) { size = 3; high = b - 4; }
+      else if (b < 28) { size = 4; high = b - 12; } else { size = 5; high = b - 28; }
+      for (var j = 0; j < size; j++) out.push(d[i++] | (((high >> j) & 1) << 7));
+    } else {
+      var top = (b & 1) << 7, n = (b - 64) >> 1;
+      if (n === 1) { out.push(d[i++] | top); continue; }
+      if (n === 31) n = 31 + d[i++];
+      var v = d[i++] | top;
+      for (var r = 0; r < n; r++) out.push(v);
+    }
+  }
+  return out;
+}
+// Inverse of pack_8bit_to_7bit: groups of a high-bits byte then up to 7 bytes
+function unpack7(d, start, end) {
+  var out = [];
+  for (var i = start; i < end; i += 8) {
+    var hi = d[i];
+    for (var j = 0; j < 7 && i + 1 + j < end; j++) out.push(d[i + 1 + j] | (((hi >> j) & 1) << 7));
+  }
+  return out;
+}
+function drawOled() {
+  var c = $("oled"), ctx = c.getContext("2d"), img = ctx.createImageData(128, 48);
+  for (var y = 0; y < 48; y++) for (var x = 0; x < 128; x++) {
+    var on = (oledImage[(y >> 3) * 128 + x] >> (y & 7)) & 1, p = (y * 128 + x) * 4;
+    img.data[p] = on ? 235 : 0; img.data[p + 1] = on ? 240 : 0; img.data[p + 2] = on ? 255 : 0; img.data[p + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+}
+function setScreenMode(mode) {
+  screenMode = mode;
+  $("segsvg").style.display = mode === "7seg" ? "" : "none";
+  $("oled").style.display = mode === "oled" ? "block" : "none";
+  $("mode7").className = mode === "7seg" ? "on" : "";
+  $("modeOled").className = mode === "oled" ? "on" : "";
+}
+function wantScreen(mode) {
+  if (!output || mode === screenMode) return;
+  output.send(HDR.concat([0x00, 0x04, 0xF7])); // swap the Deluge's display type, as DEx does
+  setScreenMode(mode);
+  setTimeout(function () { sendDisplay(true); }, 150);
+}
+
+// Picker (any open context menu)
+var picker = null;
+function showPicker(p) {
+  picker = p.open ? p : null;
+  $("picker").style.display = picker ? "block" : "none";
+  if (!picker) return;
+  $("pickerTitle").textContent = p.title;
+  var tiles = $("pickerTiles");
+  tiles.innerHTML = "";
+  p.options.forEach(function (name, idx) {
+    var t = document.createElement("button");
+    t.className = "tile" + (idx === p.selected ? " sel" : "");
+    t.textContent = name;
+    t.onclick = function () {
+      if (!output) return;
+      t.className += " tapped";
+      output.send(HDR.concat([0x03, 0x02, idx, 0xF7]));
+    };
+    tiles.appendChild(t);
+  });
+}
+
 var midi = null, input = null, output = null, keepAlive = null;
 var lastMessageAt = 0, lastSeq = -1, dropped = 0, stateCount = 0;
 var state = null, rows = null;
@@ -199,6 +299,18 @@ function parse(d) {
     s.ok = d[b.next] === 0xF7;
     return s;
   }
+  if (kind === 0x40) {
+    var last = d.length - 1; // F7
+    if (d[7] === 0x02) return { kind: "oled", offset: 8 * d[8], bytes: unpackRle(d, 10, last) };
+    return { kind: "oled", offset: 0, bytes: d[7] === 0x01 ? unpackRle(d, 9, last) : unpack7(d, 9, last) };
+  }
+  if (kind === 0x45) {
+    var pk = { kind: "picker", version: d[7], open: d[8] === 1, selected: d[9], options: [] }, count = d[10], pj = 11, pr;
+    pr = readName(d, pj); pk.title = pr.text; pj = pr.next;
+    for (var o = 0; o < count; o++) { pr = readName(d, pj); pk.options.push(pr.text); pj = pr.next; }
+    pk.ok = d[pj] === 0xF7;
+    return pk;
+  }
   if (kind === 0x41) {
     // 00 00, then 7-bit packed: one byte of high bits, then 4 digit bytes (left to right)
     var hi = d[9], digits = [];
@@ -227,9 +339,16 @@ function onMessage(ev) {
   var m = parse(ev.data);
   if (!m) return;
   lastMessageAt = Date.now();
-  if (m.kind === "seg") { showDigits(m.digits); return; }
+  if (m.kind === "seg") { if (screenMode !== "7seg") setScreenMode("7seg"); showDigits(m.digits); return; }
+  if (m.kind === "oled") {
+    if (screenMode !== "oled") setScreenMode("oled");
+    for (var k = 0; k < m.bytes.length && m.offset + k < 768; k++) oledImage[m.offset + k] = m.bytes[k];
+    drawOled();
+    return;
+  }
   log("<", ev.data);
   if (m.kind === "text") { showText(m); return; }
+  if (m.kind === "picker") { showPicker(m); return; }
   if (m.kind === "state") {
     if (lastSeq >= 0 && m.seq !== ((lastSeq + 1) & 0x7F)) dropped++;
     lastSeq = m.seq; stateCount++;
@@ -345,6 +464,11 @@ $("connect").onclick = function () {
   }, function (err) { setStatus("MIDI access refused: " + err, "bad"); });
 };
 buildMirror();
+setScreenMode("7seg");
+$("mode7").onclick = function () { wantScreen("7seg"); };
+$("modeOled").onclick = function () { wantScreen("oled"); };
+// Leaving the page in OLED mode would leave the 7-seg frozen: swap back on the way out
+window.addEventListener("pagehide", function () { if (screenMode === "oled" && output) output.send(HDR.concat([0x00, 0x04, 0xF7])); });
 $("port").onchange = function () { if (midi) usePort(); };
 if (typeof module !== "undefined") module.exports = { parse: parse };
 </script>
