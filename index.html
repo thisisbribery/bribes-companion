@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bribes Companion</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0e0f12">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
   :root {
     --bg: #0e0f12; --panel: #17191e; --line: #2a2d35; --text: #e8e6e1; --dim: #8a8d96;
@@ -61,13 +65,21 @@
     font-weight: 700; text-align: center; color: var(--text); cursor: pointer; min-height: 72px; }
   .tile.sel { border-color: var(--warn); background: #3a3122; }
   .tile.tapped { opacity: .6; }
+  #browser { display: none; margin-top: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    padding: 16px; }
+  #browserTitle { color: var(--dim); font-size: 14px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+  #browserList { max-height: 55vh; overflow-y: auto; border-radius: 10px; }
+  .item { padding: 12px 14px; font-size: 18px; border-bottom: 1px solid var(--line); display: flex; gap: 10px; }
+  .item .n { color: var(--dim); font: 13px ui-monospace, monospace; min-width: 36px; padding-top: 4px; }
+  .item.folder { color: var(--dim); }
+  .item.sel { background: #3a3122; color: var(--text); box-shadow: inset 4px 0 0 var(--warn); }
   @media (max-width: 600px) { #engine { font-size: 40px; } #top { grid-template-columns: 1fr; } #mirror svg { width: 100%; } }
 </style>
 </head>
 <body>
 <main>
   <header>
-    <h1>BRIBES COMPANION <span style="color:var(--dim);font-weight:400">debug v2</span></h1>
+    <h1>BRIBES COMPANION <span style="color:var(--dim);font-weight:400">debug v3</span></h1>
     <select id="port" aria-label="Deluge port"></select>
     <button id="connect">Connect</button>
   </header>
@@ -91,6 +103,11 @@
     <div id="pickerTiles"></div>
   </section>
 
+  <section id="browser">
+    <div id="browserTitle"></div>
+    <div id="browserList"></div>
+  </section>
+
   <section id="hero">
     <div id="family">waiting</div>
     <div id="engine">-</div>
@@ -111,7 +128,7 @@
 <script>
 "use strict";
 // Messages: F0 00 21 7B 01 02 03 <mode> F7 out (0 = subscribe + send all, 1 = keep alive), 0x42 STATE / 0x43 KIT_ROWS /
-// 0x44 TEXT / 0x45 PICKER in, 03 02 <n> out = choose picker option n. Display mirror: 00 <2 keep alive | 3 force |
+// 0x44 TEXT / 0x45 PICKER / 0x46 BROWSER / 0x47 BROWSER_SEL in, 03 02 <n> out = choose picker option n. Display mirror: 00 <2 keep alive | 3 force |
 // 4 swap 7SEG/OLED> out, 0x41 7-seg digits / 0x40 OLED frame in.
 var HDR = [0xF0, 0x00, 0x21, 0x7B, 0x01, 0x02];
 
@@ -254,6 +271,37 @@ function showPicker(p) {
   });
 }
 
+// Browser (preset, song, pattern and sample browsers): a window of names around the selected one
+var browser = null;
+function showBrowser(b) {
+  browser = b.open ? b : null;
+  $("browser").style.display = browser ? "block" : "none";
+  if (!browser) return;
+  $("browserTitle").textContent = b.folder || "Browser";
+  var list = $("browserList");
+  list.innerHTML = "";
+  b.items.forEach(function (it, idx) {
+    var row = document.createElement("div");
+    row.className = "item" + (it.folder ? " folder" : "");
+    row.setAttribute("data-abs", b.base + idx);
+    var n = document.createElement("span"); n.className = "n"; n.textContent = it.folder ? "DIR" : String(b.base + idx + 1);
+    var t = document.createElement("span"); t.textContent = it.name.replace(/\.xml$/i, "").replace(/\.wav$/i, "");
+    row.appendChild(n); row.appendChild(t);
+    list.appendChild(row);
+  });
+  highlightBrowser(b.selected);
+}
+function highlightBrowser(sel) {
+  if (!browser) return;
+  browser.selected = sel;
+  var rows = $("browserList").querySelectorAll(".item");
+  for (var r = 0; r < rows.length; r++) {
+    var on = +rows[r].getAttribute("data-abs") === sel;
+    rows[r].className = rows[r].className.replace(/ sel/g, "") + (on ? " sel" : "");
+    if (on) rows[r].scrollIntoView({ block: "center" });
+  }
+}
+
 var midi = null, input = null, output = null, keepAlive = null;
 var lastMessageAt = 0, lastSeq = -1, dropped = 0, stateCount = 0;
 var state = null, rows = null;
@@ -311,6 +359,22 @@ function parse(d) {
     pk.ok = d[pj] === 0xF7;
     return pk;
   }
+  if (kind === 0x46) {
+    var bw = { kind: "browser", version: d[7], open: d[8] === 1, base: (d[9] << 7) | d[10], selected: (d[11] << 7) | d[12],
+      items: [] }, bc = d[13], bj = 14, br;
+    if (bw.selected === 0x3FFF) bw.selected = -1;
+    br = readName(d, bj); bw.folder = br.text; bj = br.next;
+    for (var bi = 0; bi < bc; bi++) {
+      var folder = d[bj++] === 1;
+      br = readName(d, bj); bw.items.push({ folder: folder, name: br.text }); bj = br.next;
+    }
+    bw.ok = d[bj] === 0xF7;
+    return bw;
+  }
+  if (kind === 0x47) {
+    var bs = (d[8] << 7) | d[9];
+    return { kind: "browserSel", selected: bs === 0x3FFF ? -1 : bs };
+  }
   if (kind === 0x41) {
     // 00 00, then 7-bit packed: one byte of high bits, then 4 digit bytes (left to right)
     var hi = d[9], digits = [];
@@ -349,6 +413,8 @@ function onMessage(ev) {
   log("<", ev.data);
   if (m.kind === "text") { showText(m); return; }
   if (m.kind === "picker") { showPicker(m); return; }
+  if (m.kind === "browser") { showBrowser(m); return; }
+  if (m.kind === "browserSel") { highlightBrowser(m.selected); return; }
   if (m.kind === "state") {
     if (lastSeq >= 0 && m.seq !== ((lastSeq + 1) & 0x7F)) dropped++;
     lastSeq = m.seq; stateCount++;
@@ -444,7 +510,14 @@ function usePort() {
   setStatus("Asked " + output.name + " for state...", "warn");
 }
 
-$("connect").onclick = function () {
+var wakeLock = null;
+function keepAwake() {
+  if (!navigator.wakeLock || document.visibilityState !== "visible") return;
+  navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; }, function () {});
+}
+document.addEventListener("visibilitychange", keepAwake);
+
+function connect() {
   if (!navigator.requestMIDIAccess) { setStatus("This browser has no Web MIDI. Use Chrome.", "bad"); return; }
   navigator.requestMIDIAccess({ sysex: true }).then(function (access) {
     midi = access;
@@ -461,8 +534,19 @@ $("connect").onclick = function () {
       else setStatus("Live on " + output.name + " (last message " + Math.round(age / 1000) + " s ago)", "ok");
     }, 1000);
     $("connect").textContent = "Resend";
+    keepAwake();
   }, function (err) { setStatus("MIDI access refused: " + err, "bad"); });
-};
+}
+$("connect").onclick = connect;
+
+// Once MIDI with SysEx has been allowed, connect on launch without a tap
+if (navigator.permissions && navigator.permissions.query) {
+  navigator.permissions.query({ name: "midi", sysex: true }).then(function (p) {
+    if (p.state === "granted") connect();
+  }, function () {});
+}
+// Works offline once opened: the service worker keeps a copy of the app
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
 buildMirror();
 setScreenMode("7seg");
 $("mode7").onclick = function () { wantScreen("7seg"); };
