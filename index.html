@@ -111,13 +111,14 @@ main{max-width:1180px;margin:0 auto;padding:14px 14px 40px}
 #preset{font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #rowname{font-size:15px;color:var(--muted);height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #knobs{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.kgroup{padding:8px 6px 4px}
 .kgroup{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px 10px 6px}
 .kgroup .label{margin:0 0 6px 2px}
-.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:4px}
-.knob{background:none;border:1px solid transparent;border-radius:10px;padding:4px 2px;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:0;font:inherit}
-.knob svg{width:46px;height:46px}
-.knob .kv{font:700 13px var(--mono);height:18px}
-.knob .kn{font:500 11px var(--sans);color:var(--muted);height:30px;line-height:1.2;text-align:center;overflow:hidden;width:100%}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:0}
+.knob{background:none;border:1px solid transparent;border-radius:10px;padding:2px 0 0;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:0;font:inherit}
+.knob svg{width:58px;height:58px}
+.knob .kv{font:700 17px var(--mono);height:22px;line-height:22px}
+.knob .kn{font:600 12.5px var(--sans);color:var(--muted);height:32px;line-height:1.25;text-align:center;overflow:hidden;width:100%;padding:0 1px;overflow-wrap:break-word}
 .knob.open{border-color:var(--pink);box-shadow:0 0 12px var(--pink-glow);background:color-mix(in srgb,var(--pink) 10%,transparent)}
 .knob.open .kn{color:var(--ink)}
 .knob.tapped{opacity:.6}
@@ -290,7 +291,7 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v7 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v8 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -353,7 +354,7 @@ function keys(x, y, w, h, n, wc, bc) {
   for (i = 0; i < n - 1; i++) if (pat[i % 7]) s += R((x + (i + 1) * kw - kw * 0.32).toFixed(1), y, (kw * 0.64).toFixed(1), (h * 0.6).toFixed(1), bc, 0.8);
   return s;
 }
-function wave(x, y, w, a, fn, n) {
+function wavePath(x, y, w, a, fn, n) {
   var d = "", steps = n || 48;
   for (var i = 0; i <= steps; i++) {
     var t = i / steps;
@@ -390,7 +391,7 @@ var ART = {
   gin: function () {
     var s = R(30, 6, 100, 88, "#1e6b3c", 5, ' stroke="#2f8a52" stroke-width="1.5"') +
       L("M36 46 H48 V40 M112 46 H124 V60 M36 88 H50 M110 88 H124", "#3f9d63", 1.2) +
-      R(52, 12, 56, 28, "#a9bfa2", 3) + L(wave(56, 28, 48, 8, function (t) { return Math.exp(-4 * t) * Math.sin(t * 30); }), "#1d2a1c", 1.6) +
+      R(52, 12, 56, 28, "#a9bfa2", 3) + L(wavePath(56, 28, 48, 8, function (t) { return Math.exp(-4 * t) * Math.sin(t * 30); }), "#1d2a1c", 1.6) +
       knob(41, 24, 5.5, "#ecebe6", "#1e6b3c") + knob(119, 24, 5.5, "#ecebe6", "#1e6b3c");
     for (var j = 0; j < 4; j++) for (var i = 0; i < 4; i++) s += C(56 + i * 16, 52 + j * 11, 4.4, i === 1 && j === 2 ? "#ff1fd6" : "#ecebe6");
     return s;
@@ -457,14 +458,14 @@ var ART = {
     for (var k = 6; k >= 0; k--) {
       var m = k / 6, col = "rgb(" + Math.round(255 * (1 - m)) + "," + Math.round(31 + 193 * m) + "," + Math.round(214 - 22 * m) + ")";
       var fn = function (t) { var sn = Math.sin(t * Math.PI * 4), sw = 2 * ((t * 2) % 1) - 1; return sn * (1 - m) + sw * m; };
-      s += L(wave(18 + k * 6, 74 - k * 7, 92, 9, fn, 64), col, 1.8);
+      s += L(wavePath(18 + k * 6, 74 - k * 7, 92, 9, fn, 64), col, 1.8);
     }
     return s;
   },
   // Ring mod: two linked rings
   ring: function () {
     return R(8, 10, 144, 80, "#1a1d21", 6) + C(64, 50, 24, "none", ' stroke="#ff1fd6" stroke-width="5"') +
-      C(96, 50, 24, "none", ' stroke="#19ffe0" stroke-width="5"') + L(wave(30, 50, 100, 10, function (t) { return Math.sin(t * 25) * Math.sin(t * 6); }, 80), "#e9e7e2", 1.6);
+      C(96, 50, 24, "none", ' stroke="#19ffe0" stroke-width="5"') + L(wavePath(30, 50, 100, 10, function (t) { return Math.sin(t * 25) * Math.sin(t * 6); }, 80), "#e9e7e2", 1.6);
   },
   // Brings: a resonating body and a vibrating string
   rings: function () {
@@ -472,7 +473,7 @@ var ART = {
     for (var r = 4; r >= 1; r--) s += C(54, 50, r * 9, "none", ' stroke="#19ffe0" stroke-width="2" opacity="' + (1.15 - r * 0.22).toFixed(2) + '"');
     s += C(54, 50, 4, "#19ffe0");
     var st = function (t) { return Math.sin(t * Math.PI * 3); };
-    s += L(wave(96, 70, 48, 8, st), "#ff1fd6", 1.8) + L(wave(96, 70, 48, -8, st), "#ff1fd6", 1.8, ' opacity=".5"');
+    s += L(wavePath(96, 70, 48, 8, st), "#ff1fd6", 1.8) + L(wavePath(96, 70, 48, -8, st), "#ff1fd6", 1.8, ' opacity=".5"');
     return s + knob(108, 30, 7, "#d9dde0", "#10201f") + knob(134, 30, 7, "#d9dde0", "#10201f");
   },
   // DX7 style FM keyboard: membrane buttons and a green screen
@@ -506,7 +507,7 @@ var ART = {
   },
   // Init: a plain sine
   init: function () {
-    return R(8, 10, 144, 80, "#1a1d21", 6, ' stroke="#2c3036" stroke-dasharray="4 4"') + L(wave(28, 50, 104, 20, sin(1)), "#9aa0a8", 2.5);
+    return R(8, 10, 144, 80, "#1a1d21", 6, ' stroke="#2c3036" stroke-dasharray="4 4"') + L(wavePath(28, 50, 104, 20, sin(1)), "#9aa0a8", 2.5);
   },
   midi: function () {
     var s = C(80, 50, 30, "#2a2d33") + C(80, 50, 25, "#0f1114") + R(76, 21, 8, 7, "#2a2d33", 1);
@@ -920,7 +921,9 @@ function showParams(p) {
       var b = document.createElement("button");
       b.className = "knob";
       b.innerHTML = '<span class="ks"></span><span class="kv"></span><span class="kn"></span>';
-      b.querySelector(".kn").textContent = k.name;
+      // Two words too long for a knob label at this size; the rest stay as the Deluge's English titles
+      b.querySelector(".kn").textContent = k.name.replace("frequency", "freq.").replace("resonance", "res.").replace("start offset", "offset");
+      b.title = k.name;
       b.onclick = function () {
         if (b.classList.contains("cant")) return; // Its pad would only say CANT
         b.classList.add("tapped"); tx([0x03, 0x07, k.x, k.y]);
@@ -984,7 +987,9 @@ function renderSong() {
   if (view === 3) return renderArranger(body);
   if (view === 2) return renderGrid(body);
   var html = '<div class="clips">';
-  clips.forEach(function (c, i) {
+  // The Deluge's pad rows count from the bottom (clip 1 is the bottom row), so list them top down as the pads are
+  clips.slice().reverse().forEach(function (c, ri) {
+    var i = clips.length - 1 - ri;
     var o = outputs[c.output];
     html += '<button class="clip' + (c.playing ? " playing" : "") + (c.pending ? " pending" : "") + (c.current ? " current" : "") +
       (c.soloing ? " soloing" : "") + '" data-i="' + i + '"><span class="sw" style="background:' + rgb(o) + '"></span>' +
@@ -1050,7 +1055,9 @@ function renderArranger(body) {
   if (!arranger) { body.innerHTML = ""; songLayout = ""; return; }
   var html = '<div class="arrinfo">The same stretch of the song the pads show: scroll and zoom on the Deluge to move it</div>' +
     '<div class="arr" id="arr">';
-  arranger.lanes.forEach(function (lane, oi) {
+  // The first track is the bottom pad row on the Deluge: draw top down as the pads are
+  arranger.lanes.slice().reverse().forEach(function (lane, ri) {
+    var oi = arranger.lanes.length - 1 - ri;
     var o = outputs[oi]; if (!o) return;
     html += '<div class="alane' + (o.muted ? " muted" : "") + '"><div class="an">' + escapeHtml(o.name || "Track " + (oi + 1)) +
       '</div><div class="atrack">';
