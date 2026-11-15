@@ -1,6 +1,6 @@
-// Offline copy of the app. Serves the saved copy first, then refreshes it from the network when online, so an
-// update shows up on the launch after it's published.
-var CACHE = "bribes-companion-v13";
+// Offline copy of the app. The page itself comes from the network when it's reachable (so an update shows straight
+// away), falling back to the saved copy offline; other files are served from the saved copy and refreshed behind.
+var CACHE = "bribes-companion-v14";
 var FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "assets/coin-front.png", "assets/coin-back.png"];
 
 self.addEventListener("install", function (e) {
@@ -17,6 +17,18 @@ self.addEventListener("activate", function (e) {
 
 self.addEventListener("fetch", function (e) {
   if (e.request.method !== "GET") return;
+  var page = e.request.mode === "navigate" || /\/(index\.html)?(\?.*)?$/.test(new URL(e.request.url).pathname);
+  if (page) {
+    e.respondWith(caches.open(CACHE).then(function (c) {
+      return fetch(e.request, { cache: "no-store" }).then(function (res) {
+        if (res && res.ok) c.put("index.html", res.clone());
+        return res;
+      }).catch(function () {
+        return c.match("index.html").then(function (hit) { return hit || c.match("./"); });
+      });
+    }));
+    return;
+  }
   e.respondWith(caches.open(CACHE).then(function (c) {
     return c.match(e.request, { ignoreSearch: true }).then(function (hit) {
       var fresh = fetch(e.request).then(function (res) {
