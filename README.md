@@ -1,8 +1,8 @@
 # Bribes Companion
 
-A companion screen for the Deluge Bribes custom firmware. Open it in Chrome on a phone or tablet that's connected to the Deluge over USB. It shows the engine, preset and kit rows you're on.
+A companion screen for the Deluge Bribes custom firmware. Open it in Chrome on a phone or tablet that's connected to the Deluge over USB. It mirrors the Deluge's display with every 7-seg word spelled out, shows the engine, preset and kit rows you're on with a drawing of each engine, and lets you tap picker tiles and presets to choose them on the Deluge.
 
-This is debug v0, so it shows text and colours only. It needs a Bribes test build that sends companion state messages.
+It needs a Bribes build that sends companion messages. To use it offline, open it once in Chrome and choose Add to Home screen.
 
 Live page: https://thisisbribery.github.io/bribes-companion/
 
