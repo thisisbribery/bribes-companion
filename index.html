@@ -36,17 +36,37 @@
   details { margin-top: 16px; } summary { color: var(--dim); cursor: pointer; }
   #log { font: 12px/1.5 ui-monospace, monospace; white-space: pre-wrap; word-break: break-all; color: var(--dim);
     max-height: 260px; overflow: auto; background: var(--panel); padding: 10px; border-radius: 8px; }
-  @media (max-width: 600px) { #engine { font-size: 40px; } }
+  #top { display: grid; grid-template-columns: auto 1fr; gap: 16px; margin-top: 16px; align-items: stretch; }
+  #mirror { background: #050506; border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; display: flex;
+    align-items: center; }
+  #mirror svg { width: 260px; height: auto; display: block; }
+  .seg { fill: #2a0f0f; } .seg.on { fill: #ff3b2f; filter: drop-shadow(0 0 4px rgba(255, 59, 47, .7)); }
+  #spelled { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px;
+    display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+  #menuName { color: var(--dim); font-size: 14px; letter-spacing: .12em; text-transform: uppercase; min-height: 20px; }
+  #fullText { font-size: 34px; font-weight: 700; line-height: 1.15; word-break: break-word; }
+  #rawText { color: var(--dim); font: 13px ui-monospace, monospace; margin-top: 6px; }
+  #fullText.popup { color: var(--warn); }
+  @media (max-width: 600px) { #engine { font-size: 40px; } #top { grid-template-columns: 1fr; } #mirror svg { width: 100%; } }
 </style>
 </head>
 <body>
 <main>
   <header>
-    <h1>BRIBES COMPANION <span style="color:var(--dim);font-weight:400">debug v0</span></h1>
+    <h1>BRIBES COMPANION <span style="color:var(--dim);font-weight:400">debug v1</span></h1>
     <select id="port" aria-label="Deluge port"></select>
     <button id="connect">Connect</button>
   </header>
   <div id="status"><span class="dot" id="dot"></span><span id="statusText">Not connected</span></div>
+
+  <section id="top">
+    <div id="mirror" aria-label="Deluge display mirror"><svg id="segsvg" viewBox="0 0 236 100"></svg></div>
+    <div id="spelled">
+      <div id="menuName"></div>
+      <div id="fullText">-</div>
+      <div id="rawText"></div>
+    </div>
+  </section>
 
   <section id="hero">
     <div id="family">waiting</div>
@@ -67,7 +87,8 @@
 
 <script>
 "use strict";
-// Messages: F0 00 21 7B 01 02 03 <mode> F7 out (0 = subscribe + send all, 1 = keep alive), 0x42 STATE / 0x43 KIT_ROWS in
+// Messages: F0 00 21 7B 01 02 03 <mode> F7 out (0 = subscribe + send all, 1 = keep alive), 0x42 STATE / 0x43 KIT_ROWS /
+// 0x44 TEXT in. Display mirror: 02 00 <2 keep alive | 3 force> out, 0x41 7-seg digits in.
 var HDR = [0xF0, 0x00, 0x21, 0x7B, 0x01, 0x02];
 
 // drum_synth::Engine numbers (append-only in the firmware) and the special codes above them
@@ -106,6 +127,33 @@ function engineInfo(code) {
 function pick(list, v) { return v === 0x7F ? "-" : (list[v] !== undefined ? list[v] : String(v)); }
 function hex(bytes) { return Array.prototype.map.call(bytes, function (b) { return ("0" + b.toString(16)).slice(-2); }).join(" "); }
 
+// 7-seg mirror: bit 6 = A (top) ... bit 0 = G (middle), 0x80 = dot. Segment polygons per digit, 50 wide, 100 high
+var SEG_SHAPES = [
+  [6, "M10,4 L40,4 L35,10 L15,10 Z"],          // A
+  [5, "M42,6 L42,46 L37,42 L37,12 Z"],          // B
+  [4, "M42,54 L42,94 L37,88 L37,58 Z"],         // C
+  [3, "M10,96 L40,96 L35,90 L15,90 Z"],         // D
+  [2, "M8,54 L8,94 L13,88 L13,58 Z"],           // E
+  [1, "M8,6 L8,46 L13,42 L13,12 Z"],            // F
+  [0, "M11,50 L16,46 L34,46 L39,50 L34,54 L16,54 Z"] // G
+];
+function buildMirror() {
+  var svg = $("segsvg"), html = "";
+  for (var d = 0; d < 4; d++) {
+    html += '<g transform="translate(' + (d * 58 + 2) + ',0)">';
+    SEG_SHAPES.forEach(function (sg) { html += '<path class="seg" data-d="' + d + '" data-b="' + sg[0] + '" d="' + sg[1] + '"/>'; });
+    html += '<circle class="seg" data-d="' + d + '" data-b="7" cx="48" cy="94" r="3.5"/></g>';
+  }
+  svg.innerHTML = html;
+}
+function showDigits(digits) {
+  var els = $("segsvg").querySelectorAll(".seg");
+  for (var k = 0; k < els.length; k++) {
+    var e = els[k], v = digits[+e.getAttribute("data-d")], b = +e.getAttribute("data-b");
+    e.setAttribute("class", (v >> b) & 1 ? "seg on" : "seg");
+  }
+}
+
 var midi = null, input = null, output = null, keepAlive = null;
 var lastMessageAt = 0, lastSeq = -1, dropped = 0, stateCount = 0;
 var state = null, rows = null;
@@ -116,6 +164,11 @@ function log(dir, bytes) {
   var el = $("log");
   var line = new Date().toLocaleTimeString() + " " + dir + " " + hex(bytes) + "\n";
   el.textContent = (line + el.textContent).slice(0, 6000);
+}
+
+function sendDisplay(force) {
+  if (!output) return;
+  output.send(HDR.concat([0x00, force ? 0x03 : 0x02, 0xF7]));
 }
 
 function send(mode) {
@@ -146,6 +199,22 @@ function parse(d) {
     s.ok = d[b.next] === 0xF7;
     return s;
   }
+  if (kind === 0x41) {
+    // 00 00, then 7-bit packed: one byte of high bits, then 4 digit bytes (left to right)
+    var hi = d[9], digits = [];
+    for (var q = 0; q < 4; q++) digits.push(d[10 + q] | (((hi >> q) & 1) << 7));
+    return { kind: "seg", digits: digits };
+  }
+  if (kind === 0x44) {
+    var t = { kind: "text", version: d[7], popup: (d[8] & 1) === 1 }, j = 9, r;
+    r = readName(d, j); t.main = r.text; j = r.next;
+    r = readName(d, j); t.mainEnglish = r.text; j = r.next;
+    r = readName(d, j); t.popupText = r.text; j = r.next;
+    r = readName(d, j); t.popupEnglish = r.text; j = r.next;
+    r = readName(d, j); t.menu = r.text; j = r.next;
+    t.ok = d[j] === 0xF7;
+    return t;
+  }
   if (kind === 0x43) {
     var count = d[8], list = [];
     for (var r = 0; r < count; r++) list.push(d[9 + r]);
@@ -158,7 +227,9 @@ function onMessage(ev) {
   var m = parse(ev.data);
   if (!m) return;
   lastMessageAt = Date.now();
+  if (m.kind === "seg") { showDigits(m.digits); return; }
   log("<", ev.data);
+  if (m.kind === "text") { showText(m); return; }
   if (m.kind === "state") {
     if (lastSeq >= 0 && m.seq !== ((lastSeq + 1) & 0x7F)) dropped++;
     lastSeq = m.seq; stateCount++;
@@ -167,6 +238,14 @@ function onMessage(ev) {
     rows = m.rows;
   }
   render();
+}
+
+function showText(t) {
+  var shown = t.popup ? t.popupEnglish : t.mainEnglish, raw = t.popup ? t.popupText : t.main;
+  $("menuName").textContent = t.menu;
+  $("fullText").textContent = shown || "-";
+  $("fullText").className = t.popup ? "popup" : "";
+  $("rawText").textContent = raw && raw !== shown ? "7-seg: " + raw : "";
 }
 
 function render() {
@@ -242,6 +321,7 @@ function usePort() {
   input.onmidimessage = onMessage;
   lastSeq = -1; dropped = 0;
   send(0);
+  sendDisplay(true);
   setStatus("Asked " + output.name + " for state...", "warn");
 }
 
@@ -255,6 +335,7 @@ $("connect").onclick = function () {
     if (keepAlive) clearInterval(keepAlive);
     keepAlive = setInterval(function () {
       send(1);
+      sendDisplay(false);
       var age = Date.now() - lastMessageAt;
       if (!lastMessageAt) setStatus("Connected to " + (output ? output.name : "?") +
         ". No reply yet: is this the Bribes companion test bin?", "warn");
@@ -263,6 +344,7 @@ $("connect").onclick = function () {
     $("connect").textContent = "Resend";
   }, function (err) { setStatus("MIDI access refused: " + err, "bad"); });
 };
+buildMirror();
 $("port").onchange = function () { if (midi) usePort(); };
 if (typeof module !== "undefined") module.exports = { parse: parse };
 </script>
