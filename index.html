@@ -131,6 +131,28 @@ main{max-width:1180px;margin:0 auto;padding:14px 14px 40px}
 .knob .sw{min-width:56px;max-width:100%;overflow:hidden;text-overflow:ellipsis;height:30px;padding:0 10px;border-radius:15px;background:#2a2d33;border:1px solid var(--line);font:700 14px var(--sans);display:grid;place-items:center;white-space:nowrap}
 .knob.switch.open .sw{background:var(--pink);color:var(--panel);border-color:var(--pink)}
 .knob.cant .kv{visibility:hidden}
+/* Gold knobs: the 8 mod buttons and their two knobs, as on the Deluge, in a gold frame */
+:root{--gold:#e3b04b;--gold-glow:rgba(227,176,75,.45)}
+.frame{border-radius:14px;padding:10px 12px 8px;margin-top:14px}
+.frame > .label{margin:0 0 8px 2px}
+#gold{border:2px solid var(--gold);background:color-mix(in srgb,var(--gold) 5%,var(--soft))}
+#gold > .label{color:var(--gold)}
+.goldgrid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+.gcol{border:1px solid transparent;border-radius:10px;padding:4px 0 2px;display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.gcol.on{border-color:var(--gold);box-shadow:0 0 12px var(--gold-glow);background:color-mix(in srgb,var(--gold) 12%,transparent)}
+.gled{display:flex;align-items:center;gap:6px;font:700 12px var(--mono);color:var(--muted);height:18px}
+.gled i{width:9px;height:9px;border-radius:50%;background:#3a3420;border:1px solid #5a4d2a}
+.gcol.on .gled{color:var(--gold)}
+.gcol.on .gled i{background:var(--gold);border-color:var(--gold);box-shadow:0 0 8px var(--gold)}
+.gcol .knob{width:100%;pointer-events:none}
+.gcol .knob .kn{height:45px}
+.gcol .knob.none{opacity:.35}
+.gtag{font:700 10px var(--mono);letter-spacing:.08em;color:var(--gold);height:13px;line-height:13px;text-transform:uppercase}
+/* The engine's own controls, in a brighter frame */
+#special{border:2px solid var(--pink);box-shadow:0 0 14px var(--pink-glow);background:color-mix(in srgb,var(--pink) 4%,var(--soft))}
+#special > .label{color:var(--pink)}
+#special .kgroup{background:none;border:0;padding:0 0 4px}
+#special .kgroup + .kgroup{border-top:1px solid var(--line);padding-top:8px;margin-top:4px}
 /* Clip state as the hardware pads: green playing (breathing), red stopped, blue soloed, flashing while armed */
 :root{--pad-play:#2bd94a;--pad-stop:#e8322f;--pad-solo:#2f7bff}
 @keyframes breathe{0%,100%{filter:brightness(1)}50%{filter:brightness(1.45)}}
@@ -301,6 +323,8 @@ footer a{color:var(--pink)}
           <div id="rowname"></div>
         </div>
       </div>
+      <div id="gold" class="frame" style="display:none"><div class="label">Gold knobs</div><div class="goldgrid"></div></div>
+      <div id="special" class="frame" style="display:none"><div class="label"></div><div class="sbody"></div></div>
       <div id="knobs"></div>
       <div id="rows"></div>
       <div id="kitSamples" style="display:none"></div>
@@ -313,7 +337,7 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v14 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v15 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -939,14 +963,15 @@ function groupName(g) {
   }
   return KNOB_GROUPS[g] || "";
 }
-function knobSvg(pos, bipolar) {
+function knobSvg(pos, bipolar, colour) {
+  colour = colour || "#ff1fd6";
   // 270 degree sweep, from 7:30 to 4:30; bipolar fills from the top
   var a0 = 135, a = 135 + pos / 127 * 270, r = 18, cx = 23, cy = 23;
   function pt(deg, rad) { var t = deg * Math.PI / 180; return (cx + rad * Math.cos(t)).toFixed(1) + " " + (cy + rad * Math.sin(t)).toFixed(1); }
   function arc(from, to) {
     if (Math.abs(to - from) < 0.5) return "";
     var large = Math.abs(to - from) > 180 ? 1 : 0, sweep = to > from ? 1 : 0;
-    return '<path d="M' + pt(from, r) + " A" + r + " " + r + " 0 " + large + " " + sweep + " " + pt(to, r) + '" fill="none" stroke="#ff1fd6" stroke-width="3.5" stroke-linecap="round"/>';
+    return '<path d="M' + pt(from, r) + " A" + r + " " + r + " 0 " + large + " " + sweep + " " + pt(to, r) + '" fill="none" stroke="' + colour + '" stroke-width="3.5" stroke-linecap="round"/>';
   }
   var track = '<path d="M' + pt(135, r) + " A" + r + " " + r + ' 0 1 1 ' + pt(45, r) + '" fill="none" stroke="#2c3036" stroke-width="3.5" stroke-linecap="round"/>';
   var fill = bipolar ? arc(270, a) : arc(a0, a);
@@ -956,12 +981,14 @@ function knobSvg(pos, bipolar) {
 }
 var knobEls = {}, knobLayout = "";
 function showParams(p) {
-  var box = $("knobs");
-  if (!p.open || !p.knobs.length) { box.innerHTML = ""; knobEls = {}; knobLayout = ""; return; }
+  var box = $("knobs"), special = $("special"), sbody = special.querySelector(".sbody");
+  if (!p.open || !p.knobs.length) {
+    box.innerHTML = ""; sbody.innerHTML = ""; special.style.display = "none"; knobEls = {}; knobLayout = ""; return;
+  }
   // Rebuild only when the set of knobs changes; otherwise update in place, so nothing moves
   var layout = p.knobs.map(function (k) { return k.x + "," + k.y + "," + k.group + ":" + k.name + ":" + k.isSwitch; }).join("|");
   if (layout !== knobLayout) {
-    knobLayout = layout; knobEls = {}; box.innerHTML = "";
+    knobLayout = layout; knobEls = {}; box.innerHTML = ""; sbody.innerHTML = "";
     var groups = {};
     p.knobs.forEach(function (k) {
       if (!groups[k.group]) {
@@ -986,7 +1013,17 @@ function showParams(p) {
       groups[k.group].querySelector(".kgrid").appendChild(b);
       knobEls[k.x + "," + k.y + "," + k.group] = b;
     });
-    Object.keys(groups).sort(function (a, b) { return a - b; }).forEach(function (g) { box.appendChild(groups[g]); });
+    // The engine's controls and switches go in the bright frame above; the standard sections below
+    var hasSpecial = false;
+    Object.keys(groups).sort(function (a, b) { return a - b; }).forEach(function (g) {
+      if (g >= 7) {
+        hasSpecial = true;
+        groups[g].querySelector(".label").textContent = g == 8 ? "Switches" : "Controls";
+        sbody.appendChild(groups[g]);
+      } else box.appendChild(groups[g]);
+    });
+    special.style.display = hasSpecial ? "" : "none";
+    special.querySelector(".label").textContent = groupName(7);
   }
   p.knobs.forEach(function (k) {
     var b = knobEls[k.x + "," + k.y + "," + k.group]; if (!b) return;
@@ -1002,6 +1039,50 @@ function showParams(p) {
     b.className = "knob" + (k.isSwitch ? " switch" : "") + (k.open ? " open" : "") + (k.cant ? " cant" : "");
     b.title = k.cant ? "Not available on this sound (the Deluge would say CANT)" : "";
   });
+}
+
+// ---- Gold knobs: each mod button's pair, the lit one glowing. Tapping a pair presses its mod button.
+// The Deluge prints STUTTER/CUSTOM 1 and CUSTOM 2/3 on the last two buttons: those slots are tagged.
+var GOLD_TAGS = { "6,0": "Custom 1", "7,1": "Custom 2", "7,0": "Custom 3" };
+var goldCols = null;
+function showGold(g) {
+  var box = $("gold");
+  if (!g.open) { box.style.display = "none"; return; }
+  box.style.display = "";
+  var grid = box.querySelector(".goldgrid");
+  if (!goldCols) {
+    goldCols = [];
+    for (var b = 0; b < 8; b++) {
+      var col = document.createElement("div"); col.className = "gcol";
+      col.innerHTML = '<div class="gled"><i></i>' + (b + 1) + '</div>';
+      for (var w = 1; w >= 0; w--) {
+        var tag = GOLD_TAGS[b + "," + w] || "";
+        var k = document.createElement("div"); k.className = "knob";
+        k.innerHTML = '<span class="gtag"></span><span class="ks"></span><span class="kv"></span><span class="kn"></span>';
+        k.querySelector(".gtag").textContent = tag;
+        col.appendChild(k);
+      }
+      (function (button, el) {
+        el.onclick = function () { tx([0x03, 0x0C, button]); };
+      })(b, col);
+      grid.appendChild(col); goldCols.push(col);
+    }
+  }
+  for (var c = 0; c < 8; c++) {
+    var colEl = goldCols[c];
+    colEl.classList.toggle("on", g.mode === c);
+    var knobsEl = colEl.querySelectorAll(".knob");
+    for (var u = 0; u < 2; u++) {
+      var e = g.knobs[c * 2 + u], el2 = knobsEl[u];
+      var key = e.pos + ":" + e.bipolar + ":" + e.value + ":" + e.none + ":" + e.name;
+      if (el2.getAttribute("data-k") === key) continue;
+      el2.setAttribute("data-k", key);
+      el2.querySelector(".ks").innerHTML = knobSvg(e.none ? 0 : e.pos, e.bipolar, "#e3b04b");
+      el2.querySelector(".kv").textContent = e.none ? "" : (e.bipolar && e.value > 0 ? "+" : "") + e.value;
+      el2.querySelector(".kn").textContent = e.name; // As the Deluge's OLED names it
+      el2.classList.toggle("none", e.none);
+    }
+  }
 }
 
 // ---- Transport
@@ -1367,6 +1448,17 @@ function parse(d) {
     return ar;
   }
   if (kind === 0x54) return { kind: "diag", text: readName(d, 8).text };
+  if (kind === 0x55) {
+    var gd = { kind: "gold", open: d[8] === 1, mode: d[9], knobs: [] };
+    if (!gd.open) return gd;
+    var gi = 10;
+    for (var gq = 0; gq < 16; gq++) {
+      var ge = { bipolar: (d[gi] & 1) !== 0, none: (d[gi] & 4) !== 0, pos: d[gi + 1], value: ((d[gi + 2] << 7) | d[gi + 3]) - 8192 };
+      var gn = readName(d, gi + 4); ge.name = gn.text; gi = gn.next;
+      gd.knobs.push(ge);
+    }
+    return gd;
+  }
   if (kind === 0x51) return { kind: "beat", phase: ((d[8] << 7) | d[9]) / 16384 };
   if (kind === 0x52) {
     var ks = { kind: "kitSamples", rows: [] }, kc = d[8], kj = 9;
@@ -1419,7 +1511,7 @@ function parse(d) {
 
 
 var QUIET = { playhead: 1, wave: 1, transport: 1, arrangerPos: 1, params: 1, clips: 1, clipPos: 1, arranger: 1, outputs: 1,
-  beat: 1, kitActive: 1 };
+  beat: 1, kitActive: 1, gold: 1 };
 function onMessage(ev) {
   var m = parse(ev.data);
   if (!m) return;
@@ -1447,6 +1539,7 @@ function onMessage(ev) {
   case "arrangerPos": arrangerPos = m.pos; placeArrangerHead(); return;
   case "clipPos": clipPos = m.pos; placeClipHeads(); return;
   case "diag": $("waveDiag").textContent = m.text; return;
+  case "gold": showGold(m); return;
   case "beat": beatAt = { phase: m.phase, time: performance.now() }; return;
   case "kitSamples": showKitSamples(m.rows); return;
   case "kitActive": showKitActive(m.bits); return;
