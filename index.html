@@ -123,6 +123,12 @@ main{max-width:1180px;margin:0 auto;padding:14px 14px 40px}
 .knob.open .kn{color:var(--ink)}
 .knob.tapped{opacity:.6}
 .knob.cant{opacity:.28;filter:grayscale(1);cursor:not-allowed}
+.kgroup.engine{border-color:color-mix(in srgb,var(--pink) 35%,var(--line))}
+.kgroup.engine .label{color:var(--pink)}
+.knob.switch{justify-content:center;gap:6px;padding-top:8px}
+.kgroup.switches .kgrid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
+.knob .sw{min-width:56px;max-width:100%;overflow:hidden;text-overflow:ellipsis;height:30px;padding:0 10px;border-radius:15px;background:#2a2d33;border:1px solid var(--line);font:700 14px var(--sans);display:grid;place-items:center;white-space:nowrap}
+.knob.switch.open .sw{background:var(--pink);color:var(--panel);border-color:var(--pink)}
 .knob.cant .kv{visibility:hidden}
 /* Clip state as the hardware pads: green playing (breathing), red stopped, blue soloed, flashing while armed */
 :root{--pad-play:#2bd94a;--pad-stop:#e8322f;--pad-solo:#2f7bff}
@@ -305,7 +311,7 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v10 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v11 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -922,7 +928,15 @@ function render() {
   });
 }
 
-var KNOB_GROUPS = ["Oscillators", "Filters", "Envelope 1", "Envelope 2", "Voice", "Effects", "LFOs"];
+var KNOB_GROUPS = ["Oscillators", "Filters", "Envelope 1", "Envelope 2", "Voice", "Effects", "LFOs", "Engine", "Switches"];
+// The engine group is named after the engine
+function groupName(g) {
+  if (g === 7 && state) {
+    var info = engineInfo(state.engine);
+    return info[1] === "deluge" ? "303" : info[0];
+  }
+  return KNOB_GROUPS[g] || "";
+}
 function knobSvg(pos, bipolar) {
   // 270 degree sweep, from 7:30 to 4:30; bipolar fills from the top
   var a0 = 135, a = 135 + pos / 127 * 270, r = 18, cx = 23, cy = 23;
@@ -943,39 +957,47 @@ function showParams(p) {
   var box = $("knobs");
   if (!p.open || !p.knobs.length) { box.innerHTML = ""; knobEls = {}; knobLayout = ""; return; }
   // Rebuild only when the set of knobs changes; otherwise update in place, so nothing moves
-  var layout = p.knobs.map(function (k) { return k.x + "," + k.y + ":" + k.name; }).join("|");
+  var layout = p.knobs.map(function (k) { return k.x + "," + k.y + "," + k.group + ":" + k.name + ":" + k.isSwitch; }).join("|");
   if (layout !== knobLayout) {
     knobLayout = layout; knobEls = {}; box.innerHTML = "";
     var groups = {};
     p.knobs.forEach(function (k) {
       if (!groups[k.group]) {
         var g = document.createElement("div"); g.className = "kgroup";
-        g.innerHTML = '<div class="label">' + (KNOB_GROUPS[k.group] || "") + '</div><div class="kgrid"></div>';
+        g.innerHTML = '<div class="label"></div><div class="kgrid"></div>';
+        g.querySelector(".label").textContent = groupName(k.group);
+        if (k.group >= 7) g.classList.add("engine");
+        if (k.group === 8) g.classList.add("switches");
         groups[k.group] = g;
       }
       var b = document.createElement("button");
       b.className = "knob";
-      b.innerHTML = '<span class="ks"></span><span class="kv"></span><span class="kn"></span>';
+      b.innerHTML = k.isSwitch ? '<span class="sw"></span><span class="kn"></span>'
+        : '<span class="ks"></span><span class="kv"></span><span class="kn"></span>';
       // Two words too long for a knob label at this size; the rest stay as the Deluge's English titles
-      b.querySelector(".kn").textContent = k.name.replace("frequency", "freq.").replace("resonance", "res.").replace("start offset", "offset");
+      b.querySelector(".kn").textContent = k.name.replace("frequency", "freq.").replace("resonance", "res.").replace("start offset", "offset").replace(/^Resonance$/, "Res.");
       b.title = k.name;
       b.onclick = function () {
         if (b.classList.contains("cant")) return; // Its pad would only say CANT
         b.classList.add("tapped"); tx([0x03, 0x07, k.x, k.y]);
       };
       groups[k.group].querySelector(".kgrid").appendChild(b);
-      knobEls[k.x + "," + k.y] = b;
+      knobEls[k.x + "," + k.y + "," + k.group] = b;
     });
     Object.keys(groups).sort(function (a, b) { return a - b; }).forEach(function (g) { box.appendChild(groups[g]); });
   }
   p.knobs.forEach(function (k) {
-    var b = knobEls[k.x + "," + k.y]; if (!b) return;
-    var key = k.pos + ":" + k.bipolar + ":" + k.value + ":" + k.open + ":" + k.cant;
+    var b = knobEls[k.x + "," + k.y + "," + k.group]; if (!b) return;
+    var key = k.pos + ":" + k.bipolar + ":" + k.value + ":" + k.open + ":" + k.cant + ":" + k.text;
     if (b.getAttribute("data-k") === key) return;
     b.setAttribute("data-k", key);
-    b.querySelector(".ks").innerHTML = knobSvg(k.pos, k.bipolar);
-    b.querySelector(".kv").textContent = (k.bipolar && k.value > 0 ? "+" : "") + k.value;
-    b.className = "knob" + (k.open ? " open" : "") + (k.cant ? " cant" : "");
+    if (k.isSwitch) {
+      b.querySelector(".sw").textContent = k.text;
+    } else {
+      b.querySelector(".ks").innerHTML = knobSvg(k.pos, k.bipolar);
+      b.querySelector(".kv").textContent = (k.bipolar && k.value > 0 ? "+" : "") + k.value;
+    }
+    b.className = "knob" + (k.isSwitch ? " switch" : "") + (k.open ? " open" : "") + (k.cant ? " cant" : "");
     b.title = k.cant ? "Not available on this sound (the Deluge would say CANT)" : "";
   });
 }
@@ -1288,9 +1310,11 @@ function parse(d) {
     var pc = d[9], pi = 10;
     for (var q2 = 0; q2 < pc; q2++) {
       var kk = { x: d[pi], y: d[pi + 1], group: d[pi + 2], bipolar: (d[pi + 3] & 1) !== 0, open: (d[pi + 3] & 2) !== 0,
-        cant: (d[pi + 3] & 4) !== 0,
+        cant: (d[pi + 3] & 4) !== 0, wide: (d[pi + 3] & 8) !== 0,
         pos: d[pi + 4], value: ((d[pi + 5] << 7) | d[pi + 6]) - 8192 };
       var kn = readName(d, pi + 7); kk.name = kn.text; pi = kn.next;
+      var kt = readName(d, pi); kk.text = kt.text; pi = kt.next;
+      kk.isSwitch = kk.text.length > 0;
       pp.knobs.push(kk);
     }
     pp.ok = d[pi] === 0xF7;
