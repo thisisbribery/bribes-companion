@@ -221,6 +221,48 @@ main{max-width:1180px;margin:0 auto;padding:14px 14px 40px}
 .arrinfo{font:12px var(--mono);color:var(--muted);margin:-4px 0 8px}
 #arrHead{position:absolute;top:0;bottom:0;width:2px;background:#fff;display:none;pointer-events:none;box-shadow:0 0 6px #fff}
 
+/* Firmware selector: STOCK (community 1.3, no mods) or BRIBELUGE. The green dot marks what the Deluge answered as. */
+.fw{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex:0 0 auto}
+.fw button{border-radius:0;padding:0 11px;height:36px;font:700 11.5px var(--mono);letter-spacing:.08em;background:var(--soft);color:var(--muted);position:relative}
+.fw button + button{border-left:1px solid var(--line)}
+.fw button.on{background:var(--pink);color:var(--panel)}
+.fw button.det::after{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok)}
+/* Stock mode: only what stock firmware can do, everything else hidden */
+#stock{display:none}
+body.stock #stock{display:block}
+body.stock .stage,body.stock #nBack,body.stock #nLeft,body.stock #nRight,body.stock #nSelect,body.stock #metro,
+body.stock #menuName,body.stock #fullText,body.stock #popupText,body.stock #rawText{display:none}
+body.stock #segsvg,body.stock #oled{display:none!important}
+body.stock .row2{height:auto;padding:0 2px 6px;display:block}
+body.stock .side{max-width:none;text-align:left}
+#bigMirror{display:flex;justify-content:center;align-items:center;background:#060607;min-height:180px}
+#bigSeg{width:100%;max-width:560px;height:auto;display:block}
+#bigOled{width:100%;max-width:960px;aspect-ratio:128/48;image-rendering:pixelated;display:none;background:#000;border-radius:6px}
+.sbtns{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:14px}
+.sbtns button{height:52px;background:var(--soft);color:var(--ink);border:1px solid var(--line);font-size:15px}
+.sbtns button:active,.sbtns button.held{background:var(--pink);color:var(--panel);border-color:var(--pink)}
+#followHead{display:flex;align-items:baseline;gap:12px;margin:18px 2px 8px}
+#followHead .hint{margin:0}
+#followKnobs{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+#followKnobs .knob{touch-action:none;cursor:ns-resize}
+#followKnobs .knob.unk .kv{color:var(--muted)}
+#followKnobs .knob.absent{opacity:.3}
+#followKnobs .knob.drag{border-color:var(--pink);box-shadow:0 0 12px var(--pink-glow)}
+#stockSetup{margin-top:18px}
+#stockSetup summary{font-weight:600;color:var(--ink)}
+#stockSetup ol{margin:10px 0 0;padding-left:22px;color:var(--ink);font-size:15px}
+#stockSetup li{margin:6px 0}
+#stockSetup code{font:600 13px var(--mono);color:var(--pink)}
+.chans{display:flex;gap:18px;flex-wrap:wrap;margin:12px 0 4px;align-items:center}
+.chans label{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:14px}
+.chans select{padding:6px 10px}
+.learn{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;margin-top:10px}
+.learn div{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:6px 6px 6px 12px;font-size:14px}
+.learn small{font:12px var(--mono);color:var(--muted)}
+.learn button{padding:6px 12px;font-size:13px}
+.upsell{margin-top:16px;color:var(--muted);font-size:14px}
+.upsell a{color:var(--pink)}
+
 details{margin-top:18px} summary{color:var(--muted);cursor:pointer;font-size:14px}
 dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:12px 0 0;font-size:14px}
 dt{color:var(--muted)} dd{margin:0;font-family:var(--mono)}
@@ -243,6 +285,10 @@ footer a{color:var(--pink)}
       <span class="coin" aria-hidden="true"><span class="coin-inner"><img src="assets/coin-front.png" alt=""><span class="edge"></span><img class="back" src="assets/coin-back.png" alt=""></span></span>
       <b>Bribeluge <span>Companion</span></b>
     </a>
+    <div class="fw" role="group" aria-label="Firmware on the Deluge">
+      <button id="fwStock" title="Stock community firmware 1.3: screen mirror, MIDI Follow knobs, learned commands">STOCK</button>
+      <button id="fwBribes" title="Bribes firmware: the full companion">BRIBELUGE</button>
+    </div>
     <div class="group">
       <button class="tbtn" id="tPlay" aria-label="Play"><svg viewBox="0 0 20 20"><path d="M5 3 L17 10 L5 17 Z" fill="currentColor"/></svg></button>
       <button class="tbtn" id="tRec" aria-label="Record"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.5" fill="currentColor"/></svg></button>
@@ -331,13 +377,40 @@ footer a{color:var(--pink)}
     </section>
   </div>
 
+  <section id="stock">
+    <div class="card" id="bigMirror" aria-label="Deluge display">
+      <svg id="bigSeg" viewBox="0 0 236 100"></svg>
+      <canvas id="bigOled" width="128" height="48"></canvas>
+    </div>
+    <div class="sbtns" id="cmdButtons"></div>
+    <div id="followHead"><div class="label">MIDI Follow</div>
+      <p class="hint">Drag a knob up or down. Values arrive when you change track or move a knob on the Deluge; dimmed ones don't apply to this track.</p></div>
+    <div id="followKnobs"></div>
+    <details class="card" id="stockSetup">
+      <summary>Set up the Deluge (once)</summary>
+      <div class="chans">
+        <label>MIDI Follow channel <select id="followCh"></select></label>
+        <label>Command channel <select id="cmdCh"></select></label>
+      </div>
+      <ol>
+        <li><code>SETTINGS &gt; MIDI &gt; MIDI-FOLLOW &gt; CHANNEL A</code>: set it to the MIDI Follow channel above.</li>
+        <li><code>SETTINGS &gt; MIDI &gt; MIDI-FOLLOW &gt; FEEDBACK &gt; CHANNEL</code>: set it to <code>A</code>, so the knobs here show the Deluge's values.</li>
+        <li>Keep <code>SETTINGS &gt; MIDI &gt; CLOCK &gt; OUT</code> on for the tempo and play light.</li>
+        <li>For each button: go to <code>SETTINGS &gt; MIDI &gt; COMMANDS</code>, pick the command, hold <code>LEARN</code> and tap Send below. The Deluge learns it for this USB port.</li>
+      </ol>
+      <div class="learn" id="learnList"></div>
+    </details>
+    <p class="upsell">Running Bribes firmware? Switch to BRIBELUGE for preset names, engine pictures, pickers, the browser, waveforms and song views.
+      <a href="https://github.com/thisisbribery/deluge-bribes-v1" target="_blank" rel="noopener">Get the firmware</a>.</p>
+  </section>
+
   <details>
     <summary>Debug</summary>
     <dl id="fields"></dl>
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v15 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v16 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -626,8 +699,8 @@ var SEG_SHAPES = [
   [1, "M8,6 L8,46 L13,42 L13,12 Z"],            // F
   [0, "M11,50 L16,46 L34,46 L39,50 L34,54 L16,54 Z"] // G
 ];
-function buildMirror() {
-  var svg = $("segsvg"), html = "";
+function buildMirror(id) {
+  var svg = $(id || "segsvg"), html = "";
   for (var d = 0; d < 4; d++) {
     html += '<g transform="translate(' + (d * 58 + 2) + ',0)">';
     SEG_SHAPES.forEach(function (sg) { html += '<path class="seg" data-d="' + d + '" data-b="' + sg[0] + '" d="' + sg[1] + '"/>'; });
@@ -636,7 +709,7 @@ function buildMirror() {
   svg.innerHTML = html;
 }
 function showDigits(digits) {
-  var els = $("segsvg").querySelectorAll(".seg");
+  var els = document.querySelectorAll("#segsvg .seg, #bigSeg .seg");
   for (var k = 0; k < els.length; k++) {
     var e = els[k], v = digits[+e.getAttribute("data-d")], b = +e.getAttribute("data-b");
     e.setAttribute("class", (v >> b) & 1 ? "seg on" : "seg");
@@ -682,11 +755,14 @@ function drawOled() {
     img.data[p] = on ? 235 : 0; img.data[p + 1] = on ? 240 : 0; img.data[p + 2] = on ? 255 : 0; img.data[p + 3] = 255;
   }
   ctx.putImageData(img, 0, 0);
+  $("bigOled").getContext("2d").putImageData(img, 0, 0);
 }
 function setScreenMode(mode) {
   screenMode = mode;
   $("segsvg").style.display = mode === "7seg" ? "" : "none";
   $("oled").style.display = mode === "oled" ? "block" : "none";
+  $("bigSeg").style.display = mode === "7seg" ? "" : "none";
+  $("bigOled").style.display = mode === "oled" ? "block" : "none";
   $("mode7").className = mode === "7seg" ? "on" : "";
   $("modeOled").className = mode === "oled" ? "on" : "";
 }
@@ -1291,6 +1367,208 @@ function showKitActive(bits) {
   });
 }
 
+// ---- STOCK mode: plain community firmware 1.3, nothing flashed. Everything here uses what stock firmware already
+// has: the display mirror (as DEx uses), MIDI Follow with feedback (the default CC map below), learned global
+// commands, and MIDI clock out.
+var FOLLOW_GROUPS = [ // [CC, name, bipolar]: the firmware's default MIDI Follow map (midi_follow.cpp)
+  ["Master", [[7, "Volume"], [10, "Pan", 1], [3, "Pitch", 1], [5, "Portamento"]]],
+  ["Filters", [[74, "LPF frequency"], [71, "LPF resonance"], [70, "LPF morph"], [81, "HPF frequency"], [82, "HPF resonance"], [83, "HPF morph"]]],
+  ["Envelope 1", [[73, "Attack"], [75, "Decay"], [76, "Sustain"], [72, "Release"]]],
+  ["Envelope 2", [[77, "Attack"], [78, "Decay"], [79, "Sustain"], [80, "Release"]]],
+  ["Oscillators", [[21, "Osc1 level"], [26, "Osc2 level"], [12, "Osc1 pitch", 1], [13, "Osc2 pitch", 1], [23, "Osc1 pulse width"],
+    [28, "Osc2 pulse width"], [25, "Osc1 wave index"], [30, "Osc2 wave index"], [41, "Noise level"], [19, "Wavefold"]]],
+  ["FM", [[54, "Mod1 level"], [55, "Mod1 feedback"], [14, "Mod1 pitch", 1], [56, "Mod2 level"], [57, "Mod2 feedback"],
+    [15, "Mod2 pitch", 1], [24, "Carrier1 feedback"], [29, "Carrier2 feedback"]]],
+  ["Effects", [[91, "Reverb amount"], [52, "Delay amount"], [53, "Delay rate"], [93, "Mod-FX depth"], [16, "Mod-FX rate"],
+    [17, "Mod-FX feedback"], [18, "Mod-FX offset"], [62, "Bitcrush"], [63, "Decimation"], [20, "Stutter rate"],
+    [27, "Comp threshold"], [60, "Sidechain shape"]]],
+  ["EQ", [[86, "Bass"], [87, "Treble"], [84, "Bass frequency"], [85, "Treble frequency"]]],
+  ["LFOs", [[58, "LFO1 rate"], [59, "LFO2 rate"], [110, "LFO3 rate"], [111, "LFO4 rate"]]],
+  ["Envelope 3", [[102, "Attack"], [103, "Decay"], [104, "Sustain"], [105, "Release"]]],
+  ["Envelope 4", [[106, "Attack"], [107, "Decay"], [108, "Sustain"], [109, "Release"]]],
+  ["Arpeggiator", [[51, "Arp rate"], [50, "Arp gate"], [42, "Rhythm"], [43, "Sequence length"], [44, "Chord polyphony"],
+    [45, "Ratchets"], [46, "Note probability"], [47, "Bass probability"], [48, "Chord probability"],
+    [49, "Ratchet probability"], [39, "Spread octave"], [40, "Spread gate"], [37, "Spread velocity"],
+    [36, "Reverse probability"], [112, "Swap probability"], [113, "Glide probability"]]]
+];
+// Learned global commands: a CC on the command channel, 127 = press, 0 = release (FILL is held)
+var COMMANDS = [["Play", "PLAY", 102], ["Record", "RECORD", 103], ["Restart", "RESTART", 104], ["Tap tempo", "TAP TEMPO", 105],
+  ["Undo", "UNDO", 106], ["Redo", "REDO", 107], ["Loop", "LOOP", 108], ["Fill", "FILL", 109, true]];
+var followCh = 15, cmdCh = 16; // 1-based, as the Deluge shows them
+var followVal = {}, followEls = {}, burst = null, burstTimer = null, dragCC = -1, lastDragCC = -1, dragUntil = 0;
+function store(k, v) { try { localStorage.setItem("bribeluge-" + k, v); } catch (e) {} }
+function stored(k) { try { return localStorage.getItem("bribeluge-" + k); } catch (e) { return null; } }
+
+function ccOut(ch, cc, v) { if (output) output.send([0xB0 | ((ch - 1) & 15), cc & 127, v & 127]); }
+function command(cc, down) { ccOut(cmdCh, cc, down ? 127 : 0); }
+function pressCommand(cc) { command(cc, true); setTimeout(function () { command(cc, false); }, 40); }
+
+function followText(cc, v, bipolar) {
+  if (v === undefined) return "-";
+  if (bipolar) { var b = Math.round((v - 64) / 2); return (b > 0 ? "+" : "") + b; }
+  return String(Math.round(v * 50 / 127)); // the Deluge's 0-50
+}
+function drawFollowKnob(cc) {
+  var el = followEls[cc]; if (!el) return;
+  var v = followVal[cc], bip = el.getAttribute("data-bip") === "1";
+  el.querySelector(".ks").innerHTML = knobSvg(v === undefined ? (bip ? 64 : 0) : v, bip);
+  el.querySelector(".kv").textContent = followText(cc, v, bip);
+  el.classList.toggle("unk", v === undefined);
+}
+function buildFollowKnobs() {
+  var box = $("followKnobs");
+  if (box.childNodes.length) return;
+  FOLLOW_GROUPS.forEach(function (grp) {
+    var g = document.createElement("div"); g.className = "kgroup";
+    g.innerHTML = '<div class="label"></div><div class="kgrid"></div>';
+    g.querySelector(".label").textContent = grp[0];
+    grp[1].forEach(function (k) {
+      var b = document.createElement("div"), cc = k[0];
+      b.className = "knob"; b.setAttribute("data-bip", k[2] ? "1" : "0");
+      b.innerHTML = '<span class="ks"></span><span class="kv"></span><span class="kn"></span>';
+      b.querySelector(".kn").textContent = k[1];
+      b.title = k[1] + " (CC " + cc + ")";
+      followEls[cc] = b;
+      knobDrag(b, cc, !!k[2]);
+      g.querySelector(".kgrid").appendChild(b);
+      drawFollowKnob(cc);
+    });
+    box.appendChild(g);
+  });
+}
+// Drag up or down: one step per 2 px, sent at most every 15 ms
+function knobDrag(el, cc, bipolar) {
+  var startY = 0, startV = 0, last = -1, sentAt = 0, pend = null;
+  function flush() {
+    pend = null;
+    if (last !== followVal[cc] || sentAt === 0) { ccOut(followCh, cc, followVal[cc]); sentAt = performance.now(); last = followVal[cc]; }
+  }
+  el.addEventListener("pointerdown", function (e) {
+    try { el.setPointerCapture(e.pointerId); } catch (err) {}
+    startY = e.clientY;
+    startV = followVal[cc] !== undefined ? followVal[cc] : (bipolar ? 64 : 0);
+    dragCC = cc; el.classList.add("drag"); last = -1; sentAt = 0;
+  });
+  el.addEventListener("pointermove", function (e) {
+    if (dragCC !== cc) return;
+    var v = Math.max(0, Math.min(127, Math.round(startV + (startY - e.clientY) / 2)));
+    if (v === followVal[cc]) return;
+    followVal[cc] = v; el.classList.remove("absent"); drawFollowKnob(cc);
+    var wait = 15 - (performance.now() - sentAt);
+    if (wait <= 0) flush(); else if (!pend) pend = setTimeout(flush, wait);
+  });
+  function end() {
+    if (dragCC !== cc) return;
+    if (pend) { clearTimeout(pend); flush(); }
+    lastDragCC = cc; dragCC = -1; dragUntil = performance.now() + 400; el.classList.remove("drag");
+  }
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+}
+// Feedback from the Deluge. A burst of 8 or more CCs is a full send (new track selected): knobs left out of it don't
+// apply to this track and are dimmed.
+function followFeedback(cc, v) {
+  // The Deluge echoes values back: ignore them for the knob in your hand, and just after you let go
+  if (cc === dragCC || (cc === lastDragCC && performance.now() < dragUntil)) return;
+  followVal[cc] = v; drawFollowKnob(cc);
+  if (followEls[cc]) followEls[cc].classList.remove("absent");
+  if (!burst) burst = {};
+  burst[cc] = true;
+  clearTimeout(burstTimer);
+  burstTimer = setTimeout(function () {
+    if (Object.keys(burst).length >= 8) {
+      Object.keys(followEls).forEach(function (c) { followEls[c].classList.toggle("absent", !burst[c]); });
+    }
+    burst = null;
+  }, 120);
+}
+
+function buildCommands() {
+  var box = $("cmdButtons"), learn = $("learnList");
+  COMMANDS.forEach(function (c) {
+    var b = document.createElement("button");
+    b.textContent = c[0];
+    if (c[3]) { // held, like the Deluge's own fill
+      b.addEventListener("pointerdown", function () { b.classList.add("held"); command(c[2], true); });
+      var up = function () { if (b.classList.contains("held")) { b.classList.remove("held"); command(c[2], false); } };
+      b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("pointerleave", up);
+    } else b.onclick = function () { pressCommand(c[2]); };
+    if (c[2] !== 102 && c[2] !== 103) box.appendChild(b); // Play and record live in the top bar
+    var row = document.createElement("div");
+    row.innerHTML = "<span></span><small></small><button class=\"secondary\">Send</button>";
+    row.querySelector("span").textContent = c[1];
+    row.querySelector("small").textContent = "CC " + c[2];
+    row.querySelector("button").onclick = function () { pressCommand(c[2]); };
+    learn.appendChild(row);
+  });
+}
+function buildChannels() {
+  [["followCh", followCh], ["cmdCh", cmdCh]].forEach(function (s) {
+    var sel = $(s[0]);
+    for (var ch = 1; ch <= 16; ch++) { var o = document.createElement("option"); o.value = ch; o.textContent = ch; sel.appendChild(o); }
+    sel.value = s[1];
+    sel.onchange = function () {
+      if (s[0] === "followCh") followCh = +sel.value; else cmdCh = +sel.value;
+      store(s[0], sel.value);
+    };
+  });
+}
+
+// MIDI clock from the Deluge: tempo from 24 ticks per beat, play light from start / continue / stop. Only one input's
+// clock is used, in case the Deluge sends it on more than one port.
+var clockFrom = null, clockTimes = [], clockLastAt = 0, clockPlaying = false;
+function onClock(ev, id) {
+  var s = ev.data[0], now = typeof ev.timeStamp === "number" ? ev.timeStamp : performance.now();
+  if (clockFrom && clockFrom !== id && now - clockLastAt < 2000) return;
+  clockFrom = id; clockLastAt = now;
+  if (s === 0xFA || s === 0xFB) { clockPlaying = true; clockTimes = []; }
+  else if (s === 0xFC) clockPlaying = false;
+  else if (s === 0xF8) {
+    clockTimes.push(now);
+    if (clockTimes.length > 49) clockTimes.shift();
+  }
+  if (fwMode !== "stock") return;
+  $("tPlay").classList.toggle("on", clockPlaying);
+  if (s === 0xF8 && clockTimes.length >= 25 && clockTimes.length % 12 === 1) {
+    var per = (clockTimes[clockTimes.length - 1] - clockTimes[0]) / (clockTimes.length - 1);
+    var bpm = 60000 / (per * 24), whole = Math.round(bpm);
+    $("tempo").innerHTML = (Math.abs(bpm - whole) < 0.15 ? String(whole) : bpm.toFixed(1)) + "<small>BPM</small>";
+  }
+}
+// Any non-SysEx message from a Deluge input
+function onChannelMessage(ev, id) {
+  var d = ev.data, s = d[0];
+  if (s >= 0xF8) { if (s === 0xF8 || s === 0xFA || s === 0xFB || s === 0xFC) onClock(ev, id); return; }
+  if ((s & 0xF0) === 0xB0 && (s & 15) === followCh - 1 && d.length >= 3) followFeedback(d[1], d[2]);
+}
+
+// ---- Firmware: the page asks for the companion feed on connect. Stock firmware ignores the request, so 1.5 s of
+// silence means stock. A tap on the selector overrides the guess and is remembered.
+var fwMode = "bribes", fwDetected = null, fwChosen = stored("fw"), detectTimer = null;
+function setFw(m) {
+  fwMode = m;
+  document.body.classList.toggle("stock", m === "stock");
+  $("fwStock").classList.toggle("on", m === "stock");
+  $("fwBribes").classList.toggle("on", m === "bribes");
+  if (m === "stock") {
+    buildFollowKnobs();
+    $("tPlay").classList.toggle("on", clockPlaying); $("tRec").classList.remove("on");
+    $("tempo").innerHTML = "-<small>BPM</small>";
+  } else if (output) send(0);
+  updateStage();
+}
+function setDetected(m) {
+  fwDetected = m;
+  $("fwStock").classList.toggle("det", m === "stock");
+  $("fwBribes").classList.toggle("det", m === "bribes");
+  if (!fwChosen && m !== fwMode) setFw(m);
+}
+function startDetect() {
+  clearTimeout(detectTimer);
+  fwDetected = null;
+  $("fwStock").classList.remove("det"); $("fwBribes").classList.remove("det");
+  detectTimer = setTimeout(function () { if (fwDetected === null) setDetected("stock"); }, 1500);
+}
+
 function escapeHtml(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
 var midi = null, input = null, output = null, keepAlive = null;
@@ -1513,9 +1791,12 @@ function parse(d) {
 var QUIET = { playhead: 1, wave: 1, transport: 1, arrangerPos: 1, params: 1, clips: 1, clipPos: 1, arranger: 1, outputs: 1,
   beat: 1, kitActive: 1, gold: 1 };
 function onMessage(ev) {
+  if (ev.data[0] !== 0xF0) { onChannelMessage(ev, input ? input.id : ""); return; }
   var m = parse(ev.data);
   if (!m) return;
   lastMessageAt = Date.now();
+  // Anything but the display mirror only comes from Bribes firmware
+  if (m.kind !== "seg" && m.kind !== "oled" && fwDetected !== "bribes") setDetected("bribes");
   if (m.kind === "seg") { if (screenMode !== "7seg") setScreenMode("7seg"); showDigits(m.digits); return; }
   if (m.kind === "oled") {
     if (screenMode !== "oled") setScreenMode("oled");
@@ -1532,7 +1813,7 @@ function onMessage(ev) {
   case "wave": if (m.open) m.kind = m.kindCode; showWave(m); return;
   case "playhead": wavePlayheads = m.heads; drawWave(); return;
   case "params": showParams(m); return;
-  case "transport": showTransport(m); return;
+  case "transport": if (fwMode !== "stock") showTransport(m); return;
   case "outputs": outputs = m.list; renderSong(); return;
   case "clips": clips = m.list; renderSong(); return;
   case "arranger": arranger = m; renderSong(); return;
@@ -1573,7 +1854,7 @@ function listPorts() {
 }
 
 function usePort() {
-  if (input) input.onmidimessage = null;
+  midi.inputs.forEach(function (i) { i.onmidimessage = null; });
   output = midi.outputs.get($("port").value) || null;
   input = null;
   if (output) {
@@ -1583,8 +1864,13 @@ function usePort() {
   }
   if (!output || !input) { setStatus("Pick the Deluge port", "bad"); return; }
   input.onmidimessage = onMessage;
+  // Clock and MIDI Follow feedback can come out of any Deluge port
+  midi.inputs.forEach(function (i) {
+    if (i !== input && /deluge/i.test(i.name)) i.onmidimessage = function (ev) { if (ev.data[0] !== 0xF0) onChannelMessage(ev, i.id); };
+  });
   lastSeq = -1; dropped = 0;
-  send(0);
+  send(0); // Also the firmware check: only Bribes answers it
+  startDetect();
   sendDisplay(true);
   setStatus("Asked " + output.name + " for state...", "warn");
 }
@@ -1605,10 +1891,12 @@ function connect() {
     usePort();
     if (keepAlive) clearInterval(keepAlive);
     keepAlive = setInterval(function () {
-      send(1);
+      if (fwMode === "bribes") send(1);
       sendDisplay(false);
       var age = Date.now() - lastMessageAt;
-      if (!lastMessageAt) setStatus("Connected to " + (output ? output.name : "?") +
+      if (fwMode === "stock") setStatus("Connected to " + (output ? output.name : "?") + ", stock firmware" +
+        (fwDetected === "bribes" ? " view (this Deluge runs Bribes)" : ""), output ? "ok" : "bad");
+      else if (!lastMessageAt) setStatus("Connected to " + (output ? output.name : "?") +
         ". No reply yet: is this a Bribes companion build?", "warn");
       else setStatus("Live on " + output.name + " (last message " + Math.round(age / 1000) + " s ago)", "ok");
     }, 1000);
@@ -1620,8 +1908,19 @@ $("connect").onclick = connect;
 $("bLoad").onclick = function () { tx([0x03, 0x04]); };
 $("bBack").onclick = function () { tx([0x03, 0x05]); };
 // Top bar: transport and the select knob, as the Deluge's own buttons
-[["tPlay", 0], ["tRec", 1], ["nSelect", 2], ["nBack", 3], ["nLeft", 4], ["nRight", 5]].forEach(function (b) {
-  $(b[0]).onclick = function () { tx([0x03, 0x08, b[1]]); };
+// In STOCK mode, play and record send their learned commands instead
+[["tPlay", 0, 102], ["tRec", 1, 103], ["nSelect", 2], ["nBack", 3], ["nLeft", 4], ["nRight", 5]].forEach(function (b) {
+  $(b[0]).onclick = function () {
+    if (fwMode === "stock") { if (b[2]) pressCommand(b[2]); }
+    else tx([0x03, 0x08, b[1]]);
+  };
+});
+followCh = +stored("followCh") || 15;
+cmdCh = +stored("cmdCh") || 16;
+buildChannels();
+buildCommands();
+[["fwStock", "stock"], ["fwBribes", "bribes"]].forEach(function (b) {
+  $(b[0]).onclick = function () { fwChosen = b[1]; store("fw", b[1]); if (fwMode !== b[1]) setFw(b[1]); };
 });
 
 // Once MIDI with SysEx has been allowed, connect on launch without a tap
@@ -1633,7 +1932,9 @@ if (navigator.permissions && navigator.permissions.query) {
 // Works offline once opened: the service worker keeps a copy of the app
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
 buildMirror();
+buildMirror("bigSeg");
 setScreenMode("7seg");
+setFw(fwChosen || "bribes");
 $("heroArt").innerHTML = art("none");
 $("mode7").onclick = function () { wantScreen("7seg"); };
 $("modeOled").onclick = function () { wantScreen("oled"); };

@@ -11,6 +11,17 @@ A second screen for the Synthstrom Deluge running **[BRIBELUGE (Deluge Bribes fi
 - Waveforms for audio clips, sample markers and Start offset, with draggable markers and playheads.
 - Song view (rows and grid) and the arranger, with each clip's steps, playheads and the pads' glows. Tap to launch clips and sections.
 
+## STOCK mode: no firmware change
+
+The selector at the top switches between **STOCK** and **BRIBELUGE**. On connect the page checks which firmware it's talking to and picks for you (a green dot marks what it found); a tap overrides it. STOCK works with plain community firmware 1.3, nothing flashed:
+
+- The Deluge's display mirrored large (7SEG or OLED, and the 7SEG to OLED swap).
+- MIDI Follow knobs for the current track, using the firmware's default CC map, with the Deluge's own values shown when MIDI Follow feedback is on. Knobs that don't apply to the track dim.
+- Play, Record, Restart, Tap tempo, Undo, Redo, Loop and Fill (held) as learned MIDI commands.
+- Tempo and the play light from the Deluge's MIDI clock out.
+
+One-time setup on the Deluge (also listed in the app): set `SETTINGS > MIDI > MIDI-FOLLOW > CHANNEL A` to 15 and `FEEDBACK > CHANNEL` to A, keep `CLOCK > OUT` on, and learn each command under `SETTINGS > MIDI > COMMANDS` by holding LEARN and tapping Send in the app (commands use CCs 102 to 109 on channel 16). Both channels can be changed in the app.
+
 It needs Chrome or Edge (Web MIDI with SysEx); Safari and iOS browsers don't have Web MIDI. To use it offline, open it once in Chrome and choose **Add to Home screen**: it then runs fullscreen, keeps the screen awake and reconnects on its own.
 
 Full details are in the [BRIBELUGE COMPANION section](https://github.com/thisisbribery/deluge-bribes-v1#27-bribeluge-companion) of the firmware's README.
