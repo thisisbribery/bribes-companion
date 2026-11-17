@@ -416,7 +416,7 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v17 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v18 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -1856,7 +1856,15 @@ function listPorts() {
     var d = outs.filter(function (o) { return /deluge/i.test(o.name); });
     if (d.length) sel.value = d[0].id;
   }
-  if (!outs.length) setStatus("No MIDI devices. Plug in the Deluge, then reload.", "bad");
+  if (!outs.length) setStatus(noDelugeText(), "bad");
+}
+
+// Say what Chrome can see when there is no Deluge port, so a missing USB link isn't read as a firmware problem
+function noDelugeText() {
+  var names = [];
+  if (midi) midi.outputs.forEach(function (o) { names.push(o.name); });
+  if (!names.length) return "No MIDI devices: the Deluge isn't reaching this computer over USB. Check the cable and port, then reload.";
+  return "No Deluge port. MIDI ports here: " + names.join(", ") + ". Check the Deluge's USB link, then reload.";
 }
 
 function usePort() {
@@ -1868,7 +1876,7 @@ function usePort() {
     midi.inputs.forEach(function (i) { if (!input && i.name === output.name) input = i; });
     if (!input) midi.inputs.forEach(function (i) { if (!input && /deluge/i.test(i.name)) input = i; });
   }
-  if (!output || !input) { setStatus("Pick the Deluge port", "bad"); return; }
+  if (!output || !input) { setStatus(output ? "Pick the Deluge port" : noDelugeText(), "bad"); return; }
   input.onmidimessage = onMessage;
   // Clock and MIDI Follow feedback can come out of any Deluge port
   midi.inputs.forEach(function (i) {
@@ -1892,11 +1900,12 @@ function connect() {
   if (!navigator.requestMIDIAccess) { setStatus("This browser has no Web MIDI. Use Chrome.", "bad"); return; }
   navigator.requestMIDIAccess({ sysex: true }).then(function (access) {
     midi = access;
-    midi.onstatechange = function () { listPorts(); };
+    midi.onstatechange = function () { listPorts(); if (!output) usePort(); }; // Picks up a Deluge plugged in after connecting
     listPorts();
     usePort();
     if (keepAlive) clearInterval(keepAlive);
     keepAlive = setInterval(function () {
+      if (!output || !input) { setStatus(noDelugeText(), "bad"); return; }
       if (fwMode === "bribes") send(1);
       sendDisplay(false);
       var age = Date.now() - lastMessageAt;
