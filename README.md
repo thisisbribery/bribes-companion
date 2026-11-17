@@ -2,7 +2,7 @@
 
 A second screen for the Synthstrom Deluge running **[BRIBELUGE (Deluge Bribes firmware)](https://github.com/thisisbribery/deluge-bribes-v1)** v1.32 or later, on a phone or tablet connected over USB.
 
-**Open it:** https://thisisbribery.github.io/bribes-companion/
+**Open it:** https://www.thisisbribery.com/companion/
 
 - The Deluge's display mirrored (7SEG or OLED), with every 7-segment abbreviation spelled out in full and a menu item's name and value side by side.
 - A top bar with Play, Record, tempo, Back, the select knob and SELECT.
