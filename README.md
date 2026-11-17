@@ -4,6 +4,8 @@ A second screen for the Synthstrom Deluge running **[BRIBELUGE (Deluge Bribes fi
 
 **Open it:** https://www.thisisbribery.com/companion/
 
+**Support:** find it useful? [Buy me a coffee on Ko-fi](https://ko-fi.com/thisisbribery).
+
 - The Deluge's display mirrored (7SEG or OLED), with every 7-segment abbreviation spelled out in full and a menu item's name and value side by side.
 - A top bar with Play, Record, tempo, Back, the select knob and SELECT.
 - The track you're on: a drawing of its engine, its main settings and its engine's own controls as knobs you can tap to open on the Deluge.
