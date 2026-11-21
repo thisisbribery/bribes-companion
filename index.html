@@ -292,12 +292,14 @@ footer a{color:var(--pink)}
 #bruno .bsub{font:600 10px var(--mono);letter-spacing:.14em;color:#8b8a86;text-transform:uppercase}
 #bruno .bstripe{flex:1;height:3px;align-self:center;background:linear-gradient(90deg,#2f6fe0 0 50%,#d8342c 50% 100%);border-radius:2px;opacity:.85}
 #bruno .bsecs{display:flex;flex-wrap:wrap;gap:6px}
+#bruno .bsecs.b2{margin-top:6px}
 #bruno .bsec{background:#151518;border:1px solid #26262b;border-radius:8px;padding:0 4px 6px;flex:0 0 auto}
-#bruno .bsec > .bt{font:700 11px var(--mono);letter-spacing:.2em;color:#f2f0ea;text-align:center;padding:4px 0 3px;margin:0 -4px 6px;
+#bruno .bsec > .bt{font:700 11px var(--mono);letter-spacing:.2em;color:#f2f0ea;text-align:center;padding:4px 8px 3px;white-space:nowrap;margin:0 -4px 6px;
   border-bottom:2px solid #2f6fe0;background:#1b1b1f;border-radius:8px 8px 0 0}
 #bruno .bsec.red > .bt{border-bottom-color:#d8342c}
 #bruno .bctl{display:flex;flex-direction:column;align-items:center;width:40px}
 #bruno .bctl.wide{width:52px}
+#bruno .bctl.na{opacity:.25;pointer-events:none}
 #bruno .bitems{display:flex;gap:2px;align-items:flex-start}
 #bruno .bl{font:600 10px var(--mono);letter-spacing:.06em;color:#c9c7c1;height:14px;line-height:14px;white-space:nowrap;text-transform:uppercase}
 #bruno .bv{font:600 10px var(--mono);color:#6f6e6a;height:14px;line-height:14px;white-space:nowrap}
@@ -330,7 +332,11 @@ footer a{color:var(--pink)}
 #bruno .bb.on i{background:#ff3b2f;border-color:#ff6b61;box-shadow:0 0 7px #ff3b2f}
 #bruno .bb svg{width:26px;height:10px}
 #bruno .bhint{font:500 11px var(--sans);color:#6f6e6a;margin:6px 2px 0}
-@media (max-width:700px){#bruno .bctl{width:38px} #bruno .bs{width:36px} #bruno{--bh:132px}}
+/* Tablets: narrower columns so each row stays one line; shorter sliders on short screens */
+@media (max-width:1180px){#bruno{padding:8px 6px 6px} #bruno .bctl,#bruno .bs,#bruno .bsw{width:32px} #bruno .bctl.wide{width:42px}
+  #bruno .bb{width:38px} #bruno .bsec{padding:0 3px 6px} #bruno .bsec > .bt{letter-spacing:.1em;margin:0 -3px 6px}
+  #bruno .bs .cap{width:24px;margin-left:-12px} #bruno .bv,#bruno .bl{font-size:9px}}
+@media (max-height:700px){#bruno{--bh:124px}}
 </style>
 </head>
 <body>
@@ -469,7 +475,7 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v19 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v20 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -1182,7 +1188,7 @@ function showParams(p) {
 // so turning a knob there moves the slider here. While a control is held (and briefly after) the Deluge's echo of it
 // is ignored, so the cap doesn't fight the finger.
 var BRUNO_MAX = 16383;
-var BRUNO_SECTIONS = [
+var BRUNO_SECTIONS = [ // row 1: the synth's own panel; row 2: the second envelope and the Deluge's effects
   { t: "LFO", c: [{ id: 0, n: "Rate", k: "std" }] },
   { t: "DCO", c: [
     { id: 1, n: "Range", k: "range" }, { id: 2, n: "LFO", k: "dcolfo" }, { id: 3, n: "PWM", k: "ctl" },
@@ -1193,10 +1199,14 @@ var BRUNO_SECTIONS = [
     { id: 11, n: "Freq", k: "std" }, { id: 12, n: "Res", k: "std" }, { id: 13, n: "Env", k: "sw", o: ["NORM", "INV"] },
     { id: 14, n: "Env", k: "env" }, { id: 15, n: "LFO", k: "vcflfo" }, { id: 16, n: "Kybd", k: "kybd" }] },
   { t: "VCA", red: true, c: [{ id: 17, n: "Mode", k: "sw", o: ["ENV", "GATE"] }, { id: 18, n: "Level", k: "std" }] },
-  { t: "ENV", c: [{ id: 19, n: "A", k: "std" }, { id: 20, n: "D", k: "std" }, { id: 21, n: "S", k: "std" }, { id: 22, n: "R", k: "std" }] },
-  { t: "Chorus", red: true, c: [{ id: 23, n: "", k: "chorus" }] }
+  { t: "ENV 1", c: [{ id: 19, n: "A", k: "std" }, { id: 20, n: "D", k: "std" }, { id: 21, n: "S", k: "std" }, { id: 22, n: "R", k: "std" }] },
+  { t: "ENV 2", row: 2, c: [{ id: 24, n: "A", k: "std" }, { id: 25, n: "D", k: "std" }, { id: 26, n: "S", k: "std" }, { id: 27, n: "R", k: "std" }] },
+  { t: "Chorus", red: true, row: 2, c: [{ id: 23, n: "", k: "chorus" }, { id: 28, n: "Rate", k: "crate" }, { id: 29, n: "Depth", k: "cdepth" }] },
+  { t: "Drive", row: 2, c: [{ id: 30, n: "Drive", k: "std" }, { id: 31, n: "Crush", k: "std" }, { id: 32, n: "Deci", k: "std" }, { id: 33, n: "Sat", k: "std" }] },
+  { t: "Delay", red: true, row: 2, c: [{ id: 34, n: "Amt", k: "std" }, { id: 35, n: "Rate", k: "std" }, { id: 36, n: "Fdbk", k: "std" }] },
+  { t: "Reverb", row: 2, c: [{ id: 37, n: "Amt", k: "std" }] }
 ];
-var BRUNO_N = 24;
+var BRUNO_N = 38;
 // v: what the panel shows; dev: what the Deluge last said; hold: until when the Deluge's word waits (a move made here)
 var bruno = { built: false, open: false, v: [], dev: [], hold: [], rt: [], els: {}, dirty: {}, timer: 0, kinds: [] };
 for (var bi0 = 0; bi0 < BRUNO_N; bi0++) { bruno.v.push(-1); bruno.dev.push(-1); bruno.hold.push(0); bruno.rt.push(0); }
@@ -1212,6 +1222,8 @@ function brunoReadout(kind, p) {
   case "kybd": return Math.round(f * 100) + "%";
   case "env": return (f * 8).toFixed(1) + "oct";
   case "hpf": return ["BOOST", "FLAT", "236", "754"][p] || "";
+  case "crate": return "x" + Math.pow(2, (Math.round(f * 127) - 64) / 32).toFixed(2); // Of the mode's own rate
+  case "cdepth": return Math.round(Math.round(f * 127) / 64 * 100) + "%";
   }
   return "";
 }
@@ -1341,10 +1353,11 @@ function brunoButtons(c) {
 
 function brunoBuild() {
   var root = $("bruno");
-  root.innerHTML = '<div class="bhead"><span class="bname">BRUNO106</span><span class="bsub">DCO poly</span><span class="bstripe"></span></div><div class="bsecs"></div>' +
+  root.innerHTML = '<div class="bhead"><span class="bname">BRUNO106</span><span class="bsub">DCO poly</span><span class="bstripe"></span></div><div class="bsecs"></div><div class="bsecs b2"></div>' +
     '<div class="bhint">Drag a slider and the Deluge follows. Turn a knob on the Deluge and the slider moves.</div>';
-  var secs = root.querySelector(".bsecs");
+  var rowEls = root.querySelectorAll(".bsecs");
   BRUNO_SECTIONS.forEach(function (sec) {
+    var secs = rowEls[sec.row === 2 ? 1 : 0];
     var el = document.createElement("div"); el.className = "bsec" + (sec.red ? " red" : "");
     el.innerHTML = '<div class="bt"></div><div class="bitems"></div>';
     el.querySelector(".bt").textContent = sec.t.toUpperCase();
@@ -1387,6 +1400,8 @@ function showBruno(m) {
   var first = !bruno.open;
   if (first) { bruno.open = true; track.classList.add("bruno-on"); }
   var now = performance.now();
+  // Controls this firmware doesn't send yet (an older test build) are dimmed, not shown at zero
+  for (var ni = 0; ni < BRUNO_N; ni++) if (bruno.els[ni]) bruno.els[ni].col.classList.toggle("na", ni >= m.v.length);
   for (var id = 0; id < BRUNO_N && id < m.v.length; id++) {
     if (!first && now < bruno.hold[id]) continue; // Being moved here: the Deluge is catching up
     if (bruno.v[id] === m.v[id] && !first) continue;

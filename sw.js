@@ -1,6 +1,6 @@
 // Offline copy of the app. The page itself comes from the network when it's reachable (so an update shows straight
 // away), falling back to the saved copy offline; other files are served from the saved copy and refreshed behind.
-var CACHE = "bribes-companion-v20";
+var CACHE = "bribes-companion-v21";
 var FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "assets/coin-front.png", "assets/coin-back.png"];
 
 self.addEventListener("install", function (e) {
