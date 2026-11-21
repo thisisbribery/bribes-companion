@@ -391,7 +391,7 @@ footer a{color:var(--pink)}
 #wavet .wtmain{display:flex;gap:8px;align-items:stretch}
 #wavet .wtviews{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:6px}
 #wavet .wtview{position:relative;flex:1 1 0;min-height:190px;background:#050608;border:1px solid var(--secb);border-radius:8px;overflow:hidden;
-  touch-action:none;cursor:move}
+  touch-action:none;cursor:ns-resize}
 #wavet .wtview canvas{position:absolute;inset:0;width:100%;height:100%}
 #wavet .wtlab{position:absolute;left:8px;top:6px;right:60px;font:700 10px var(--mono);letter-spacing:.12em;color:var(--lab);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;text-transform:uppercase}
@@ -409,10 +409,6 @@ footer a{color:var(--pink)}
 #wavet .bsec.nooscb{opacity:.3;pointer-events:none}
 #wavet .bsecs.b2 .bsec{flex-grow:1}
 #wavet .bsecs.b2 .bitems{justify-content:space-around}
-#wavet .bbs{flex-direction:row;flex-wrap:wrap;gap:3px;width:86px;height:auto;min-height:var(--bh);align-content:center;justify-content:center}
-#wavet .bctl.wide{width:auto;min-width:86px}
-#wavet .bb{width:41px;height:26px;padding:2px 0 0;font-size:9px}
-#wavet .bb i{width:6px;height:6px}
 @media (max-width:900px){#wavet .wtmain{flex-direction:column} #wavet .wtside .bsecs{flex-direction:row;flex-wrap:wrap}}
 
 </style>
@@ -555,7 +551,7 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v25 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v24 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -1456,7 +1452,6 @@ Panel.prototype.build = function () {
   P.built = true;
 };
 Panel.prototype.draw = function (id) {
-  if (this === window.wavet && id >= 25) wtDraw(); // WARP moved: the lit frames change shape
   var e = this.els[id], v = this.v[id]; if (!e || v < 0) return;
   if (e.type === "slide") {
     e.el.classList.toggle("down", v === 1);
@@ -1584,26 +1579,18 @@ brophet.root.addEventListener("click", function (e) {
 // sounding voice's place (WTPOS, everything patched to the position included) a moving line through the stack.
 // Drag up and down on a table to move its position knob.
 var wavet = new Panel({
-  root: $("wavet"), cmd: 0x0F, n: 33,
+  root: $("wavet"), cmd: 0x0F, n: 25,
   head: '<div class="bhead"><span class="bname">WAVE</span><span class="bsub">Wavetable</span><span class="bstripe"></span></div>' +
     '<div class="wtmain"><div class="wtviews">' +
     '<div class="wtview" data-o="0"><canvas></canvas><div class="wtlab"></div><div class="wtpos"></div><button type="button" class="wtmode">3D</button></div>' +
     '<div class="wtview" data-o="1"><canvas></canvas><div class="wtlab"></div><div class="wtpos"></div><button type="button" class="wtmode">3D</button></div>' +
     '</div><div class="wtside"></div></div>',
-  hint: "Drag up and down on a table to move through it, left and right to warp it. The bright frame is the knob, the lines are the notes playing.",
+  hint: "Drag up and down on a table to move through it. The bright frame is the knob, the lines are the notes playing.",
   sections: [
     { t: "Osc A", c: [{ id: 0, n: "Pos", k: "wpos", knob: KN }, { id: 1, n: "Env 2", k: "bip", knob: KN },
       { id: 2, n: "LFO 1", k: "bip", knob: KN }, { id: 3, n: "Level", k: "std", knob: KN }, { id: 4, n: "Pitch", k: "semis", knob: KN }] },
-    { t: "Warp A", c: [{ id: 25, n: "Warp", k: "std", knob: KN },
-      { id: 26, n: "", b: [{ l: "SYNC" }, { l: "BEND" }, { l: "MIRR" }, { l: "SQZE" }], mode: "radio", vals: [0, 1, 2, 3] },
-      { id: 27, n: "Warp 2", k: "std", knob: KN },
-      { id: 28, n: "", b: [{ l: "FORM" }, { l: "QUAN" }, { l: "FOLD" }], mode: "radio", vals: [0, 1, 2] }] },
     { t: "Osc B", red: true, c: [{ id: 5, n: "Pos", k: "wpos", knob: KN }, { id: 6, n: "Env 2", k: "bip", knob: KN },
       { id: 7, n: "LFO 1", k: "bip", knob: KN }, { id: 8, n: "Level", k: "std", knob: KN }, { id: 9, n: "Pitch", k: "semis", knob: KN }] },
-    { t: "Warp B", red: true, c: [{ id: 29, n: "Warp", k: "std", knob: KN },
-      { id: 30, n: "", b: [{ l: "SYNC" }, { l: "BEND" }, { l: "MIRR" }, { l: "SQZE" }], mode: "radio", vals: [0, 1, 2, 3] },
-      { id: 31, n: "Warp 2", k: "std", knob: KN },
-      { id: 32, n: "", b: [{ l: "FORM" }, { l: "QUAN" }, { l: "FOLD" }], mode: "radio", vals: [0, 1, 2] }] },
     { t: "LFO 1", row: 2, c: [{ id: 10, n: "Rate", k: "std", knob: KN }] },
     { t: "Env 2", red: true, row: 2, c: [{ id: 11, n: "A", k: "std", knob: KN }, { id: 12, n: "D", k: "std", knob: KN },
       { id: 13, n: "S", k: "std", knob: KN }, { id: 14, n: "R", k: "std", knob: KN }] },
@@ -1616,8 +1603,8 @@ var wavet = new Panel({
 });
 wavet.grow = false;
 // Per oscillator: the table as it arrives, where things are, what's drawn
-var WT = [0, 1].map(function (o) {
-  return { osc: o, id: -1, cycles: 0, frames: 0, points: 0, name: "", data: [], has: false, knob: 0, voices: [], shown: [], flat: false };
+var WT = [0, 1].map(function () {
+  return { id: -1, cycles: 0, frames: 0, points: 0, name: "", data: [], has: false, knob: 0, voices: [], shown: [], flat: false };
 });
 var wtRaf = 0;
 function wtTable(m) {
@@ -1632,41 +1619,6 @@ function wtPos(m) {
   wtDraw();
 }
 function wtDraw() { if (!wtRaf) wtRaf = requestAnimationFrame(wtFrame); }
-// WAVE XYZ: an oscillator's warp from the panel (Y = WARP, Z = WARP 2, each 0 to 1, and their types)
-function wtWarpOf(o) {
-  var v = wavet.v, b = o ? 29 : 25;
-  return { yMode: Math.max(0, v[b + 1]), y: Math.max(0, v[b]) / PANEL_MAX, zMode: Math.max(0, v[b + 3]), z: Math.max(0, v[b + 2]) / PANEL_MAX };
-}
-// Where in the cycle the Deluge reads, and the window it puts on it (the same maths as WaveWarp::read)
-function wtWarpRead(w, p) {
-  var win = 1;
-  if (w.yMode !== 0 && w.y > 0.002) {
-    if (w.yMode === 1) { var k = 15 * w.y; p = p * (1 + k) / (1 + k * p); }
-    else if (w.yMode === 2) { var tri = p < 0.5 ? 2 * p : 2 - 2 * p; p += w.y * (tri - p); }
-    else if (w.yMode === 3) { var wd = 0.5 * (1 - 0.94 * w.y); p = p < wd ? p * (0.5 / wd) : 0.5 + (p - wd) * (0.5 / (1 - wd)); }
-  }
-  if (w.z > 0.002) {
-    if (w.zMode === 0) { var q = p * (1 + 7 * w.z), dp = Math.min(1, w.z * 16); win = 1 - dp + dp * 4 * p * (1 - p); p = q - Math.floor(q); }
-    else if (w.zMode === 1) { var st = Math.max(2, Math.round(2 * Math.pow(2, 9 * (1 - w.z)))); p = Math.floor(p * st) / st; }
-  }
-  return { p: p - Math.floor(p), win: win };
-}
-function wtWarpShape(w, v, win) {
-  v *= win;
-  if (w.z > 0.002 && w.zMode === 2) { var t = (v * (1 + 6 * w.z) + 1) * 0.25; t -= Math.floor(t); v += Math.min(1, w.z * 8) * (1 - 4 * Math.abs(t - 0.5) - v); }
-  return v;
-}
-function wtWarpActive(w) { return (w.yMode !== 0 && w.y > 0.002) || w.z > 0.002; }
-// A wave read through the warp: linear between its points
-function wtWarped(wave, w) {
-  if (!wave || !wtWarpActive(w)) return wave;
-  var n = wave.length, out = new Array(n);
-  for (var i = 0; i < n; i++) {
-    var r = wtWarpRead(w, i / n), x = r.p * n, a = Math.floor(x) % n, b = (a + 1) % n, f = x - Math.floor(x);
-    out[i] = wtWarpShape(w, wave[a] * (1 - f) + wave[b] * f, r.win);
-  }
-  return out;
-}
 // One frame's points at a place through the table (0 to 1), between the two frames either side
 function wtWave(t, place) {
   var n = t.frames; if (!n) return null;
@@ -1684,9 +1636,8 @@ function wtFrame() {
     var o = +view.getAttribute("data-o"), t = WT[o];
     var on = t.has && t.frames > 0;
     view.classList.toggle("off", !on && o === 1);
-    if (o === 1) Array.prototype.forEach.call(wavet.root.querySelectorAll(".wtside .bsec"), function (sec, si) {
-      if (si >= 2) sec.classList.toggle("nooscb", !t.has);
-    });
+    var sec = wavet.root.querySelectorAll(".wtside .bsec")[o];
+    if (o === 1 && sec) sec.classList.toggle("nooscb", !t.has);
     var lab = view.querySelector(".wtlab");
     var labTxt = '<b>' + (o ? "B" : "A") + '</b>' + (on ? escapeWt(t.name) : (t.has ? "loading" : "not a wavetable"));
     if (lab.innerHTML !== labTxt) lab.innerHTML = labTxt;
@@ -1754,13 +1705,13 @@ function wtStack(t, W, H, dpr) {
   return c;
 }
 function wtDraw3D(g, W, H, t, dpr) {
-  var G = wtGeom(W, H, t), n = G.n, wp = wtWarpOf(t.osc);
+  var G = wtGeom(W, H, t), n = G.n;
   g.drawImage(wtStack(t, W, H, dpr), 0, 0);
   g.lineJoin = "round";
   // Each voice's frame, then the knob's on top, its glow a wide faint stroke (a blur would cost a lot on a tablet)
   g.strokeStyle = "rgba(255,122,69,.9)"; g.lineWidth = 1.6 * dpr;
   t.shown.forEach(function (pl) {
-    var vw = wtWarped(wtWave(t, pl), wp); if (!vw) return;
+    var vw = wtWave(t, pl); if (!vw) return;
     wtPath(g, G, vw, pl, t.points); g.stroke();
   });
   g.fillStyle = "#ff7a45";
@@ -1768,7 +1719,7 @@ function wtDraw3D(g, W, H, t, dpr) {
     var rx = G.x0 + G.w + pl * (n - 1) * G.dx + 6 * dpr, ry = G.y0 + pl * (n - 1) * G.dy;
     g.fillRect(rx, ry - 2 * dpr, 8 * dpr, 4 * dpr);
   });
-  var kw = wtWarped(wtWave(t, t.knob), wp);
+  var kw = wtWave(t, t.knob);
   if (kw) {
     wtPath(g, G, kw, t.knob, t.points);
     g.strokeStyle = "rgba(63,184,255,.25)"; g.lineWidth = 7 * dpr; g.stroke();
@@ -1779,21 +1730,21 @@ function wtDraw3D(g, W, H, t, dpr) {
 }
 // One flat cycle: the knob's frame large, voices over it
 function wtDrawFlat(g, W, H, t, dpr) {
-  var G = { n: 1, x0: W * 0.05, w: W * 0.9, y0: H * 0.55, dx: 0, dy: 0, amp: H * 0.36 }, wp = wtWarpOf(t.osc);
+  var G = { n: 1, x0: W * 0.05, w: W * 0.9, y0: H * 0.55, dx: 0, dy: 0, amp: H * 0.36 };
   g.strokeStyle = "rgba(120,140,165,.3)"; g.lineWidth = 1 * dpr;
   g.beginPath(); g.moveTo(G.x0, G.y0); g.lineTo(G.x0 + G.w, G.y0); g.stroke();
   t.shown.forEach(function (pl) {
-    var vw = wtWarped(wtWave(t, pl), wp); if (!vw) return;
+    var vw = wtWave(t, pl); if (!vw) return;
     wtPath(g, G, vw, 0, t.points); g.strokeStyle = "rgba(255,122,69,.75)"; g.lineWidth = 1.4 * dpr; g.stroke();
   });
-  var kw = wtWarped(wtWave(t, t.knob), wp); if (!kw) return;
+  var kw = wtWave(t, t.knob); if (!kw) return;
   wtPath(g, G, kw, 0, t.points);
   g.strokeStyle = "#3fb8ff"; g.lineWidth = 2.5 * dpr; g.stroke();
 }
 // Drag on a table: its position knob, as the knob drags (relative, never jumps); the 3D / 2D button flips the view
 wavet.wireViews = function () {
   Array.prototype.forEach.call(wavet.root.querySelectorAll(".wtview"), function (view) {
-    var o = +view.getAttribute("data-o"), id = o ? 5 : 0, wid = o ? 29 : 25, drag = null;
+    var o = +view.getAttribute("data-o"), id = o ? 5 : 0, drag = null;
     var mode = view.querySelector(".wtmode");
     mode.addEventListener("click", function (e) { e.stopPropagation(); WT[o].flat = !WT[o].flat; mode.textContent = WT[o].flat ? "2D" : "3D"; wtDraw(); });
     mode.addEventListener("pointerdown", function (e) { e.stopPropagation(); });
@@ -1801,18 +1752,16 @@ wavet.wireViews = function () {
       if (wavet.v[id] < 0) return;
       e.preventDefault();
       try { view.setPointerCapture(e.pointerId); } catch (err) { /* Moves still arrive */ }
-      drag = { pid: e.pointerId, x: e.clientX, y: e.clientY, p: wavet.v[id], w: Math.max(0, wavet.v[wid]) };
-      wavet.holdFor(id, Infinity); wavet.holdFor(wid, Infinity);
+      drag = { pid: e.pointerId, y: e.clientY, p: wavet.v[id] };
+      wavet.holdFor(id, Infinity);
       view.classList.add("drag");
     });
     view.addEventListener("pointermove", function (e) {
       if (!drag || e.pointerId !== drag.pid) return;
       var p = Math.round(Math.max(0, Math.min(PANEL_MAX, drag.p - (e.clientY - drag.y) / Math.max(80, view.clientHeight) * PANEL_MAX)));
       if (p !== wavet.v[id]) { wavet.set(id, p, Infinity); WT[o].knob = p / PANEL_MAX; wtDraw(); }
-      var q = Math.round(Math.max(0, Math.min(PANEL_MAX, drag.w + (e.clientX - drag.x) / Math.max(120, view.clientWidth) * PANEL_MAX)));
-      if (q !== wavet.v[wid]) { wavet.set(wid, q, Infinity); wtDraw(); }
     });
-    function end(e) { if (!drag || e.pointerId !== drag.pid) return; drag = null; view.classList.remove("drag"); wavet.holdFor(id, 600); wavet.holdFor(wid, 600); }
+    function end(e) { if (!drag || e.pointerId !== drag.pid) return; drag = null; view.classList.remove("drag"); wavet.holdFor(id, 600); }
     view.addEventListener("pointerup", end); view.addEventListener("pointercancel", end); view.addEventListener("lostpointercapture", end);
   });
 };
