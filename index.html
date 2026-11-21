@@ -281,61 +281,98 @@ footer a{color:var(--pink)}
 }
 </style>
 <style>
-/* BRUNO106 panel: sliders and switches in the order the synth it comes from lays them out, left to right.
-   Dark panel, silkscreen labels, white caps, red LEDs. Both ways: drag here and the Deluge follows, and the other way. */
-#bruno{display:none;margin-top:14px;background:#0d0d0f;border:1px solid #2a2a2e;border-radius:12px;padding:10px 10px 8px;
-  box-shadow:inset 0 1px 0 #1d1d21;color:#d8d6d0;user-select:none;-webkit-user-select:none}
-#track.bruno-on #bruno{display:block}
-#track.bruno-on #special{display:none !important}
-#bruno .bhead{display:flex;align-items:baseline;gap:10px;margin:0 2px 8px}
-#bruno .bname{font:800 15px var(--sans);letter-spacing:.18em;color:#f2f0ea}
-#bruno .bsub{font:600 10px var(--mono);letter-spacing:.14em;color:#8b8a86;text-transform:uppercase}
-#bruno .bstripe{flex:1;height:3px;align-self:center;background:linear-gradient(90deg,#2f6fe0 0 50%,#d8342c 50% 100%);border-radius:2px;opacity:.85}
-#bruno .bsecs{display:flex;flex-wrap:wrap;gap:6px}
-#bruno .bsecs.b2{margin-top:6px}
-#bruno .bsec{background:#151518;border:1px solid #26262b;border-radius:8px;padding:0 4px 6px;flex:0 0 auto}
-#bruno .bsec > .bt{font:700 11px var(--mono);letter-spacing:.2em;color:#f2f0ea;text-align:center;padding:4px 8px 3px;white-space:nowrap;margin:0 -4px 6px;
-  border-bottom:2px solid #2f6fe0;background:#1b1b1f;border-radius:8px 8px 0 0}
-#bruno .bsec.red > .bt{border-bottom-color:#d8342c}
-#bruno .bctl{display:flex;flex-direction:column;align-items:center;width:40px}
-#bruno .bctl.wide{width:52px}
-#bruno .bctl.na{opacity:.25;pointer-events:none}
-#bruno .bitems{display:flex;gap:2px;align-items:flex-start}
-#bruno .bl{font:600 10px var(--mono);letter-spacing:.06em;color:#c9c7c1;height:14px;line-height:14px;white-space:nowrap;text-transform:uppercase}
-#bruno .bv{font:600 10px var(--mono);color:#6f6e6a;height:14px;line-height:14px;white-space:nowrap}
-#bruno .bctl.drag .bv{color:#ff5a4f}
-/* Slider: a slot with a 0-10 scale, a cap moved with transform (no layout work while dragging) */
-#bruno .bs{position:relative;width:40px;height:var(--bh,156px);touch-action:none;cursor:ns-resize}
-#bruno .bs .slot{position:absolute;left:50%;top:8px;bottom:8px;width:4px;margin-left:-2px;background:#000;border-radius:2px;box-shadow:0 0 0 1px #2c2c31}
-#bruno .bs .scale{position:absolute;left:2px;top:8px;bottom:8px;width:8px;
-  background:repeating-linear-gradient(to bottom,#55545a 0 1px,transparent 1px calc((100% - 1px) / 10)) ;}
-#bruno .bs .cap{position:absolute;left:50%;top:calc((1 - var(--f,0)) * (100% - 16px));width:30px;height:16px;margin-left:-15px;border-radius:3px;
+/* Engine panels: BRUNO106 as the Juno (sliders) and BROPHET as the Prophet (knobs, a P5 woodgrain or P8 black look),
+   left to right as the synths lay them out. Both ways: drag here and the Deluge follows, and the other way. */
+.cpanel{display:none;margin-top:14px;background:#0d0d0f;border:1px solid #2a2a2e;border-radius:12px;padding:10px 10px 8px;
+  box-shadow:inset 0 1px 0 #1d1d21;color:#d8d6d0;user-select:none;-webkit-user-select:none;
+  --ink2:#f2f0ea;--sub:#8b8a86;--lab:#c9c7c1;--val:#6f6e6a;--sec:#151518;--secb:#26262b;--tbar:#1b1b1f;--acc1:#2f6fe0;--acc2:#d8342c;--hot:#ff5a4f}
+#track.panel-on .cpanel.on{display:block}
+#track.panel-on #special{display:none !important}
+.cpanel .bhead{display:flex;align-items:center;gap:10px;margin:0 2px 8px}
+.cpanel .bname{font:800 15px var(--sans);letter-spacing:.18em;color:var(--ink2)}
+.cpanel .bsub{font:600 10px var(--mono);letter-spacing:.14em;color:var(--sub);text-transform:uppercase}
+.cpanel .bstripe{flex:1;height:3px;background:linear-gradient(90deg,var(--acc1) 0 50%,var(--acc2) 50% 100%);border-radius:2px;opacity:.85}
+.cpanel .bsecs{display:flex;flex-wrap:wrap;gap:6px}
+.cpanel .bsecs + .bsecs{margin-top:6px}
+.cpanel .bsecs:empty{display:none}
+.cpanel .bsec{background:var(--sec);border:1px solid var(--secb);border-radius:8px;padding:0 4px 6px;flex:0 0 auto}
+.cpanel .bsec > .bt{font:700 11px var(--mono);letter-spacing:.2em;color:var(--ink2);text-align:center;padding:4px 8px 3px;white-space:nowrap;margin:0 -4px 6px;
+  border-bottom:2px solid var(--acc1);background:var(--tbar);border-radius:8px 8px 0 0}
+.cpanel .bsec.red > .bt{border-bottom-color:var(--acc2)}
+.cpanel .bitems{display:flex;gap:2px;align-items:flex-start}
+.cpanel .bctl{display:flex;flex-direction:column;align-items:center;width:40px}
+.cpanel .bctl.wide{width:52px}
+.cpanel .bctl.na{opacity:.25;pointer-events:none}
+.cpanel .bl{font:600 10px var(--mono);letter-spacing:.06em;color:var(--lab);height:14px;line-height:14px;white-space:nowrap;text-transform:uppercase}
+.cpanel .bv{font:600 10px var(--mono);color:var(--val);height:14px;line-height:14px;white-space:nowrap}
+.cpanel .bctl.drag .bv{color:var(--hot)}
+/* Slider: a slot with a 0-10 scale, its cap placed by --f */
+.cpanel .bs{position:relative;width:40px;height:var(--bh,156px);touch-action:none;cursor:ns-resize}
+.cpanel .bs .slot{position:absolute;left:50%;top:8px;bottom:8px;width:4px;margin-left:-2px;background:#000;border-radius:2px;box-shadow:0 0 0 1px #2c2c31}
+.cpanel .bs .scale{position:absolute;left:2px;top:8px;bottom:8px;width:8px;
+  background:repeating-linear-gradient(to bottom,#55545a 0 1px,transparent 1px calc((100% - 1px) / 10))}
+.cpanel .bs.steps .scale{background:none}
+.cpanel .bs .cap{position:absolute;left:50%;top:calc((1 - var(--f,0)) * (100% - 16px));width:30px;height:16px;margin-left:-15px;border-radius:3px;
   background:linear-gradient(#f4f3ef,#cfcdc6);box-shadow:0 2px 3px rgba(0,0,0,.7),inset 0 -1px 0 #a9a69e}
-#bruno .bs .cap::after{content:"";position:absolute;left:3px;right:3px;top:7px;height:2px;background:#26262a}
-#bruno .bctl.drag .cap{background:linear-gradient(#fff,#e6e4dd);box-shadow:0 0 10px rgba(255,90,79,.55),0 2px 3px rgba(0,0,0,.7)}
-#bruno .bs.steps .scale{background:none}
+.cpanel .bs .cap::after{content:"";position:absolute;left:3px;right:3px;top:7px;height:2px;background:#26262a}
+.cpanel .bctl.drag .cap{background:linear-gradient(#fff,#e6e4dd);box-shadow:0 0 10px rgba(255,90,79,.55),0 2px 3px rgba(0,0,0,.7)}
+/* Knob: a dial turned by --a degrees (-150 to +150), over a ring of ticks */
+.cpanel .bk{position:relative;width:40px;height:44px;touch-action:none;cursor:ns-resize}
+.cpanel .bk .ring{position:absolute;left:2px;top:4px;width:36px;height:36px;border-radius:50%;
+  background:repeating-conic-gradient(from -150deg,var(--tick,#5a5a60) 0 2deg,transparent 2deg 30deg);
+  -webkit-mask:radial-gradient(circle,transparent 15px,#000 15.5px);mask:radial-gradient(circle,transparent 15px,#000 15.5px)}
+.cpanel .bk .dial{position:absolute;left:7px;top:9px;width:26px;height:26px;border-radius:50%;transform:rotate(calc(var(--a,-150) * 1deg));
+  background:var(--knob,radial-gradient(circle at 50% 50%,#d9dade 0 5px,#9fa1a6 5.5px 6.5px,#1b1b1e 7px));box-shadow:0 2px 3px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.12)}
+.cpanel .bk .dial i{position:absolute;left:50%;top:1px;width:2px;height:8px;margin-left:-1px;border-radius:1px;background:var(--pointer,#f2f0ea)}
+.cpanel .bctl.drag .bk .dial{box-shadow:0 0 10px var(--glow,rgba(255,90,79,.55)),0 2px 3px rgba(0,0,0,.75)}
 /* Two way slide switch: tap to flip */
-#bruno .bsw{width:38px;height:var(--bh,156px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+.cpanel .bsw{width:38px;height:var(--bh,156px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
   background:none;border:0;padding:0;color:inherit;cursor:pointer;touch-action:manipulation}
-#bruno .bsw .o{font:700 10px var(--mono);color:#77767a;letter-spacing:.04em}
-#bruno .bsw .o.on{color:#f2f0ea}
-#bruno .bsw .well{width:16px;height:44px;border-radius:4px;background:#000;box-shadow:0 0 0 1px #2c2c31;position:relative}
-#bruno .bsw .nub{position:absolute;left:2px;width:12px;height:20px;border-radius:2px;background:linear-gradient(#e9e7e1,#b9b6ae);top:2px;transition:top .08s}
-#bruno .bsw.down .nub{top:22px}
-/* Buttons with an LED (range, waveforms, chorus) */
-#bruno .bbs{display:flex;flex-direction:column;gap:6px;justify-content:center;height:var(--bh,156px)}
-#bruno .bb{width:44px;height:34px;border-radius:5px;padding:4px 0 0;background:linear-gradient(#3a3a40,#26262b);border:1px solid #111;
-  color:#e9e7e1;font:700 10px var(--mono);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;touch-action:manipulation;
+.cpanel .bsw .o{font:700 10px var(--mono);color:#77767a;letter-spacing:.04em}
+.cpanel .bsw .o.on{color:var(--ink2)}
+.cpanel .bsw .well{width:16px;height:44px;border-radius:4px;background:#000;box-shadow:0 0 0 1px #2c2c31;position:relative}
+.cpanel .bsw .nub{position:absolute;left:2px;width:12px;height:20px;border-radius:2px;background:linear-gradient(#e9e7e1,#b9b6ae);top:2px;transition:top .08s}
+.cpanel .bsw.down .nub{top:22px}
+/* Buttons with an LED */
+.cpanel .bbs{display:flex;flex-direction:column;gap:6px;justify-content:center;height:var(--bh,156px)}
+.cpanel .bb{width:44px;height:34px;border-radius:5px;padding:4px 0 0;background:var(--btn,linear-gradient(#3a3a40,#26262b));border:1px solid #111;
+  color:var(--btnink,#e9e7e1);font:700 10px var(--mono);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;touch-action:manipulation;
   box-shadow:0 2px 0 #000}
-#bruno .bb:active{transform:translateY(1px);box-shadow:0 1px 0 #000}
-#bruno .bb i{display:block;width:8px;height:8px;border-radius:50%;background:#3b1210;border:1px solid #5a1d19}
-#bruno .bb.on i{background:#ff3b2f;border-color:#ff6b61;box-shadow:0 0 7px #ff3b2f}
-#bruno .bb svg{width:26px;height:10px}
-#bruno .bhint{font:500 11px var(--sans);color:#6f6e6a;margin:6px 2px 0}
+.cpanel .bb:active{transform:translateY(1px);box-shadow:0 1px 0 #000}
+.cpanel .bb i{display:block;width:8px;height:8px;border-radius:50%;background:#3b1210;border:1px solid #5a1d19}
+.cpanel .bb.on i{background:#ff3b2f;border-color:#ff6b61;box-shadow:0 0 7px #ff3b2f}
+.cpanel .bb svg{width:26px;height:10px}
+.cpanel .bhint{font:500 11px var(--sans);color:var(--val);margin:6px 2px 0}
+
+/* BROPHET: knob panels are shorter; buttons sit in the knob row */
+#brophet{--bh:44px}
+#brophet .bbs{flex-direction:row;flex-wrap:wrap;gap:4px;height:auto;min-height:44px;align-content:center}
+#brophet .bctl.wide{width:auto;min-width:44px}
+#brophet .bb{width:40px;height:30px}
+#brophet .bskin{display:flex;border:1px solid var(--secb);border-radius:6px;overflow:hidden;opacity:.55}
+#brophet .bskin:hover,#brophet .bskin:focus-within{opacity:1}
+#brophet .bskin button{font:700 9px var(--mono);letter-spacing:.08em;padding:2px 6px;border-radius:0;background:none;color:var(--sub)}
+#brophet .bskin button.on{background:var(--acc2);color:#fff}
+/* P8: flat black, silver-capped black knobs, red LEDs and red highlights */
+#brophet.p8{background:#08080a;--sec:#0f0f11;--secb:#222226;--tbar:#141417;--acc1:#d8342c;--acc2:#d8342c;--hot:#ff3b2f;--glow:rgba(255,59,47,.6);
+  --knob:radial-gradient(circle at 50% 45%,#e4e5e8 0 4px,#a4a6ab 4.5px 6px,#2a2a2d 6.5px,#141416 12px);--pointer:#ff3b2f;--tick:#4a4a50}
+#brophet.p8 .bstripe{background:#d8342c;height:2px}
+/* P5: woodgrain cheeks, dark panel, cream lettering, black knobs with silver skirts, cream buttons */
+#brophet.p5{--sec:#18130f;--secb:#2c241c;--tbar:#1e1813;--ink2:#efe4c8;--lab:#e2d6b8;--sub:#a3977c;--val:#8a7f68;
+  --acc1:#c9b48a;--acc2:#c9b48a;--hot:#ffd27a;--glow:rgba(255,210,122,.5);--tick:#7a6a50;
+  --knob:radial-gradient(circle at 50% 45%,#1c1c1e 0 6px,#2a2a2c 6.5px 9px,#c8c9cd 9.5px,#8e9095 12px);--pointer:#efe4c8;
+  --btn:linear-gradient(#e9e2cf,#c9c0a8);--btnink:#2a2118;
+  background:linear-gradient(90deg,#5a3418 0,#7b4a24 6px,#4e2c14 10px,#6d3f1e 14px,#3c2210 18px,transparent 18px,transparent calc(100% - 18px),#3c2210 calc(100% - 18px),#6d3f1e calc(100% - 14px),#4e2c14 calc(100% - 10px),#7b4a24 calc(100% - 6px),#5a3418 100%),#141110;
+  padding-left:26px;padding-right:26px;border-color:#3a2a1c}
+#brophet.p5 .bstripe{background:#c9b48a;height:1px;opacity:.6}
+#brophet.p5 .bb i{background:#3b1210}
+
 /* Tablets: narrower columns so each row stays one line; shorter sliders on short screens */
-@media (max-width:1180px){#bruno{padding:8px 6px 6px} #bruno .bctl,#bruno .bs,#bruno .bsw{width:32px} #bruno .bctl.wide{width:42px}
-  #bruno .bb{width:38px} #bruno .bsec{padding:0 3px 6px} #bruno .bsec > .bt{letter-spacing:.1em;margin:0 -3px 6px}
-  #bruno .bs .cap{width:24px;margin-left:-12px} #bruno .bv,#bruno .bl{font-size:9px}}
+@media (max-width:1180px){.cpanel{padding:8px 6px 6px} .cpanel .bctl,.cpanel .bs,.cpanel .bsw{width:32px} .cpanel .bctl.wide{width:42px}
+  .cpanel .bb{width:38px} .cpanel .bsec{padding:0 3px 6px} .cpanel .bsec > .bt{letter-spacing:.1em;margin:0 -3px 6px}
+  .cpanel .bs .cap{width:24px;margin-left:-12px} .cpanel .bv,.cpanel .bl{font-size:9px}
+  .cpanel .bk{width:36px} .cpanel .bk .ring{left:0} .cpanel .bk .dial{left:5px}
+  #brophet .bctl{width:38px} #brophet.p5{padding-left:20px;padding-right:20px}}
 @media (max-height:700px){#bruno{--bh:124px}}
 </style>
 </head>
@@ -433,7 +470,8 @@ footer a{color:var(--pink)}
           <div id="rowname"></div>
         </div>
       </div>
-      <div id="bruno"></div>
+      <div id="bruno" class="cpanel"></div>
+      <div id="brophet" class="cpanel p8"></div>
       <div id="gold" class="frame" style="display:none"><div class="label">Gold knobs</div><div class="goldgrid"></div></div>
       <div id="special" class="frame" style="display:none"><div class="label"></div><div class="sbody"></div></div>
       <div id="knobs"></div>
@@ -475,7 +513,7 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v20 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v21 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -484,9 +522,9 @@ footer a{color:var(--pink)}
 // 3 <hi> <lo> move the browser there, 4 press SELECT, 5 press BACK, 6 <marker> <hi> <lo> drag a waveform marker,
 // 7 <x> <y> open a shortcut pad's setting, 8 <cmd> top bar (0 play, 1 record, 2 select, 3 back, 4 left, 5 right),
 // 9 <hi> <lo> launch or stop a session clip, 10 <section> launch a section, 13 <id> <hi> <lo> move a BRUNO106 panel
-// control.
+// control, 14 <id> <hi> <lo> a BROPHET one.
 // In: 0x42 STATE, 0x43 KIT_ROWS, 0x44 TEXT, 0x45 PICKER, 0x46 BROWSER, 0x47 BROWSER_SEL, 0x48 WAVEFORM, 0x49 PLAYHEAD,
-// 0x4A PARAMS, 0x4B TRANSPORT, 0x4C OUTPUTS, 0x4D CLIPS, 0x4E ARRANGER, 0x4F ARRANGER_POS, 0x56 PANEL (BRUNO106).
+// 0x4A PARAMS, 0x4B TRANSPORT, 0x4C OUTPUTS, 0x4D CLIPS, 0x4E ARRANGER, 0x4F ARRANGER_POS, 0x56 PANEL (BRUNO106 / BROPHET).
 // Display mirror: 00 <2 keep alive | 3 force | 4 swap 7SEG/OLED> out, 0x41 7-seg digits / 0x40 OLED frame in.
 var HDR = [0xF0, 0x00, 0x21, 0x7B, 0x01, 0x02];
 
@@ -1183,44 +1221,36 @@ function showParams(p) {
   });
 }
 
-// ---- BRUNO106 panel: sliders and switches laid out left to right as the synth the engine comes from. Both ways: a
-// move here goes to the Deluge as 03 0D <id> <hi> <lo> (14-bit), and PANEL (0x56) brings the Deluge's settings back,
-// so turning a knob there moves the slider here. While a control is held (and briefly after) the Deluge's echo of it
-// is ignored, so the cap doesn't fight the finger.
-var BRUNO_MAX = 16383;
-var BRUNO_SECTIONS = [ // row 1: the synth's own panel; row 2: the second envelope and the Deluge's effects
-  { t: "LFO", c: [{ id: 0, n: "Rate", k: "std" }] },
-  { t: "DCO", c: [
-    { id: 1, n: "Range", k: "range" }, { id: 2, n: "LFO", k: "dcolfo" }, { id: 3, n: "PWM", k: "ctl" },
-    { id: 4, n: "PWM", k: "sw", o: ["LFO", "MAN"] }, { id: 5, n: "Wave", k: "wave" },
-    { id: 7, n: "Sub", k: "ctl" }, { id: 8, n: "Noise", k: "ctl" }, { id: 9, n: "Slop", k: "ctl" }] },
-  { t: "HPF", red: true, c: [{ id: 10, n: "Freq", k: "hpf" }] },
-  { t: "VCF", c: [
-    { id: 11, n: "Freq", k: "std" }, { id: 12, n: "Res", k: "std" }, { id: 13, n: "Env", k: "sw", o: ["NORM", "INV"] },
-    { id: 14, n: "Env", k: "env" }, { id: 15, n: "LFO", k: "vcflfo" }, { id: 16, n: "Kybd", k: "kybd" }] },
-  { t: "VCA", red: true, c: [{ id: 17, n: "Mode", k: "sw", o: ["ENV", "GATE"] }, { id: 18, n: "Level", k: "std" }] },
-  { t: "ENV 1", c: [{ id: 19, n: "A", k: "std" }, { id: 20, n: "D", k: "std" }, { id: 21, n: "S", k: "std" }, { id: 22, n: "R", k: "std" }] },
-  { t: "ENV 2", row: 2, c: [{ id: 24, n: "A", k: "std" }, { id: 25, n: "D", k: "std" }, { id: 26, n: "S", k: "std" }, { id: 27, n: "R", k: "std" }] },
-  { t: "Chorus", red: true, row: 2, c: [{ id: 23, n: "", k: "chorus" }, { id: 28, n: "Rate", k: "crate" }, { id: 29, n: "Depth", k: "cdepth" }] },
-  { t: "Drive", row: 2, c: [{ id: 30, n: "Drive", k: "std" }, { id: 31, n: "Crush", k: "std" }, { id: 32, n: "Deci", k: "std" }, { id: 33, n: "Sat", k: "std" }] },
-  { t: "Delay", red: true, row: 2, c: [{ id: 34, n: "Amt", k: "std" }, { id: 35, n: "Rate", k: "std" }, { id: 36, n: "Fdbk", k: "std" }] },
-  { t: "Reverb", row: 2, c: [{ id: 37, n: "Amt", k: "std" }] }
-];
-var BRUNO_N = 38;
-// v: what the panel shows; dev: what the Deluge last said; hold: until when the Deluge's word waits (a move made here)
-var bruno = { built: false, open: false, v: [], dev: [], hold: [], rt: [], els: {}, dirty: {}, timer: 0, kinds: [] };
-for (var bi0 = 0; bi0 < BRUNO_N; bi0++) { bruno.v.push(-1); bruno.dev.push(-1); bruno.hold.push(0); bruno.rt.push(0); }
-
+// ---- Engine panels: BRUNO106 (sliders, as the Juno it comes from) and BROPHET (knobs, as the Prophet). Both ways:
+// a move here goes to the Deluge as 03 <cmd> <id> <hi> <lo> (14-bit), and PANEL (0x56) brings its settings back, so
+// turning a knob there moves the control here. While a control is held (and briefly after) the Deluge's echo of it is
+// ignored, so it doesn't fight the finger; when the hold ends the panel shows what the Deluge last said.
+var PANEL_MAX = 16383;
+var WAVE_SVG = {
+  saw: '<svg viewBox="0 0 26 10"><path d="M1 9 L9 1 V9 L17 1 V9 L25 1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  pulse: '<svg viewBox="0 0 26 10"><path d="M1 9 V1 H8 V9 H15 V1 H22 V9 H25" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  tri: '<svg viewBox="0 0 26 10"><path d="M1 9 L7 1 L13 9 L19 1 L25 9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'
+};
 // What the Deluge would call each position
-function brunoReadout(kind, p) {
-  var f = p / BRUNO_MAX;
+function panelReadout(kind, p, P) {
+  var f = p / PANEL_MAX, k;
   switch (kind) {
   case "std": return String(Math.round(f * 50));
   case "ctl": return String(Math.round(f * 127));
+  case "ctl64": k = Math.round(f * 127) - 64; return (k > 0 ? "+" : "") + k;
   case "dcolfo": return (f * f * 4).toFixed(2) + "st";
+  case "lfofreq": return (f * f * 12).toFixed(1) + "st";
+  case "lfofilt": return (f * 48).toFixed(1) + "st";
   case "vcflfo": return (f * 42).toFixed(1) + "st";
   case "kybd": return Math.round(f * 100) + "%";
   case "env": return (f * 8).toFixed(1) + "oct";
+  case "semis": k = Math.round(f * 48) - 24; return (k > 0 ? "+" : "") + k;
+  case "freqb": { // As the engine: semitone steps, two octaves each way on the keys, four off them (KBD, id 17)
+    var range = P && P.v[17] === 0 ? 48 : 24;
+    k = Math.max(-range, Math.min(range, Math.trunc((Math.round(f * 127) - 64) * range / 63)));
+    return (k > 0 ? "+" : "") + k + "st";
+  }
+  case "fine": k = Math.round((Math.round(f * 127) - 64) / 126 * 100); return (k > 0 ? "+" : "") + k + "ct";
   case "hpf": return ["BOOST", "FLAT", "236", "754"][p] || "";
   case "crate": return "x" + Math.pow(2, (Math.round(f * 127) - 64) / 32).toFixed(2); // Of the mode's own rate
   case "cdepth": return Math.round(Math.round(f * 127) / 64 * 100) + "%";
@@ -1228,186 +1258,286 @@ function brunoReadout(kind, p) {
   return "";
 }
 
-function brunoSend(id, p) {
-  bruno.dirty[id] = p;
-  if (bruno.timer) return;
+function Panel(o) {
+  var P = this;
+  P.root = o.root; P.cmd = o.cmd; P.n = o.n; P.sections = o.sections; P.head = o.head; P.hint = o.hint;
+  P.built = false; P.open = false; P.v = []; P.dev = []; P.hold = []; P.rt = []; P.els = {}; P.dirty = {}; P.timer = 0;
+  for (var i = 0; i < P.n; i++) { P.v.push(-1); P.dev.push(-1); P.hold.push(0); P.rt.push(0); }
+}
+Panel.prototype.send = function (id, p) {
+  var P = this;
+  P.dirty[id] = p;
+  if (P.timer) return;
   // At most every 25 ms, the latest position of each control moved
-  bruno.timer = setTimeout(function () {
-    bruno.timer = 0;
-    var d = bruno.dirty; bruno.dirty = {};
-    Object.keys(d).forEach(function (k) { var q = d[k]; tx([0x03, 0x0D, +k, (q >> 7) & 0x7F, q & 0x7F]); });
+  P.timer = setTimeout(function () {
+    P.timer = 0;
+    var d = P.dirty; P.dirty = {};
+    Object.keys(d).forEach(function (k) { var q = d[k]; tx([0x03, P.cmd, +k, (q >> 7) & 0x7F, q & 0x7F]); });
   }, 25);
-}
+};
 // A move made here: show it now, hold off the Deluge's echo, send it
-function brunoSet(id, p, holdMs) {
-  bruno.v[id] = p;
-  brunoHold(id, holdMs);
-  brunoDraw(id);
-  brunoSend(id, p);
-}
+Panel.prototype.set = function (id, p, holdMs) {
+  this.v[id] = p;
+  this.holdFor(id, holdMs);
+  this.draw(id);
+  this.send(id, p);
+};
 // When the hold ends, show what the Deluge last said: it only sends changes, so a move it didn't take (or a track
 // change during the hold) would otherwise leave the panel wrong
-function brunoHold(id, ms) {
-  clearTimeout(bruno.rt[id]);
-  if (ms === Infinity) { bruno.hold[id] = Infinity; return; }
-  bruno.hold[id] = performance.now() + ms;
-  bruno.rt[id] = setTimeout(function () {
-    bruno.hold[id] = 0;
-    if (bruno.open && bruno.dev[id] >= 0 && bruno.dev[id] !== bruno.v[id]) { bruno.v[id] = bruno.dev[id]; brunoDraw(id); }
+Panel.prototype.holdFor = function (id, ms) {
+  var P = this;
+  clearTimeout(P.rt[id]);
+  if (ms === Infinity) { P.hold[id] = Infinity; return; }
+  P.hold[id] = performance.now() + ms;
+  P.rt[id] = setTimeout(function () {
+    P.hold[id] = 0;
+    if (P.open && P.dev[id] >= 0 && P.dev[id] !== P.v[id]) { P.v[id] = P.dev[id]; P.draw(id); }
   }, ms + 20);
-}
-
-function brunoSlider(c) {
-  var col = document.createElement("div"); col.className = "bctl";
-  var steps = c.k === "hpf";
-  col.innerHTML = '<div class="bl"></div><div class="bs' + (steps ? " steps" : "") + '" role="slider" aria-valuemin="0"><div class="scale"></div><div class="slot"></div><div class="cap"></div></div><div class="bv"></div>';
-  col.querySelector(".bl").textContent = c.n;
-  var s = col.querySelector(".bs"), cap = col.querySelector(".cap");
-  s.setAttribute("aria-label", c.n);
-  s.setAttribute("aria-valuemax", steps ? 3 : BRUNO_MAX);
-  var drag = null;
-  s.addEventListener("pointerdown", function (e) {
-    if (bruno.v[c.id] < 0) return;
+};
+// Drag up and down, relative: the control moves with the finger from where it is, so a touch never makes it jump.
+// travel(): pixels for the whole range.
+Panel.prototype.dragger = function (el, col, c, steps, travel) {
+  var P = this, drag = null;
+  el.addEventListener("pointerdown", function (e) {
+    if (P.v[c.id] < 0) return;
     e.preventDefault();
-    try { s.setPointerCapture(e.pointerId); } catch (err) { /* Pointer already gone: moves still reach the slot */ }
-    // Relative: the cap moves with the finger from where it is, wherever the slot was touched
-    drag = { pid: e.pointerId, y: e.clientY, p: steps ? bruno.v[c.id] / 3 * BRUNO_MAX : bruno.v[c.id], travel: Math.max(40, s.clientHeight - 16) };
-    brunoHold(c.id, Infinity);
+    try { el.setPointerCapture(e.pointerId); } catch (err) { /* Pointer already gone: moves still reach it */ }
+    drag = { pid: e.pointerId, y: e.clientY, p: steps ? P.v[c.id] / steps * PANEL_MAX : P.v[c.id], travel: Math.max(40, travel()) };
+    P.holdFor(c.id, Infinity);
     col.classList.add("drag");
   });
-  s.addEventListener("pointermove", function (e) {
+  el.addEventListener("pointermove", function (e) {
     if (!drag || e.pointerId !== drag.pid) return;
-    var p = Math.round(Math.max(0, Math.min(BRUNO_MAX, drag.p - (e.clientY - drag.y) / drag.travel * BRUNO_MAX)));
-    if (steps) p = Math.round(p / BRUNO_MAX * 3);
-    if (p !== bruno.v[c.id]) brunoSet(c.id, p, Infinity);
+    var p = Math.round(Math.max(0, Math.min(PANEL_MAX, drag.p - (e.clientY - drag.y) / drag.travel * PANEL_MAX)));
+    if (steps) p = Math.round(p / PANEL_MAX * steps);
+    if (p !== P.v[c.id]) P.set(c.id, p, Infinity);
   });
   function end(e) {
     if (!drag || e.pointerId !== drag.pid) return;
     drag = null;
     col.classList.remove("drag");
-    brunoHold(c.id, 600);
+    P.holdFor(c.id, 600);
   }
-  s.addEventListener("pointerup", end);
-  s.addEventListener("pointercancel", end);
-  s.addEventListener("lostpointercapture", end);
-  // Without capture (it can fail), a finger lifted off the slot never reaches it: end the drag when it leaves
-  s.addEventListener("pointerleave", function (e) { if (drag && !s.hasPointerCapture(e.pointerId)) end(e); });
-  bruno.els[c.id] = { kind: c.k, col: col, slider: s, cap: cap, out: col.querySelector(".bv") };
-  return col;
-}
-
-function brunoSwitch(c) {
-  var col = document.createElement("div"); col.className = "bctl";
-  col.innerHTML = '<div class="bl"></div><button class="bsw" type="button"><span class="o"></span><span class="well"><span class="nub"></span></span><span class="o"></span></button><div class="bv"></div>';
-  col.querySelector(".bl").textContent = c.n;
-  var b = col.querySelector(".bsw"), o = b.querySelectorAll(".o");
-  o[0].textContent = c.o[0]; o[1].textContent = c.o[1];
-  b.setAttribute("aria-label", c.n);
-  b.onclick = function () { if (bruno.v[c.id] >= 0) brunoSet(c.id, bruno.v[c.id] ? 0 : 1, 600); };
-  bruno.els[c.id] = { kind: "sw", col: col, button: b, opts: o };
-  return col;
-}
-
-var BRUNO_WAVES = {
-  5: '<svg viewBox="0 0 26 10"><path d="M1 9 V1 H8 V9 H15 V1 H22 V9 H25" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
-  6: '<svg viewBox="0 0 26 10"><path d="M1 9 L9 1 V9 L17 1 V9 L25 1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'
+  el.addEventListener("pointerup", end);
+  el.addEventListener("pointercancel", end);
+  el.addEventListener("lostpointercapture", end);
+  // Without capture (it can fail), a finger lifted off the control never reaches it: end the drag when it leaves
+  el.addEventListener("pointerleave", function (e) { if (drag && !el.hasPointerCapture(e.pointerId)) end(e); });
 };
-function brunoButton(id, label, onTap) {
-  var b = document.createElement("button"); b.className = "bb"; b.type = "button";
-  b.innerHTML = "<i></i>" + (BRUNO_WAVES[id] && !label ? BRUNO_WAVES[id] : "<span></span>");
-  if (label) b.querySelector("span").textContent = label;
-  b.onclick = onTap;
-  return b;
-}
-function brunoButtons(c) {
-  var col = document.createElement("div"); col.className = "bctl wide";
-  col.innerHTML = '<div class="bl"></div><div class="bbs"></div><div class="bv"></div>';
-  col.querySelector(".bl").textContent = c.n;
-  var box = col.querySelector(".bbs"), btns = [];
-  if (c.k === "range") {
-    ["16'", "8'", "4'"].forEach(function (t, i) {
-      btns.push(brunoButton(-1, t, function () { if (bruno.v[1] >= 0) brunoSet(1, i, 600); }));
-    });
-    bruno.els[1] = { kind: "range", col: col, btns: btns };
-  } else if (c.k === "wave") {
-    [5, 6].forEach(function (id) {
-      var b = brunoButton(id, "", function () { if (bruno.v[id] >= 0) brunoSet(id, bruno.v[id] ? 0 : 1, 600); });
-      b.setAttribute("aria-label", id === 5 ? "Pulse" : "Saw");
-      btns.push(b);
-      bruno.els[id] = { kind: "led", col: col, btns: [b] };
-    });
-  } else { // chorus: I and II, both = I+II
-    ["I", "II"].forEach(function (t, i) {
-      btns.push(brunoButton(-1, t, function () {
-        var v = bruno.v[23]; if (v < 0) return;
-        var bits = (v === 1 || v === 3 ? 1 : 0) | (v === 2 || v === 3 ? 2 : 0);
-        bits ^= 1 << i;
-        brunoSet(23, bits, 600); // bits 1 = I, 2 = II, 3 = I+II, 0 = off: the same numbers as the Deluge's
-      }));
-    });
-    bruno.els[23] = { kind: "chorus", col: col, btns: btns };
-  }
-  btns.forEach(function (b) { box.appendChild(b); });
+Panel.prototype.column = function (c, wide) {
+  var col = document.createElement("div"); col.className = "bctl" + (wide ? " wide" : "");
+  col.innerHTML = '<div class="bl"></div><div class="bw"></div><div class="bv"></div>';
+  col.querySelector(".bl").textContent = c.n || "";
   return col;
-}
-
-function brunoBuild() {
-  var root = $("bruno");
-  root.innerHTML = '<div class="bhead"><span class="bname">BRUNO106</span><span class="bsub">DCO poly</span><span class="bstripe"></span></div><div class="bsecs"></div><div class="bsecs b2"></div>' +
-    '<div class="bhint">Drag a slider and the Deluge follows. Turn a knob on the Deluge and the slider moves.</div>';
-  var rowEls = root.querySelectorAll(".bsecs");
-  BRUNO_SECTIONS.forEach(function (sec) {
-    var secs = rowEls[sec.row === 2 ? 1 : 0];
+};
+Panel.prototype.slider = function (c) {
+  var col = this.column(c), steps = c.k === "hpf" ? 3 : 0;
+  var s = document.createElement("div"); s.className = "bs" + (steps ? " steps" : "");
+  s.innerHTML = '<div class="scale"></div><div class="slot"></div><div class="cap"></div>';
+  s.setAttribute("role", "slider"); s.setAttribute("aria-label", c.n); s.setAttribute("aria-valuemin", 0);
+  s.setAttribute("aria-valuemax", steps || PANEL_MAX);
+  col.querySelector(".bw").appendChild(s);
+  this.dragger(s, col, c, steps, function () { return s.clientHeight - 16; });
+  this.els[c.id] = { kind: c.k, type: "slider", col: col, el: s, cap: s.querySelector(".cap"), out: col.querySelector(".bv") };
+  return col;
+};
+Panel.prototype.knob = function (c) {
+  var col = this.column(c);
+  var k = document.createElement("div"); k.className = "bk";
+  k.innerHTML = '<div class="ring"></div><div class="dial"><i></i></div>';
+  k.setAttribute("role", "slider"); k.setAttribute("aria-label", c.n); k.setAttribute("aria-valuemin", 0);
+  k.setAttribute("aria-valuemax", PANEL_MAX);
+  col.querySelector(".bw").appendChild(k);
+  this.dragger(k, col, c, 0, function () { return 180; }); // A long throw: fine control on a small knob
+  this.els[c.id] = { kind: c.k, type: "knob", col: col, el: k, dial: k.querySelector(".dial"), out: col.querySelector(".bv") };
+  return col;
+};
+Panel.prototype.slide = function (c) { // Two way slide switch: tap to flip
+  var P = this, col = this.column(c);
+  var b = document.createElement("button"); b.className = "bsw"; b.type = "button";
+  b.innerHTML = '<span class="o"></span><span class="well"><span class="nub"></span></span><span class="o"></span>';
+  var o = b.querySelectorAll(".o"); o[0].textContent = c.o[0]; o[1].textContent = c.o[1];
+  b.setAttribute("aria-label", c.n);
+  b.onclick = function () { if (P.v[c.id] >= 0) P.set(c.id, P.v[c.id] ? 0 : 1, 600); };
+  col.querySelector(".bw").appendChild(b);
+  this.els[c.id] = { kind: "sw", type: "slide", col: col, el: b, opts: o };
+  return col;
+};
+// LED buttons. c.b lists them: {id, l (label) or w (wave picture)} and the group's mode:
+//  "radio": one of c.vals (button i sets id to vals[i]); "toggle": each button its own id, 0 / 1;
+//  "bits": button i is bit i of id's value, through c.toBits / c.fromBits, never all off unless c.none.
+Panel.prototype.buttons = function (c) {
+  var P = this, col = this.column(c, true), box = document.createElement("div"); box.className = "bbs";
+  col.querySelector(".bw").appendChild(box);
+  var btns = c.b.map(function (d, i) {
+    var b = document.createElement("button"); b.className = "bb"; b.type = "button";
+    b.innerHTML = "<i></i>" + (d.w ? WAVE_SVG[d.w] : "<span></span>");
+    if (!d.w) b.querySelector("span").textContent = d.l;
+    b.setAttribute("aria-label", d.a || d.l || d.w);
+    b.onclick = function () {
+      var id = c.mode === "toggle" ? d.id : c.id, v = P.v[id];
+      if (v < 0) return;
+      if (c.mode === "radio") P.set(id, c.vals[i], 600);
+      else if (c.mode === "toggle") P.set(id, v ? 0 : 1, 600);
+      else {
+        var bits = (c.toBits ? c.toBits(v) : v) ^ (1 << i);
+        if (!bits && !c.none) return; // An oscillator keeps at least one wave
+        P.set(id, c.fromBits ? c.fromBits(bits) : bits, 600);
+      }
+    };
+    box.appendChild(b);
+    return b;
+  });
+  var e = { kind: c.mode, type: "buttons", col: col, btns: btns, c: c };
+  if (c.mode === "toggle") c.b.forEach(function (d, i) { P.els[d.id] = { kind: "toggle", type: "buttons", col: col, btns: [btns[i]], c: c }; });
+  else P.els[c.id] = e;
+  return col;
+};
+Panel.prototype.build = function () {
+  var P = this;
+  P.root.innerHTML = P.head + '<div class="bsecs"></div><div class="bsecs b2"></div><div class="bsecs b3"></div><div class="bhint"></div>';
+  P.root.querySelector(".bhint").textContent = P.hint;
+  var rowEls = P.root.querySelectorAll(".bsecs");
+  P.sections.forEach(function (sec) {
     var el = document.createElement("div"); el.className = "bsec" + (sec.red ? " red" : "");
     el.innerHTML = '<div class="bt"></div><div class="bitems"></div>';
     el.querySelector(".bt").textContent = sec.t.toUpperCase();
     var items = el.querySelector(".bitems");
     sec.c.forEach(function (c) {
-      bruno.kinds[c.id] = c.k;
-      items.appendChild(c.k === "sw" ? brunoSwitch(c) : (c.k === "range" || c.k === "wave" || c.k === "chorus") ? brunoButtons(c) : brunoSlider(c));
+      items.appendChild(c.k === "sw" ? P.slide(c) : c.b ? P.buttons(c) : c.knob ? P.knob(c) : P.slider(c));
     });
-    secs.appendChild(el);
+    rowEls[(sec.row || 1) - 1].appendChild(el);
   });
-  bruno.built = true;
-}
-
-function brunoDraw(id) {
-  var e = bruno.els[id], v = bruno.v[id]; if (!e || v < 0) return;
-  switch (e.kind) {
-  case "sw":
-    e.button.classList.toggle("down", v === 1);
+  P.built = true;
+};
+Panel.prototype.draw = function (id) {
+  var e = this.els[id], v = this.v[id]; if (!e || v < 0) return;
+  if (e.type === "slide") {
+    e.el.classList.toggle("down", v === 1);
     e.opts[0].classList.toggle("on", v === 0); e.opts[1].classList.toggle("on", v === 1);
     return;
-  case "range": e.btns.forEach(function (b, i) { b.classList.toggle("on", v === i); }); return;
-  case "led": e.btns[0].classList.toggle("on", v !== 0); return;
-  case "chorus":
-    e.btns[0].classList.toggle("on", v === 1 || v === 3); e.btns[1].classList.toggle("on", v === 2 || v === 3); return;
   }
-  var f = e.kind === "hpf" ? v / 3 : v / BRUNO_MAX;
-  e.cap.style.setProperty("--f", f.toFixed(4)); // The cap's place, in CSS: right at any size, even while hidden
-  e.out.textContent = brunoReadout(e.kind, v);
-  e.slider.setAttribute("aria-valuenow", v);
-}
-
-function showBruno(m) {
-  var track = $("track");
-  if (!m.open) {
-    if (bruno.open) { bruno.open = false; track.classList.remove("bruno-on"); }
+  if (e.type === "buttons") {
+    var c = e.c;
+    if (e.kind === "toggle") {
+      e.btns[0].classList.toggle("on", v !== 0);
+      if (this.redrawWith && this.redrawWith[id] !== undefined) this.draw(this.redrawWith[id]); // A readout that reads this
+      return;
+    }
+    var bits = e.kind === "bits" ? (c.toBits ? c.toBits(v) : v) : 0;
+    e.btns.forEach(function (b, i) { b.classList.toggle("on", e.kind === "radio" ? c.vals[i] === v : ((bits >> i) & 1) === 1); });
     return;
   }
-  for (var di = 0; di < BRUNO_N && di < m.v.length; di++) bruno.dev[di] = m.v[di];
-  if (!bruno.built) brunoBuild();
-  var first = !bruno.open;
-  if (first) { bruno.open = true; track.classList.add("bruno-on"); }
-  var now = performance.now();
+  var f = e.kind === "hpf" ? v / 3 : v / PANEL_MAX;
+  // The control's place, in CSS: right at any size, even while hidden
+  if (e.type === "knob") e.dial.style.setProperty("--a", (f * 300 - 150).toFixed(1));
+  else e.cap.style.setProperty("--f", f.toFixed(4));
+  e.out.textContent = panelReadout(e.kind, v, this);
+  e.el.setAttribute("aria-valuenow", v);
+};
+Panel.prototype.show = function (m) {
+  var P = this;
+  if (!m) { if (P.open) { P.open = false; P.root.classList.remove("on"); } return; }
+  for (var di = 0; di < P.n && di < m.v.length; di++) P.dev[di] = m.v[di];
+  if (!P.built) P.build();
+  var first = !P.open;
+  if (first) { P.open = true; P.root.classList.add("on"); }
   // Controls this firmware doesn't send yet (an older test build) are dimmed, not shown at zero
-  for (var ni = 0; ni < BRUNO_N; ni++) if (bruno.els[ni]) bruno.els[ni].col.classList.toggle("na", ni >= m.v.length);
-  for (var id = 0; id < BRUNO_N && id < m.v.length; id++) {
-    if (!first && now < bruno.hold[id]) continue; // Being moved here: the Deluge is catching up
-    if (bruno.v[id] === m.v[id] && !first) continue;
-    bruno.v[id] = m.v[id];
-    brunoDraw(id);
+  for (var ni = 0; ni < P.n; ni++) if (P.els[ni]) P.els[ni].col.classList.toggle("na", ni >= m.v.length);
+  var now = performance.now();
+  for (var id = 0; id < P.n && id < m.v.length; id++) {
+    if (!first && now < P.hold[id]) continue; // Being moved here: the Deluge is catching up
+    if (P.v[id] === m.v[id] && !first) continue;
+    P.v[id] = m.v[id];
+    P.draw(id);
   }
+};
+
+var bruno = new Panel({
+  root: $("bruno"), cmd: 0x0D, n: 38,
+  head: '<div class="bhead"><span class="bname">BRUNO106</span><span class="bsub">DCO poly</span><span class="bstripe"></span></div>',
+  hint: "Drag a slider and the Deluge follows. Turn a knob on the Deluge and the slider moves.",
+  sections: [ // row 1: the synth's own panel; row 2: the second envelope and the Deluge's effects
+    { t: "LFO", c: [{ id: 0, n: "Rate", k: "std" }] },
+    { t: "DCO", c: [
+      { id: 1, n: "Range", b: [{ l: "16'" }, { l: "8'" }, { l: "4'" }], mode: "radio", vals: [0, 1, 2] },
+      { id: 2, n: "LFO", k: "dcolfo" }, { id: 3, n: "PWM", k: "ctl" },
+      { id: 4, n: "PWM", k: "sw", o: ["LFO", "MAN"] },
+      { n: "Wave", b: [{ id: 5, w: "pulse", a: "Pulse" }, { id: 6, w: "saw", a: "Saw" }], mode: "toggle" },
+      { id: 7, n: "Sub", k: "ctl" }, { id: 8, n: "Noise", k: "ctl" }, { id: 9, n: "Slop", k: "ctl" }] },
+    { t: "HPF", red: true, c: [{ id: 10, n: "Freq", k: "hpf" }] },
+    { t: "VCF", c: [
+      { id: 11, n: "Freq", k: "std" }, { id: 12, n: "Res", k: "std" }, { id: 13, n: "Env", k: "sw", o: ["NORM", "INV"] },
+      { id: 14, n: "Env", k: "env" }, { id: 15, n: "LFO", k: "vcflfo" }, { id: 16, n: "Kybd", k: "kybd" }] },
+    { t: "VCA", red: true, c: [{ id: 17, n: "Mode", k: "sw", o: ["ENV", "GATE"] }, { id: 18, n: "Level", k: "std" }] },
+    { t: "ENV 1", c: [{ id: 19, n: "A", k: "std" }, { id: 20, n: "D", k: "std" }, { id: 21, n: "S", k: "std" }, { id: 22, n: "R", k: "std" }] },
+    { t: "ENV 2", row: 2, c: [{ id: 24, n: "A", k: "std" }, { id: 25, n: "D", k: "std" }, { id: 26, n: "S", k: "std" }, { id: 27, n: "R", k: "std" }] },
+    // I and II, both for I+II: bits 1 = I, 2 = II, 3 = I+II, 0 = off, the same numbers as the Deluge's
+    { t: "Chorus", red: true, row: 2, c: [{ id: 23, n: "", b: [{ l: "I" }, { l: "II" }], mode: "bits", none: true },
+      { id: 28, n: "Rate", k: "crate" }, { id: 29, n: "Depth", k: "cdepth" }] },
+    { t: "Drive", row: 2, c: [{ id: 30, n: "Drive", k: "std" }, { id: 31, n: "Crush", k: "std" }, { id: 32, n: "Deci", k: "std" }, { id: 33, n: "Sat", k: "std" }] },
+    { t: "Delay", red: true, row: 2, c: [{ id: 34, n: "Amt", k: "std" }, { id: 35, n: "Rate", k: "std" }, { id: 36, n: "Fdbk", k: "std" }] },
+    { t: "Reverb", row: 2, c: [{ id: 37, n: "Amt", k: "std" }] }
+  ]
+});
+
+// BROPHET: the P5 (woodgrain) or P8 (black, red LEDs) look, a choice kept on this device
+var BROPHET_SKIN_KEY = "bribeluge-brophet-skin";
+function brophetSkin() { try { return localStorage.getItem(BROPHET_SKIN_KEY) === "p5" ? "p5" : "p8"; } catch (e) { return "p8"; } }
+var KN = true; // knob
+var brophet = new Panel({
+  root: $("brophet"), cmd: 0x0E, n: 43,
+  head: '<div class="bhead"><span class="bname">BROPHET</span><span class="bsub">Poly synth</span><span class="bstripe"></span>' +
+    '<span class="bskin" role="group" aria-label="Panel look"><button type="button" data-s="p5">P5</button><button type="button" data-s="p8">P8</button></span></div>',
+  hint: "Drag a knob up or down and the Deluge follows. Turn a knob on the Deluge and this one moves.",
+  sections: [
+    { t: "Poly-mod", c: [{ id: 5, n: "Filt env", k: "ctl", knob: KN }, { id: 6, n: "Osc B", k: "ctl", knob: KN },
+      // Destinations as two buttons: Freq A 1, PW A 2, both 3 (the engine's 0, 1, 2)
+      { id: 7, n: "Dest", b: [{ l: "FRQ A" }, { l: "PW A" }], mode: "bits",
+        toBits: function (v) { return v + 1; }, fromBits: function (b) { return b - 1; } }] },
+    { t: "LFO", red: true, c: [{ id: 1, n: "Rate", k: "std", knob: KN },
+      { id: 2, n: "Shape", b: [{ w: "saw", a: "Saw" }, { w: "tri", a: "Triangle" }, { w: "pulse", a: "Square" }], mode: "radio", vals: [3, 1, 2] },
+      { id: 3, n: "Freq", k: "lfofreq", knob: KN }, { id: 4, n: "Filter", k: "lfofilt", knob: KN }] },
+    { t: "Osc A", c: [{ id: 8, n: "Freq", k: "semis", knob: KN },
+      // Saw 1, pulse 2, both 3 (the engine's 0, 1, 2)
+      { id: 9, n: "Wave", b: [{ w: "saw", a: "Saw" }, { w: "pulse", a: "Pulse" }], mode: "bits",
+        toBits: function (v) { return v + 1; }, fromBits: function (b) { return b - 1; } },
+      { id: 10, n: "PW", k: "ctl", knob: KN }, { n: "", b: [{ id: 11, l: "SYNC" }], mode: "toggle" }] },
+    { t: "Osc B", red: true, row: 2, c: [{ id: 12, n: "Freq", k: "freqb", knob: KN }, { id: 13, n: "Fine", k: "fine", knob: KN },
+      { id: 14, n: "Wave", b: [{ w: "saw", a: "Saw" }, { w: "tri", a: "Triangle" }, { w: "pulse", a: "Pulse" }], mode: "bits" },
+      { id: 15, n: "PW", k: "ctl", knob: KN }, { n: "", b: [{ id: 16, l: "LO" }, { id: 17, l: "KBD" }], mode: "toggle" }] },
+    { t: "Mixer", row: 2, c: [{ id: 18, n: "Osc A", k: "ctl", knob: KN }, { id: 19, n: "Osc B", k: "ctl", knob: KN }, { id: 20, n: "Noise", k: "ctl", knob: KN }] },
+    { t: "Filter", row: 2, c: [{ id: 21, n: "Cutoff", k: "std", knob: KN }, { id: 22, n: "Res", k: "std", knob: KN },
+      { id: 23, n: "Env amt", k: "env", knob: KN }, { id: 24, n: "Kbd", k: "kybd", knob: KN }, { id: 25, n: "Drive", k: "std", knob: KN }] },
+    { t: "Filter env", red: true, row: 3, c: [{ id: 26, n: "A", k: "std", knob: KN }, { id: 27, n: "D", k: "std", knob: KN },
+      { id: 28, n: "S", k: "std", knob: KN }, { id: 29, n: "R", k: "std", knob: KN }] },
+    { t: "Amp env", row: 3, c: [{ id: 30, n: "A", k: "std", knob: KN }, { id: 31, n: "D", k: "std", knob: KN },
+      { id: 32, n: "S", k: "std", knob: KN }, { id: 33, n: "R", k: "std", knob: KN }] },
+    { t: "Master", red: true, row: 3, c: [{ id: 0, n: "Glide", k: "std", knob: KN }, { id: 34, n: "Analog", k: "ctl", knob: KN },
+      { id: 35, n: "Volume", k: "std", knob: KN }] },
+    { t: "Dirt", row: 3, c: [{ id: 36, n: "Crush", k: "std", knob: KN }, { id: 37, n: "Deci", k: "std", knob: KN }, { id: 38, n: "Sat", k: "std", knob: KN }] },
+    { t: "Delay", red: true, row: 3, c: [{ id: 39, n: "Amt", k: "std", knob: KN }, { id: 40, n: "Rate", k: "std", knob: KN }, { id: 41, n: "Fdbk", k: "std", knob: KN }] },
+    { t: "Reverb", row: 3, c: [{ id: 42, n: "Amt", k: "std", knob: KN }] }
+  ]
+});
+brophet.redrawWith = { 17: 12 }; // KBD changes osc B's range, so its readout
+function setBrophetSkin(s) {
+  try { localStorage.setItem(BROPHET_SKIN_KEY, s); } catch (e) { /* Private window: just this visit */ }
+  brophet.root.classList.toggle("p5", s === "p5"); brophet.root.classList.toggle("p8", s !== "p5");
+  Array.prototype.forEach.call(brophet.root.querySelectorAll(".bskin button"), function (b) { b.classList.toggle("on", b.getAttribute("data-s") === s); });
+}
+brophet.root.addEventListener("click", function (e) {
+  var b = e.target.closest && e.target.closest(".bskin button");
+  if (b) setBrophetSkin(b.getAttribute("data-s"));
+});
+
+// PANEL: which engine panel, if any
+function showPanel(m) {
+  bruno.show(m.which === 1 ? m : null);
+  var wasBuilt = brophet.built;
+  brophet.show(m.which === 2 ? m : null);
+  if (!wasBuilt && brophet.built) setBrophetSkin(brophetSkin());
+  $("track").classList.toggle("panel-on", bruno.open || brophet.open);
 }
 
 // ---- Gold knobs: each mod button's pair, the lit one glowing. Tapping a pair presses its mod button.
@@ -2020,7 +2150,8 @@ function parse(d) {
   }
   if (kind === 0x54) return { kind: "diag", text: readName(d, 8).text };
   if (kind === 0x56) {
-    var bp = { kind: "panel", open: d[8] === 1, v: [] };
+    // Which panel: 0 none, 1 BRUNO106, 2 BROPHET
+    var bp = { kind: "panel", which: d[8], open: d[8] === 1 || d[8] === 2, v: [] };
     if (!bp.open) return bp;
     for (var bq = 0, bn = d[9]; bq < bn && 11 + bq * 2 < d.length; bq++) bp.v.push((d[10 + bq * 2] << 7) | d[11 + bq * 2]);
     bp.ok = d[10 + bp.v.length * 2] === 0xF7;
@@ -2121,7 +2252,7 @@ function onMessage(ev) {
   case "clipPos": clipPos = m.pos; placeClipHeads(); return;
   case "diag": $("waveDiag").textContent = m.text; return;
   case "gold": showGold(m); return;
-  case "panel": if (!m.open || m.ok) showBruno(m); return;
+  case "panel": if (!m.open || m.ok) showPanel(m); return;
   case "beat": beatAt = { phase: m.phase, time: performance.now() }; return;
   case "kitSamples": showKitSamples(m.rows); return;
   case "kitActive": showKitActive(m.bits); return;
