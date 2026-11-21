@@ -280,6 +280,58 @@ footer a{color:var(--pink)}
   .row1{flex-wrap:wrap;height:auto;row-gap:6px} .nav{margin-left:0} #mirror svg{width:72px}
 }
 </style>
+<style>
+/* BRUNO106 panel: sliders and switches in the order the synth it comes from lays them out, left to right.
+   Dark panel, silkscreen labels, white caps, red LEDs. Both ways: drag here and the Deluge follows, and the other way. */
+#bruno{display:none;margin-top:14px;background:#0d0d0f;border:1px solid #2a2a2e;border-radius:12px;padding:10px 10px 8px;
+  box-shadow:inset 0 1px 0 #1d1d21;color:#d8d6d0;user-select:none;-webkit-user-select:none}
+#track.bruno-on #bruno{display:block}
+#track.bruno-on #special{display:none !important}
+#bruno .bhead{display:flex;align-items:baseline;gap:10px;margin:0 2px 8px}
+#bruno .bname{font:800 15px var(--sans);letter-spacing:.18em;color:#f2f0ea}
+#bruno .bsub{font:600 10px var(--mono);letter-spacing:.14em;color:#8b8a86;text-transform:uppercase}
+#bruno .bstripe{flex:1;height:3px;align-self:center;background:linear-gradient(90deg,#2f6fe0 0 50%,#d8342c 50% 100%);border-radius:2px;opacity:.85}
+#bruno .bsecs{display:flex;flex-wrap:wrap;gap:6px}
+#bruno .bsec{background:#151518;border:1px solid #26262b;border-radius:8px;padding:0 4px 6px;flex:0 0 auto}
+#bruno .bsec > .bt{font:700 11px var(--mono);letter-spacing:.2em;color:#f2f0ea;text-align:center;padding:4px 0 3px;margin:0 -4px 6px;
+  border-bottom:2px solid #2f6fe0;background:#1b1b1f;border-radius:8px 8px 0 0}
+#bruno .bsec.red > .bt{border-bottom-color:#d8342c}
+#bruno .bctl{display:flex;flex-direction:column;align-items:center;width:40px}
+#bruno .bctl.wide{width:52px}
+#bruno .bitems{display:flex;gap:2px;align-items:flex-start}
+#bruno .bl{font:600 10px var(--mono);letter-spacing:.06em;color:#c9c7c1;height:14px;line-height:14px;white-space:nowrap;text-transform:uppercase}
+#bruno .bv{font:600 10px var(--mono);color:#6f6e6a;height:14px;line-height:14px;white-space:nowrap}
+#bruno .bctl.drag .bv{color:#ff5a4f}
+/* Slider: a slot with a 0-10 scale, a cap moved with transform (no layout work while dragging) */
+#bruno .bs{position:relative;width:40px;height:var(--bh,156px);touch-action:none;cursor:ns-resize}
+#bruno .bs .slot{position:absolute;left:50%;top:8px;bottom:8px;width:4px;margin-left:-2px;background:#000;border-radius:2px;box-shadow:0 0 0 1px #2c2c31}
+#bruno .bs .scale{position:absolute;left:2px;top:8px;bottom:8px;width:8px;
+  background:repeating-linear-gradient(to bottom,#55545a 0 1px,transparent 1px calc((100% - 1px) / 10)) ;}
+#bruno .bs .cap{position:absolute;left:50%;top:calc((1 - var(--f,0)) * (100% - 16px));width:30px;height:16px;margin-left:-15px;border-radius:3px;
+  background:linear-gradient(#f4f3ef,#cfcdc6);box-shadow:0 2px 3px rgba(0,0,0,.7),inset 0 -1px 0 #a9a69e}
+#bruno .bs .cap::after{content:"";position:absolute;left:3px;right:3px;top:7px;height:2px;background:#26262a}
+#bruno .bctl.drag .cap{background:linear-gradient(#fff,#e6e4dd);box-shadow:0 0 10px rgba(255,90,79,.55),0 2px 3px rgba(0,0,0,.7)}
+#bruno .bs.steps .scale{background:none}
+/* Two way slide switch: tap to flip */
+#bruno .bsw{width:38px;height:var(--bh,156px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  background:none;border:0;padding:0;color:inherit;cursor:pointer;touch-action:manipulation}
+#bruno .bsw .o{font:700 10px var(--mono);color:#77767a;letter-spacing:.04em}
+#bruno .bsw .o.on{color:#f2f0ea}
+#bruno .bsw .well{width:16px;height:44px;border-radius:4px;background:#000;box-shadow:0 0 0 1px #2c2c31;position:relative}
+#bruno .bsw .nub{position:absolute;left:2px;width:12px;height:20px;border-radius:2px;background:linear-gradient(#e9e7e1,#b9b6ae);top:2px;transition:top .08s}
+#bruno .bsw.down .nub{top:22px}
+/* Buttons with an LED (range, waveforms, chorus) */
+#bruno .bbs{display:flex;flex-direction:column;gap:6px;justify-content:center;height:var(--bh,156px)}
+#bruno .bb{width:44px;height:34px;border-radius:5px;padding:4px 0 0;background:linear-gradient(#3a3a40,#26262b);border:1px solid #111;
+  color:#e9e7e1;font:700 10px var(--mono);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;touch-action:manipulation;
+  box-shadow:0 2px 0 #000}
+#bruno .bb:active{transform:translateY(1px);box-shadow:0 1px 0 #000}
+#bruno .bb i{display:block;width:8px;height:8px;border-radius:50%;background:#3b1210;border:1px solid #5a1d19}
+#bruno .bb.on i{background:#ff3b2f;border-color:#ff6b61;box-shadow:0 0 7px #ff3b2f}
+#bruno .bb svg{width:26px;height:10px}
+#bruno .bhint{font:500 11px var(--sans);color:#6f6e6a;margin:6px 2px 0}
+@media (max-width:700px){#bruno .bctl{width:38px} #bruno .bs{width:36px} #bruno{--bh:132px}}
+</style>
 </head>
 <body>
 <div id="bar"><div class="barin">
@@ -375,6 +427,7 @@ footer a{color:var(--pink)}
           <div id="rowname"></div>
         </div>
       </div>
+      <div id="bruno"></div>
       <div id="gold" class="frame" style="display:none"><div class="label">Gold knobs</div><div class="goldgrid"></div></div>
       <div id="special" class="frame" style="display:none"><div class="label"></div><div class="sbody"></div></div>
       <div id="knobs"></div>
@@ -416,7 +469,7 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v18 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v19 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -424,9 +477,10 @@ footer a{color:var(--pink)}
 // Out: F0 00 21 7B 01 02 03 <mode> F7. Modes: 0 subscribe + send all, 1 keep alive, 2 <n> choose picker option,
 // 3 <hi> <lo> move the browser there, 4 press SELECT, 5 press BACK, 6 <marker> <hi> <lo> drag a waveform marker,
 // 7 <x> <y> open a shortcut pad's setting, 8 <cmd> top bar (0 play, 1 record, 2 select, 3 back, 4 left, 5 right),
-// 9 <hi> <lo> launch or stop a session clip, 10 <section> launch a section.
+// 9 <hi> <lo> launch or stop a session clip, 10 <section> launch a section, 13 <id> <hi> <lo> move a BRUNO106 panel
+// control.
 // In: 0x42 STATE, 0x43 KIT_ROWS, 0x44 TEXT, 0x45 PICKER, 0x46 BROWSER, 0x47 BROWSER_SEL, 0x48 WAVEFORM, 0x49 PLAYHEAD,
-// 0x4A PARAMS, 0x4B TRANSPORT, 0x4C OUTPUTS, 0x4D CLIPS, 0x4E ARRANGER, 0x4F ARRANGER_POS.
+// 0x4A PARAMS, 0x4B TRANSPORT, 0x4C OUTPUTS, 0x4D CLIPS, 0x4E ARRANGER, 0x4F ARRANGER_POS, 0x56 PANEL (BRUNO106).
 // Display mirror: 00 <2 keep alive | 3 force | 4 swap 7SEG/OLED> out, 0x41 7-seg digits / 0x40 OLED frame in.
 var HDR = [0xF0, 0x00, 0x21, 0x7B, 0x01, 0x02];
 
@@ -1123,6 +1177,224 @@ function showParams(p) {
   });
 }
 
+// ---- BRUNO106 panel: sliders and switches laid out left to right as the synth the engine comes from. Both ways: a
+// move here goes to the Deluge as 03 0D <id> <hi> <lo> (14-bit), and PANEL (0x56) brings the Deluge's settings back,
+// so turning a knob there moves the slider here. While a control is held (and briefly after) the Deluge's echo of it
+// is ignored, so the cap doesn't fight the finger.
+var BRUNO_MAX = 16383;
+var BRUNO_SECTIONS = [
+  { t: "LFO", c: [{ id: 0, n: "Rate", k: "std" }] },
+  { t: "DCO", c: [
+    { id: 1, n: "Range", k: "range" }, { id: 2, n: "LFO", k: "dcolfo" }, { id: 3, n: "PWM", k: "ctl" },
+    { id: 4, n: "PWM", k: "sw", o: ["LFO", "MAN"] }, { id: 5, n: "Wave", k: "wave" },
+    { id: 7, n: "Sub", k: "ctl" }, { id: 8, n: "Noise", k: "ctl" }, { id: 9, n: "Slop", k: "ctl" }] },
+  { t: "HPF", red: true, c: [{ id: 10, n: "Freq", k: "hpf" }] },
+  { t: "VCF", c: [
+    { id: 11, n: "Freq", k: "std" }, { id: 12, n: "Res", k: "std" }, { id: 13, n: "Env", k: "sw", o: ["NORM", "INV"] },
+    { id: 14, n: "Env", k: "env" }, { id: 15, n: "LFO", k: "vcflfo" }, { id: 16, n: "Kybd", k: "kybd" }] },
+  { t: "VCA", red: true, c: [{ id: 17, n: "Mode", k: "sw", o: ["ENV", "GATE"] }, { id: 18, n: "Level", k: "std" }] },
+  { t: "ENV", c: [{ id: 19, n: "A", k: "std" }, { id: 20, n: "D", k: "std" }, { id: 21, n: "S", k: "std" }, { id: 22, n: "R", k: "std" }] },
+  { t: "Chorus", red: true, c: [{ id: 23, n: "", k: "chorus" }] }
+];
+var BRUNO_N = 24;
+// v: what the panel shows; dev: what the Deluge last said; hold: until when the Deluge's word waits (a move made here)
+var bruno = { built: false, open: false, v: [], dev: [], hold: [], rt: [], els: {}, dirty: {}, timer: 0, kinds: [] };
+for (var bi0 = 0; bi0 < BRUNO_N; bi0++) { bruno.v.push(-1); bruno.dev.push(-1); bruno.hold.push(0); bruno.rt.push(0); }
+
+// What the Deluge would call each position
+function brunoReadout(kind, p) {
+  var f = p / BRUNO_MAX;
+  switch (kind) {
+  case "std": return String(Math.round(f * 50));
+  case "ctl": return String(Math.round(f * 127));
+  case "dcolfo": return (f * f * 4).toFixed(2) + "st";
+  case "vcflfo": return (f * 42).toFixed(1) + "st";
+  case "kybd": return Math.round(f * 100) + "%";
+  case "env": return (f * 8).toFixed(1) + "oct";
+  case "hpf": return ["BOOST", "FLAT", "236", "754"][p] || "";
+  }
+  return "";
+}
+
+function brunoSend(id, p) {
+  bruno.dirty[id] = p;
+  if (bruno.timer) return;
+  // At most every 25 ms, the latest position of each control moved
+  bruno.timer = setTimeout(function () {
+    bruno.timer = 0;
+    var d = bruno.dirty; bruno.dirty = {};
+    Object.keys(d).forEach(function (k) { var q = d[k]; tx([0x03, 0x0D, +k, (q >> 7) & 0x7F, q & 0x7F]); });
+  }, 25);
+}
+// A move made here: show it now, hold off the Deluge's echo, send it
+function brunoSet(id, p, holdMs) {
+  bruno.v[id] = p;
+  brunoHold(id, holdMs);
+  brunoDraw(id);
+  brunoSend(id, p);
+}
+// When the hold ends, show what the Deluge last said: it only sends changes, so a move it didn't take (or a track
+// change during the hold) would otherwise leave the panel wrong
+function brunoHold(id, ms) {
+  clearTimeout(bruno.rt[id]);
+  if (ms === Infinity) { bruno.hold[id] = Infinity; return; }
+  bruno.hold[id] = performance.now() + ms;
+  bruno.rt[id] = setTimeout(function () {
+    bruno.hold[id] = 0;
+    if (bruno.open && bruno.dev[id] >= 0 && bruno.dev[id] !== bruno.v[id]) { bruno.v[id] = bruno.dev[id]; brunoDraw(id); }
+  }, ms + 20);
+}
+
+function brunoSlider(c) {
+  var col = document.createElement("div"); col.className = "bctl";
+  var steps = c.k === "hpf";
+  col.innerHTML = '<div class="bl"></div><div class="bs' + (steps ? " steps" : "") + '" role="slider" aria-valuemin="0"><div class="scale"></div><div class="slot"></div><div class="cap"></div></div><div class="bv"></div>';
+  col.querySelector(".bl").textContent = c.n;
+  var s = col.querySelector(".bs"), cap = col.querySelector(".cap");
+  s.setAttribute("aria-label", c.n);
+  s.setAttribute("aria-valuemax", steps ? 3 : BRUNO_MAX);
+  var drag = null;
+  s.addEventListener("pointerdown", function (e) {
+    if (bruno.v[c.id] < 0) return;
+    e.preventDefault();
+    try { s.setPointerCapture(e.pointerId); } catch (err) { /* Pointer already gone: moves still reach the slot */ }
+    // Relative: the cap moves with the finger from where it is, wherever the slot was touched
+    drag = { pid: e.pointerId, y: e.clientY, p: steps ? bruno.v[c.id] / 3 * BRUNO_MAX : bruno.v[c.id], travel: Math.max(40, s.clientHeight - 16) };
+    brunoHold(c.id, Infinity);
+    col.classList.add("drag");
+  });
+  s.addEventListener("pointermove", function (e) {
+    if (!drag || e.pointerId !== drag.pid) return;
+    var p = Math.round(Math.max(0, Math.min(BRUNO_MAX, drag.p - (e.clientY - drag.y) / drag.travel * BRUNO_MAX)));
+    if (steps) p = Math.round(p / BRUNO_MAX * 3);
+    if (p !== bruno.v[c.id]) brunoSet(c.id, p, Infinity);
+  });
+  function end(e) {
+    if (!drag || e.pointerId !== drag.pid) return;
+    drag = null;
+    col.classList.remove("drag");
+    brunoHold(c.id, 600);
+  }
+  s.addEventListener("pointerup", end);
+  s.addEventListener("pointercancel", end);
+  s.addEventListener("lostpointercapture", end);
+  // Without capture (it can fail), a finger lifted off the slot never reaches it: end the drag when it leaves
+  s.addEventListener("pointerleave", function (e) { if (drag && !s.hasPointerCapture(e.pointerId)) end(e); });
+  bruno.els[c.id] = { kind: c.k, col: col, slider: s, cap: cap, out: col.querySelector(".bv") };
+  return col;
+}
+
+function brunoSwitch(c) {
+  var col = document.createElement("div"); col.className = "bctl";
+  col.innerHTML = '<div class="bl"></div><button class="bsw" type="button"><span class="o"></span><span class="well"><span class="nub"></span></span><span class="o"></span></button><div class="bv"></div>';
+  col.querySelector(".bl").textContent = c.n;
+  var b = col.querySelector(".bsw"), o = b.querySelectorAll(".o");
+  o[0].textContent = c.o[0]; o[1].textContent = c.o[1];
+  b.setAttribute("aria-label", c.n);
+  b.onclick = function () { if (bruno.v[c.id] >= 0) brunoSet(c.id, bruno.v[c.id] ? 0 : 1, 600); };
+  bruno.els[c.id] = { kind: "sw", col: col, button: b, opts: o };
+  return col;
+}
+
+var BRUNO_WAVES = {
+  5: '<svg viewBox="0 0 26 10"><path d="M1 9 V1 H8 V9 H15 V1 H22 V9 H25" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  6: '<svg viewBox="0 0 26 10"><path d="M1 9 L9 1 V9 L17 1 V9 L25 1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'
+};
+function brunoButton(id, label, onTap) {
+  var b = document.createElement("button"); b.className = "bb"; b.type = "button";
+  b.innerHTML = "<i></i>" + (BRUNO_WAVES[id] && !label ? BRUNO_WAVES[id] : "<span></span>");
+  if (label) b.querySelector("span").textContent = label;
+  b.onclick = onTap;
+  return b;
+}
+function brunoButtons(c) {
+  var col = document.createElement("div"); col.className = "bctl wide";
+  col.innerHTML = '<div class="bl"></div><div class="bbs"></div><div class="bv"></div>';
+  col.querySelector(".bl").textContent = c.n;
+  var box = col.querySelector(".bbs"), btns = [];
+  if (c.k === "range") {
+    ["16'", "8'", "4'"].forEach(function (t, i) {
+      btns.push(brunoButton(-1, t, function () { if (bruno.v[1] >= 0) brunoSet(1, i, 600); }));
+    });
+    bruno.els[1] = { kind: "range", col: col, btns: btns };
+  } else if (c.k === "wave") {
+    [5, 6].forEach(function (id) {
+      var b = brunoButton(id, "", function () { if (bruno.v[id] >= 0) brunoSet(id, bruno.v[id] ? 0 : 1, 600); });
+      b.setAttribute("aria-label", id === 5 ? "Pulse" : "Saw");
+      btns.push(b);
+      bruno.els[id] = { kind: "led", col: col, btns: [b] };
+    });
+  } else { // chorus: I and II, both = I+II
+    ["I", "II"].forEach(function (t, i) {
+      btns.push(brunoButton(-1, t, function () {
+        var v = bruno.v[23]; if (v < 0) return;
+        var bits = (v === 1 || v === 3 ? 1 : 0) | (v === 2 || v === 3 ? 2 : 0);
+        bits ^= 1 << i;
+        brunoSet(23, bits, 600); // bits 1 = I, 2 = II, 3 = I+II, 0 = off: the same numbers as the Deluge's
+      }));
+    });
+    bruno.els[23] = { kind: "chorus", col: col, btns: btns };
+  }
+  btns.forEach(function (b) { box.appendChild(b); });
+  return col;
+}
+
+function brunoBuild() {
+  var root = $("bruno");
+  root.innerHTML = '<div class="bhead"><span class="bname">BRUNO106</span><span class="bsub">DCO poly</span><span class="bstripe"></span></div><div class="bsecs"></div>' +
+    '<div class="bhint">Drag a slider and the Deluge follows. Turn a knob on the Deluge and the slider moves.</div>';
+  var secs = root.querySelector(".bsecs");
+  BRUNO_SECTIONS.forEach(function (sec) {
+    var el = document.createElement("div"); el.className = "bsec" + (sec.red ? " red" : "");
+    el.innerHTML = '<div class="bt"></div><div class="bitems"></div>';
+    el.querySelector(".bt").textContent = sec.t.toUpperCase();
+    var items = el.querySelector(".bitems");
+    sec.c.forEach(function (c) {
+      bruno.kinds[c.id] = c.k;
+      items.appendChild(c.k === "sw" ? brunoSwitch(c) : (c.k === "range" || c.k === "wave" || c.k === "chorus") ? brunoButtons(c) : brunoSlider(c));
+    });
+    secs.appendChild(el);
+  });
+  bruno.built = true;
+}
+
+function brunoDraw(id) {
+  var e = bruno.els[id], v = bruno.v[id]; if (!e || v < 0) return;
+  switch (e.kind) {
+  case "sw":
+    e.button.classList.toggle("down", v === 1);
+    e.opts[0].classList.toggle("on", v === 0); e.opts[1].classList.toggle("on", v === 1);
+    return;
+  case "range": e.btns.forEach(function (b, i) { b.classList.toggle("on", v === i); }); return;
+  case "led": e.btns[0].classList.toggle("on", v !== 0); return;
+  case "chorus":
+    e.btns[0].classList.toggle("on", v === 1 || v === 3); e.btns[1].classList.toggle("on", v === 2 || v === 3); return;
+  }
+  var f = e.kind === "hpf" ? v / 3 : v / BRUNO_MAX;
+  e.cap.style.setProperty("--f", f.toFixed(4)); // The cap's place, in CSS: right at any size, even while hidden
+  e.out.textContent = brunoReadout(e.kind, v);
+  e.slider.setAttribute("aria-valuenow", v);
+}
+
+function showBruno(m) {
+  var track = $("track");
+  if (!m.open) {
+    if (bruno.open) { bruno.open = false; track.classList.remove("bruno-on"); }
+    return;
+  }
+  for (var di = 0; di < BRUNO_N && di < m.v.length; di++) bruno.dev[di] = m.v[di];
+  if (!bruno.built) brunoBuild();
+  var first = !bruno.open;
+  if (first) { bruno.open = true; track.classList.add("bruno-on"); }
+  var now = performance.now();
+  for (var id = 0; id < BRUNO_N && id < m.v.length; id++) {
+    if (!first && now < bruno.hold[id]) continue; // Being moved here: the Deluge is catching up
+    if (bruno.v[id] === m.v[id] && !first) continue;
+    bruno.v[id] = m.v[id];
+    brunoDraw(id);
+  }
+}
+
 // ---- Gold knobs: each mod button's pair, the lit one glowing. Tapping a pair presses its mod button.
 // The Deluge prints STUTTER/CUSTOM 1 and CUSTOM 2/3 on the last two buttons: those slots are tagged.
 var GOLD_TAGS = { "6,0": "Custom 1", "7,1": "Custom 2", "7,0": "Custom 3" };
@@ -1732,6 +2004,13 @@ function parse(d) {
     return ar;
   }
   if (kind === 0x54) return { kind: "diag", text: readName(d, 8).text };
+  if (kind === 0x56) {
+    var bp = { kind: "panel", open: d[8] === 1, v: [] };
+    if (!bp.open) return bp;
+    for (var bq = 0, bn = d[9]; bq < bn && 11 + bq * 2 < d.length; bq++) bp.v.push((d[10 + bq * 2] << 7) | d[11 + bq * 2]);
+    bp.ok = d[10 + bp.v.length * 2] === 0xF7;
+    return bp;
+  }
   if (kind === 0x55) {
     var gd = { kind: "gold", open: d[8] === 1, mode: d[9], knobs: [] };
     if (!gd.open) return gd;
@@ -1795,7 +2074,7 @@ function parse(d) {
 
 
 var QUIET = { playhead: 1, wave: 1, transport: 1, arrangerPos: 1, params: 1, clips: 1, clipPos: 1, arranger: 1, outputs: 1,
-  beat: 1, kitActive: 1, gold: 1 };
+  beat: 1, kitActive: 1, gold: 1, panel: 1 };
 function onMessage(ev) {
   if (ev.data[0] !== 0xF0) { onChannelMessage(ev, input ? input.id : ""); return; }
   var m = parse(ev.data);
@@ -1827,6 +2106,7 @@ function onMessage(ev) {
   case "clipPos": clipPos = m.pos; placeClipHeads(); return;
   case "diag": $("waveDiag").textContent = m.text; return;
   case "gold": showGold(m); return;
+  case "panel": if (!m.open || m.ok) showBruno(m); return;
   case "beat": beatAt = { phase: m.phase, time: performance.now() }; return;
   case "kitSamples": showKitSamples(m.rows); return;
   case "kitActive": showKitActive(m.bits); return;
