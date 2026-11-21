@@ -551,7 +551,7 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v23 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v24 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -1641,7 +1641,7 @@ function wtFrame() {
     var lab = view.querySelector(".wtlab");
     var labTxt = '<b>' + (o ? "B" : "A") + '</b>' + (on ? escapeWt(t.name) : (t.has ? "loading" : "not a wavetable"));
     if (lab.innerHTML !== labTxt) lab.innerHTML = labTxt;
-    var cv = view.querySelector("canvas"), dpr = window.devicePixelRatio || 1;
+    var cv = view.querySelector("canvas"), dpr = Math.min(2, window.devicePixelRatio || 1); // Past 2x is pixels nobody sees
     var W = Math.round(cv.clientWidth * dpr), H = Math.round(cv.clientHeight * dpr);
     if (!W || !H) return;
     if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
@@ -1675,8 +1675,15 @@ function wtPath(g, G, wave, place, points) {
   }
   return { x: x, y: y };
 }
-function wtDraw3D(g, W, H, t, dpr) {
-  var G = wtGeom(W, H, t), n = G.n;
+// The 64 frames don't move: they're drawn once into an offscreen canvas (again only when the table, a frame of it or
+// the size changes), and each update just copies that and draws the knob's and the voices' lines on top
+function wtStack(t, W, H, dpr) {
+  var key = t.id + ":" + t.data.length + ":" + W + "x" + H;
+  if (t.stack && t.stackKey === key) return t.stack;
+  var c = t.stack || document.createElement("canvas");
+  c.width = W; c.height = H;
+  var g = c.getContext("2d"), G = wtGeom(W, H, t), n = G.n;
+  g.clearRect(0, 0, W, H);
   g.lineJoin = "round";
   // Back to front, each frame filled down to its own baseline in the background colour so it hides the ones behind
   for (var f = n - 1; f >= 0; f--) {
@@ -1688,28 +1695,36 @@ function wtDraw3D(g, W, H, t, dpr) {
     g.lineTo(at.x + G.w, at.y + G.amp * 1.1); g.lineTo(at.x, at.y + G.amp * 1.1); g.closePath();
     g.fillStyle = "rgba(5,6,8,0.82)"; g.fill();
     wtPath(g, G, wave, place, t.points);
-    var depth = 1 - place;
-    g.strokeStyle = "rgba(120,140,165," + (0.25 + 0.45 * depth).toFixed(3) + ")";
+    g.strokeStyle = "rgba(120,140,165," + (0.25 + 0.45 * (1 - place)).toFixed(3) + ")";
     g.lineWidth = 1 * dpr; g.stroke();
   }
-  // The knob's frame, bright, and each voice's
+  // The rail the knob and voices ride
+  g.strokeStyle = "rgba(120,140,165,.35)"; g.lineWidth = 1 * dpr;
+  g.beginPath(); g.moveTo(G.x0 + G.w + 10 * dpr, G.y0); g.lineTo(G.x0 + G.w + 10 * dpr + (n - 1) * G.dx, G.y0 + (n - 1) * G.dy); g.stroke();
+  t.stack = c; t.stackKey = key;
+  return c;
+}
+function wtDraw3D(g, W, H, t, dpr) {
+  var G = wtGeom(W, H, t), n = G.n;
+  g.drawImage(wtStack(t, W, H, dpr), 0, 0);
+  g.lineJoin = "round";
+  // Each voice's frame, then the knob's on top, its glow a wide faint stroke (a blur would cost a lot on a tablet)
+  g.strokeStyle = "rgba(255,122,69,.9)"; g.lineWidth = 1.6 * dpr;
+  t.shown.forEach(function (pl) {
+    var vw = wtWave(t, pl); if (!vw) return;
+    wtPath(g, G, vw, pl, t.points); g.stroke();
+  });
+  g.fillStyle = "#ff7a45";
+  t.shown.forEach(function (pl) {
+    var rx = G.x0 + G.w + pl * (n - 1) * G.dx + 6 * dpr, ry = G.y0 + pl * (n - 1) * G.dy;
+    g.fillRect(rx, ry - 2 * dpr, 8 * dpr, 4 * dpr);
+  });
   var kw = wtWave(t, t.knob);
   if (kw) {
     wtPath(g, G, kw, t.knob, t.points);
-    g.strokeStyle = "#3fb8ff"; g.lineWidth = 2.5 * dpr; g.shadowColor = "rgba(63,184,255,.8)"; g.shadowBlur = 8 * dpr; g.stroke();
-    g.shadowBlur = 0;
+    g.strokeStyle = "rgba(63,184,255,.25)"; g.lineWidth = 7 * dpr; g.stroke();
+    g.strokeStyle = "#3fb8ff"; g.lineWidth = 2.5 * dpr; g.stroke();
   }
-  t.shown.forEach(function (pl) {
-    var vw = wtWave(t, pl); if (!vw) return;
-    wtPath(g, G, vw, pl, t.points);
-    g.strokeStyle = "rgba(255,122,69,.9)"; g.lineWidth = 1.6 * dpr; g.stroke();
-    // A tick on the stack's side rail, so a voice is easy to follow even behind the knob's frame
-    var rx = G.x0 + G.w + pl * (n - 1) * G.dx + 6 * dpr, ry = G.y0 + pl * (n - 1) * G.dy;
-    g.fillStyle = "#ff7a45"; g.fillRect(rx, ry - 2 * dpr, 8 * dpr, 4 * dpr);
-  });
-  // The rail itself
-  g.strokeStyle = "rgba(120,140,165,.35)"; g.lineWidth = 1 * dpr;
-  g.beginPath(); g.moveTo(G.x0 + G.w + 10 * dpr, G.y0); g.lineTo(G.x0 + G.w + 10 * dpr + (n - 1) * G.dx, G.y0 + (n - 1) * G.dy); g.stroke();
   var kx = G.x0 + G.w + 10 * dpr + t.knob * (n - 1) * G.dx, ky = G.y0 + t.knob * (n - 1) * G.dy;
   g.fillStyle = "#3fb8ff"; g.beginPath(); g.arc(kx, ky, 4 * dpr, 0, Math.PI * 2); g.fill();
 }
@@ -2471,7 +2486,7 @@ function parse(d) {
 
 
 var QUIET = { playhead: 1, wave: 1, transport: 1, arrangerPos: 1, params: 1, clips: 1, clipPos: 1, arranger: 1, outputs: 1,
-  beat: 1, kitActive: 1, gold: 1, panel: 1 };
+  beat: 1, kitActive: 1, gold: 1, panel: 1, wtable: 1, wtpos: 1 };
 function onMessage(ev) {
   if (ev.data[0] !== 0xF0) { onChannelMessage(ev, input ? input.id : ""); return; }
   var m = parse(ev.data);
