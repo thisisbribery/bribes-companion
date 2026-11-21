@@ -1,5 +1,5 @@
 # Bribeluge Companion has moved
 
-This branch only serves a redirect for the old GitHub Pages address. The page now lives at https://www.thisisbribery.com/companion/
+This branch only serves a redirect for the old GitHub Pages address. The page now lives at https://www.thisisbribery.com/bribeluge/companion/
 
 The source is on the `main` branch.

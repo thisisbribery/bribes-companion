@@ -1,4 +1,4 @@
-// The Bribeluge Companion moved to https://www.thisisbribery.com/companion/ .
+// The Bribeluge Companion moved to https://www.thisisbribery.com/bribeluge/companion/ .
 // This replaces the old app's service worker: it removes itself and its offline copy, then reloads
 // open windows, which land on the redirect page.
 self.addEventListener("install", function () { self.skipWaiting(); });
