@@ -344,23 +344,34 @@ footer a{color:var(--pink)}
 .cpanel .bb svg{width:26px;height:10px}
 .cpanel .bhint{font:500 11px var(--sans);color:var(--val);margin:6px 2px 0}
 
-/* BROPHET: knob panels are shorter; buttons sit in the knob row */
-#brophet{--bh:44px}
-#brophet .bbs{flex-direction:row;flex-wrap:wrap;gap:4px;height:auto;min-height:44px;align-content:center}
-#brophet .bctl.wide{width:auto;min-width:44px}
-#brophet .bb{width:40px;height:30px}
+/* BROPHET: big knobs (--kw a column, --ks a knob), four rows filled edge to edge; buttons sit in the knob row */
+#brophet{--bh:60px;--kw:54px;--ks:48px}
+#brophet .bsec{flex:1 0 auto}
+#brophet .bitems{justify-content:space-around}
+#brophet .bctl{width:var(--kw)}
+#brophet .bl,#brophet .bv{font-size:11px;height:16px;line-height:16px}
+#brophet .bsec > .bt{font-size:12px}
+#brophet .bk{width:var(--kw);height:var(--bh)}
+#brophet .bk .ring{left:calc((var(--kw) - var(--ks)) / 2);top:6px;width:var(--ks);height:var(--ks);
+  -webkit-mask:radial-gradient(circle,transparent calc(var(--ks) / 2 - 4px),#000 calc(var(--ks) / 2 - 3.5px));
+  mask:radial-gradient(circle,transparent calc(var(--ks) / 2 - 4px),#000 calc(var(--ks) / 2 - 3.5px))}
+#brophet .bk .dial{left:calc((var(--kw) - var(--ks)) / 2 + 7px);top:13px;width:calc(var(--ks) - 14px);height:calc(var(--ks) - 14px)}
+#brophet .bk .dial i{top:2px;width:3px;height:11px;margin-left:-1.5px}
+#brophet .bbs{flex-direction:row;flex-wrap:wrap;gap:5px;height:auto;min-height:var(--bh);align-content:center;justify-content:center}
+#brophet .bctl.wide{width:auto;min-width:var(--kw)}
+#brophet .bb{width:46px;height:38px;font-size:11px}
 #brophet .bskin{display:flex;border:1px solid var(--secb);border-radius:6px;overflow:hidden;opacity:.55}
 #brophet .bskin:hover,#brophet .bskin:focus-within{opacity:1}
 #brophet .bskin button{font:700 9px var(--mono);letter-spacing:.08em;padding:2px 6px;border-radius:0;background:none;color:var(--sub)}
 #brophet .bskin button.on{background:var(--acc2);color:#fff}
 /* P8: flat black, silver-capped black knobs, red LEDs and red highlights */
 #brophet.p8{background:#08080a;--sec:#0f0f11;--secb:#222226;--tbar:#141417;--acc1:#d8342c;--acc2:#d8342c;--hot:#ff3b2f;--glow:rgba(255,59,47,.6);
-  --knob:radial-gradient(circle at 50% 45%,#e4e5e8 0 4px,#a4a6ab 4.5px 6px,#2a2a2d 6.5px,#141416 12px);--pointer:#ff3b2f;--tick:#4a4a50}
+  --knob:radial-gradient(circle at 50% 45%,#e4e5e8 0 6px,#a4a6ab 6.5px 8.5px,#2a2a2d 9px,#141416 17px);--pointer:#ff3b2f;--tick:#4a4a50}
 #brophet.p8 .bstripe{background:#d8342c;height:2px}
 /* P5: woodgrain cheeks, dark panel, cream lettering, black knobs with silver skirts, cream buttons */
 #brophet.p5{--sec:#18130f;--secb:#2c241c;--tbar:#1e1813;--ink2:#efe4c8;--lab:#e2d6b8;--sub:#a3977c;--val:#8a7f68;
   --acc1:#c9b48a;--acc2:#c9b48a;--hot:#ffd27a;--glow:rgba(255,210,122,.5);--tick:#7a6a50;
-  --knob:radial-gradient(circle at 50% 45%,#1c1c1e 0 6px,#2a2a2c 6.5px 9px,#c8c9cd 9.5px,#8e9095 12px);--pointer:#efe4c8;
+  --knob:radial-gradient(circle at 50% 45%,#1c1c1e 0 8px,#2a2a2c 8.5px 12.5px,#c8c9cd 13px,#8e9095 17px);--pointer:#efe4c8;
   --btn:linear-gradient(#e9e2cf,#c9c0a8);--btnink:#2a2118;
   background:linear-gradient(90deg,#5a3418 0,#7b4a24 6px,#4e2c14 10px,#6d3f1e 14px,#3c2210 18px,transparent 18px,transparent calc(100% - 18px),#3c2210 calc(100% - 18px),#6d3f1e calc(100% - 14px),#4e2c14 calc(100% - 10px),#7b4a24 calc(100% - 6px),#5a3418 100%),#141110;
   padding-left:26px;padding-right:26px;border-color:#3a2a1c}
@@ -372,7 +383,8 @@ footer a{color:var(--pink)}
   .cpanel .bb{width:38px} .cpanel .bsec{padding:0 3px 6px} .cpanel .bsec > .bt{letter-spacing:.1em;margin:0 -3px 6px}
   .cpanel .bs .cap{width:24px;margin-left:-12px} .cpanel .bv,.cpanel .bl{font-size:9px}
   .cpanel .bk{width:36px} .cpanel .bk .ring{left:0} .cpanel .bk .dial{left:5px}
-  #brophet .bctl{width:38px} #brophet.p5{padding-left:20px;padding-right:20px}}
+  #brophet{--kw:51px} #brophet .bctl,#brophet .bk{width:var(--kw)} #brophet .bk .ring{left:calc((var(--kw) - var(--ks)) / 2)}
+  #brophet .bk .dial{left:calc((var(--kw) - var(--ks)) / 2 + 7px)} #brophet .bb{width:46px} #brophet.p5{padding-left:20px;padding-right:20px}}
 @media (max-height:700px){#bruno{--bh:124px}}
 </style>
 </head>
@@ -513,7 +525,7 @@ footer a{color:var(--pink)}
     <div id="log"></div>
   </details>
 
-  <footer>Bribeluge Companion v21 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
+  <footer>Bribeluge Companion v22 by <a href="https://www.instagram.com/thisisbribery/" target="_blank" rel="noopener">Bribery</a>. Runs entirely in your browser. Not affiliated with or endorsed by Synthstrom Audible.</footer>
 </main>
 
 <script>
@@ -1395,7 +1407,7 @@ Panel.prototype.buttons = function (c) {
 };
 Panel.prototype.build = function () {
   var P = this;
-  P.root.innerHTML = P.head + '<div class="bsecs"></div><div class="bsecs b2"></div><div class="bsecs b3"></div><div class="bhint"></div>';
+  P.root.innerHTML = P.head + '<div class="bsecs"></div><div class="bsecs b2"></div><div class="bsecs b3"></div><div class="bsecs b4"></div><div class="bhint"></div>';
   P.root.querySelector(".bhint").textContent = P.hint;
   var rowEls = P.root.querySelectorAll(".bsecs");
   P.sections.forEach(function (sec) {
@@ -1406,6 +1418,7 @@ Panel.prototype.build = function () {
     sec.c.forEach(function (c) {
       items.appendChild(c.k === "sw" ? P.slide(c) : c.b ? P.buttons(c) : c.knob ? P.knob(c) : P.slider(c));
     });
+    if (P.grow) el.style.flexGrow = sec.c.length;
     rowEls[(sec.row || 1) - 1].appendChild(el);
   });
   P.built = true;
@@ -1515,11 +1528,12 @@ var brophet = new Panel({
       { id: 32, n: "S", k: "std", knob: KN }, { id: 33, n: "R", k: "std", knob: KN }] },
     { t: "Master", red: true, row: 3, c: [{ id: 0, n: "Glide", k: "std", knob: KN }, { id: 34, n: "Analog", k: "ctl", knob: KN },
       { id: 35, n: "Volume", k: "std", knob: KN }] },
-    { t: "Dirt", row: 3, c: [{ id: 36, n: "Crush", k: "std", knob: KN }, { id: 37, n: "Deci", k: "std", knob: KN }, { id: 38, n: "Sat", k: "std", knob: KN }] },
-    { t: "Delay", red: true, row: 3, c: [{ id: 39, n: "Amt", k: "std", knob: KN }, { id: 40, n: "Rate", k: "std", knob: KN }, { id: 41, n: "Fdbk", k: "std", knob: KN }] },
-    { t: "Reverb", row: 3, c: [{ id: 42, n: "Amt", k: "std", knob: KN }] }
+    { t: "Dirt", row: 4, c: [{ id: 36, n: "Crush", k: "std", knob: KN }, { id: 37, n: "Deci", k: "std", knob: KN }, { id: 38, n: "Sat", k: "std", knob: KN }] },
+    { t: "Delay", red: true, row: 4, c: [{ id: 39, n: "Amt", k: "std", knob: KN }, { id: 40, n: "Rate", k: "std", knob: KN }, { id: 41, n: "Fdbk", k: "std", knob: KN }] },
+    { t: "Reverb", row: 4, c: [{ id: 42, n: "Amt", k: "std", knob: KN }] }
   ]
 });
+brophet.grow = true; // Rows filled edge to edge, the space shared by control
 brophet.redrawWith = { 17: 12 }; // KBD changes osc B's range, so its readout
 function setBrophetSkin(s) {
   try { localStorage.setItem(BROPHET_SKIN_KEY, s); } catch (e) { /* Private window: just this visit */ }
