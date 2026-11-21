@@ -2,7 +2,7 @@
 
 A second screen for the Synthstrom Deluge running **[BRIBELUGE (Deluge Bribes firmware)](https://github.com/thisisbribery/deluge-bribes-v1)** v1.32 or later, on a phone or tablet connected over USB.
 
-**Open it:** https://www.thisisbribery.com/companion/
+**Open it:** https://www.thisisbribery.com/bribeluge/companion/launch/ (setup steps, credits and how it talks to the Deluge: https://www.thisisbribery.com/bribeluge/companion/)
 
 **Support:** find it useful? [Buy me a coffee on Ko-fi](https://ko-fi.com/thisisbribery).
 
@@ -27,5 +27,17 @@ One-time setup on the Deluge (also listed in the app): set `SETTINGS > MIDI > MI
 It needs Chrome or Edge (Web MIDI with SysEx); Safari and iOS browsers don't have Web MIDI. To use it offline, open it once in Chrome and choose **Add to Home screen**: it then runs fullscreen, keeps the screen awake and reconnects on its own.
 
 Full details are in the [BRIBELUGE COMPANION section](https://github.com/thisisbribery/deluge-bribes-v1#27-bribeluge-companion) of the firmware's README.
+
+## Built on the community firmware
+
+- **[Deluge Community firmware](https://github.com/SynthstromAudible/DelugeFirmware)** (GPL-3.0). Bribeluge is a fork of it.
+- **Screen over SysEx, by [bfredl](https://github.com/bfredl).** The 7SEG and OLED mirror is the community firmware's display-over-SysEx feature, first shown in [delugeclient](https://bfredl.github.io/delugeclient/app.html). The companion unpacks the same stream (7-to-8 bit packing with RLE, the inverse of the firmware's `pack_8to7_rle`).
+- **[DEx](https://github.com/silicakes/deluge-extensions), by silicakes.** The reference for driving the mirror (keep-alive, display swap).
+- **MIDI Follow** (community firmware) drives every knob in STOCK mode.
+
+## How it talks to the Deluge
+
+Plain USB MIDI through Web MIDI with SysEx. No OSC, NRPN or custom USB protocol. SysEx uses Synthstrom's manufacturer ID, `F0 00 21 7B 01 02 ... F7` (`02` is the display command); older docs show `F0 7D`, the developer ID the community used until February 2024. The display mirror is `00 02` / `00 03` / `00 04` out and `40` (OLED) / `41` (7SEG) in. Bribeluge's own messages are `03 <mode>` out and `42` to `4F` and `56` in. The full list is at the top of the script in `index.html` and on the [companion page](https://www.thisisbribery.com/bribeluge/companion/#protocol).
+
 
 Not affiliated with or endorsed by Synthstrom Audible.
